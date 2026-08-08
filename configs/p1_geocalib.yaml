@@ -1,0 +1,24 @@
+config_version: p1-geocalib-2026-08-08.1
+
+# This adapter accepts only an explicitly supplied local checkpoint. It never
+# passes GeoCalib's built-in "pinhole"/"distorted" download aliases.
+camera_backend:
+  name: geocalib
+  module_name: geocalib
+  weights_path: weights/geocalib-pinhole.tar
+  expected_weights_sha256: 86d6aeacd8bbd974c59ce39f61854e00d36911c732ad89be471476fd708722ac
+  model_commit: 97b8968e7798a66bf04fcf791fb535624241bda7
+  weights_license: CC-BY-4.0
+  inference_device: cpu
+  geocalib_camera_model: pinhole
+
+crop_protocol:
+  crop_count: 6
+  side_fraction_of_short_edge: 0.52
+  target_overlap_fraction: 0.25
+
+quality_gate:
+  min_applicability: 0.5
+  min_coverage: 0.5
+  max_uncertainty: 0.5
+  min_qualified_crops: 3

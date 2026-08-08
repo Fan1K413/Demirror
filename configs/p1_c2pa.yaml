@@ -1,0 +1,8 @@
+config_version: p1-c2pa-local-2026-08-08.1
+
+# The adapter only reads local embedded C2PA data.  It never fetches remote
+# manifests or OCSP data, so revocation freshness cannot be asserted.
+module_name: c2pa
+expected_dependency_version: "0.32.6"
+trust_list_version: not_configured
+network_access: disabled

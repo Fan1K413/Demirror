@@ -1,0 +1,24 @@
+config_version: p1-camera-contract-2026-08-08.1
+
+# Select exactly one backend per run.  No automatic fallback or download occurs.
+camera_backend:
+  name: perspective_fields
+  module_name: perspective2d
+  weights_path: null
+  expected_weights_sha256: null
+  model_commit: null
+  weights_license: null
+  inference_device: auto
+  perspective_fields_model_version: Paramnet-360Cities-edina-uncentered
+
+# Square crops are unresized and are mapped back to canonical image pixels.
+crop_protocol:
+  crop_count: 6
+  side_fraction_of_short_edge: 0.52
+  target_overlap_fraction: 0.25
+
+quality_gate:
+  min_applicability: 0.5
+  min_coverage: 0.5
+  max_uncertainty: 0.5
+  min_qualified_crops: 3
