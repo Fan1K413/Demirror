@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Demirror 本地图片几何测量与证据审阅工具。">
+    <title>Demirror · 几何证据审阅</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Demirror 首页">
+          <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>Demirror</span>
+        </a>
+        <div class="local-pill"><span></span>仅在本机处理</div>
+      </header>
+
+      <main>
+        <section class="intro" aria-labelledby="page-title">
+          <div>
+            <p class="eyebrow">Projection geometry evidence</p>
+            <h1 id="page-title">让透视线索<br>回到可审阅的证据。</h1>
+          </div>
+          <p class="intro-copy">上传一张静态图片，生成可复核的线段族叠图、候选异常线、相机参数一致性记录与离线 C2PA 读取结果。</p>
+        </section>
+
+        <section class="workspace" aria-label="上传与分析">
+          <form id="upload-form" class="upload-card" novalidate>
+            <input id="file-input" name="file" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" hidden>
+            <label id="dropzone" class="dropzone" for="file-input">
+              <span class="upload-symbol" aria-hidden="true">↑</span>
+              <span class="upload-title">拖放图片到这里</span>
+              <span class="upload-subtitle">或选择本机文件 · JPEG、PNG、静态 WebP · 最大 25 MB</span>
+              <span id="selected-file" class="selected-file" aria-live="polite">尚未选择文件</span>
+            </label>
+            <div class="upload-footer">
+              <p>不上传 URL，不调用外部 API；文件与分析证据保存在本机的临时作业目录。</p>
+              <button id="submit-button" class="primary-button" type="submit" disabled>开始分析</button>
+            </div>
+          </form>
+
+          <aside class="method-card" aria-label="分析边界">
+            <p class="eyebrow">审阅边界</p>
+            <h2>测量，不下结论</h2>
+            <ul>
+              <li><span>01</span>线段与消失方向族用于几何审阅</li>
+              <li><span>02</span>相机参数仅检查全图与局部裁剪的一致性</li>
+              <li><span>03</span>C2PA 仅读取已嵌入且可离线验证的信息</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section id="analysis-panel" class="analysis-panel" hidden aria-live="polite">
+          <div class="analysis-status">
+            <span id="status-dot" class="status-dot" data-status="queued"></span>
+            <div>
+              <p id="status-label" class="status-label">正在排队</p>
+              <p id="status-detail" class="status-detail">已创建本地作业。</p>
+            </div>
+          </div>
+          <p id="job-filename" class="job-filename"></p>
+        </section>
+
+        <section id="result-panel" class="result-panel" hidden aria-labelledby="result-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Evidence review</p>
+              <h2 id="result-title">本次分析结果</h2>
+            </div>
+            <button id="new-analysis" class="quiet-button" type="button">分析另一张图片</button>
+          </div>
+
+          <div class="summary-grid">
+            <article class="summary-card primary-summary">
+              <p class="card-kicker">P0 · 投影几何</p>
+              <p id="p0-observation" class="result-value">等待结果</p>
+              <p id="p0-description" class="card-description"></p>
+              <div id="p0-metrics" class="metric-grid"></div>
+            </article>
+            <article class="summary-card">
+              <p class="card-kicker">P1 · 相机一致性</p>
+              <p id="camera-observation" class="result-value">等待结果</p>
+              <p id="camera-description" class="card-description"></p>
+              <div id="camera-metrics" class="metric-grid"></div>
+            </article>
+            <article class="summary-card">
+              <p class="card-kicker">C2PA · 嵌入记录</p>
+              <p id="c2pa-observation" class="result-value">等待结果</p>
+              <p id="c2pa-description" class="card-description"></p>
+              <div id="c2pa-metrics" class="metric-grid"></div>
+            </article>
+          </div>
+
+          <section id="evidence-visuals" class="evidence-visuals" aria-labelledby="visuals-title">
+            <div class="section-heading compact-heading">
+              <div>
+                <p class="eyebrow">Inspectable artifacts</p>
+                <h2 id="visuals-title">可审阅叠图</h2>
+              </div>
+              <p>颜色只标记检测与候选关系；请结合原图逐项复核。</p>
+            </div>
+            <div id="visual-grid" class="visual-grid"></div>
+          </section>
+
+          <section id="limitations-section" class="limitations" hidden aria-labelledby="limitations-title">
+            <p class="eyebrow">Limitations &amp; audit notes</p>
+            <h2 id="limitations-title">限制与审阅提示</h2>
+            <ul id="limitations-list"></ul>
+          </section>
+        </section>
+      </main>
+
+      <footer>Demirror 本地演示 · 结果是审阅辅助，不构成内容来源、真实性或 AI 生成判定。</footer>
+    </div>
+    <script src="/app.js" defer></script>
+  </body>
+</html>

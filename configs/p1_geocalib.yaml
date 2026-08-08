@@ -11,6 +11,10 @@ camera_backend:
   weights_license: CC-BY-4.0
   inference_device: cpu
   geocalib_camera_model: pinhole
+  # GeoCalib expands dense fields to its supplied input size; this cap avoids
+  # multi-gigabyte memory peaks on large photographs while retaining scalar
+  # outputs in original image coordinates.
+  geocalib_max_input_edge: 1280
 
 crop_protocol:
   crop_count: 6

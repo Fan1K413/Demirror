@@ -24,6 +24,7 @@ from image_trust.provenance.c2pa import inspect_c2pa_asset, write_c2pa_record
 from image_trust.provenance.config import load_c2pa_config
 from image_trust.schemas import RunStatus
 from image_trust.utils.config import load_config
+from image_trust.web.server import serve_local_demo
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -131,6 +132,18 @@ def build_parser() -> argparse.ArgumentParser:
         help="Required to run a control_smoke registry's control split.",
     )
     calibration_run.add_argument("--output", type=Path, required=True)
+    serve = subparsers.add_parser(
+        "serve",
+        help="Run the local-only Demirror web demonstration server.",
+    )
+    serve.add_argument("--host", default="127.0.0.1")
+    serve.add_argument("--port", type=int, default=8765)
+    serve.add_argument(
+        "--jobs-root",
+        type=Path,
+        default=Path(".demirror_web_jobs"),
+        help="Ignored local directory for uploads, job state, and evidence artifacts.",
+    )
     return parser
 
 
@@ -215,6 +228,17 @@ def main(argv: list[str] | None = None) -> int:
             f"image_count={len(run.image_ids)} "
             f"output={args.output}"
         )
+        return 0
+    if args.command == "serve":
+        server = serve_local_demo(Path.cwd(), args.jobs_root, args.host, args.port)
+        print(f"Demirror local demo: http://{args.host}:{args.port}")
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            pass
+        finally:
+            server.job_store.close()  # type: ignore[attr-defined]
+            server.server_close()
         return 0
     return 2
 

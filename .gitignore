@@ -13,4 +13,5 @@ data/
 weights/
 docs/
 .env
+.demirror_web_jobs/
 .DS_Store

@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Protocol
 
 import numpy as np
+from PIL import Image
 
 from image_trust.camera.contracts import (
     CameraBackendConfig,
@@ -243,13 +244,24 @@ class GeoCalibBackend(_UnavailableCameraBackend):
             return self._unavailable_estimate(started)
         try:
             model, device, torch = self._load_model()
-            image = torch.from_numpy(request.image_rgb).permute(2, 0, 1)
+            image_rgb, input_was_downscaled = _resize_geocalib_input(
+                request.image_rgb,
+                self.config.geocalib_max_input_edge,
+            )
+            image = torch.from_numpy(image_rgb).permute(2, 0, 1)
             image = image.to(device=device, dtype=torch.float32).div(255.0)
             result = model.calibrate(
                 image,
                 camera_model=self.config.geocalib_camera_model,
             )
-            return self._to_camera_estimate(result, torch, started, device)
+            return self._to_camera_estimate(
+                result,
+                torch,
+                started,
+                device,
+                output_size=(request.image_rgb.shape[1], request.image_rgb.shape[0]),
+                input_was_downscaled=input_was_downscaled,
+            )
         except Exception as exc:
             return CameraEstimate(
                 status=CameraEstimateStatus.FAILED,
@@ -278,21 +290,43 @@ class GeoCalibBackend(_UnavailableCameraBackend):
         self._resolved_device = device
         return model, device, torch
 
-    def _to_camera_estimate(self, result, torch, started: float, device: str) -> CameraEstimate:
+    def _to_camera_estimate(
+        self,
+        result,
+        torch,
+        started: float,
+        device: str,
+        *,
+        output_size: tuple[int, int] | None = None,
+        input_was_downscaled: bool = False,
+    ) -> CameraEstimate:
         camera = result["camera"]
         gravity = result["gravity"]
-        width = _scalar(camera.size[0, 0])
-        height = _scalar(camera.size[0, 1])
+        model_width = _scalar(camera.size[0, 0])
+        model_height = _scalar(camera.size[0, 1])
+        width, height = output_size or (round(model_width), round(model_height))
+        scale_x = width / model_width
+        scale_y = height / model_height
         principal_point = Point(
-            x=_scalar(camera.c[0, 0]),
-            y=_scalar(camera.c[0, 1]),
+            x=_scalar(camera.c[0, 0]) * scale_x,
+            y=_scalar(camera.c[0, 1]) * scale_y,
         )
         roll = _scalar(gravity.rp[0, 0])
         pitch = _scalar(gravity.rp[0, 1])
         vfov_deg = math.degrees(_scalar(camera.vfov[0]))
         horizon = _geocalib_horizon(camera, gravity, torch)[0]
         confidence = _combined_confidence(result, torch)
-        uncertainty = _geocalib_uncertainty(result, width, height)
+        uncertainty = _geocalib_uncertainty(result, width, height, focal_scale=scale_y)
+        limitations = [
+            "geocalib_horizon_derived_from_camera_and_gravity",
+            "geocalib_principal_point_is_assumed_center_not_optimized",
+            "geocalib_prediction_confidence_is_not_source_confidence",
+            f"geocalib_camera_model:{self.config.geocalib_camera_model}",
+        ]
+        if input_was_downscaled:
+            limitations.append(
+                f"geocalib_input_downscaled_to_max_edge:{self.config.geocalib_max_input_edge}"
+            )
         return CameraEstimate(
             status=CameraEstimateStatus.OK,
             camera_model=_geocalib_camera_model(self.config.geocalib_camera_model),
@@ -305,18 +339,13 @@ class GeoCalibBackend(_UnavailableCameraBackend):
             ),
             principal_point=principal_point,
             horizon=HorizonLine(
-                p1=Point(x=0.0, y=_scalar(horizon[0])),
-                p2=Point(x=width, y=_scalar(horizon[1])),
+                p1=Point(x=0.0, y=_scalar(horizon[0]) * scale_y),
+                p2=Point(x=width, y=_scalar(horizon[1]) * scale_y),
             ),
             uncertainty=uncertainty,
             applicability=confidence[0],
             coverage=confidence[1],
-            limitations=[
-                "geocalib_horizon_derived_from_camera_and_gravity",
-                "geocalib_principal_point_is_assumed_center_not_optimized",
-                "geocalib_prediction_confidence_is_not_source_confidence",
-                f"geocalib_camera_model:{self.config.geocalib_camera_model}",
-            ],
+            limitations=limitations,
             provenance=self._provenance(started, inference_device=device),
         )
 
@@ -385,10 +414,18 @@ def _geocalib_horizon(camera, gravity, torch):
     return torch.stack([left, right], dim=-1)
 
 
-def _geocalib_uncertainty(result, width: float, height: float) -> CameraUncertainty:
+def _geocalib_uncertainty(
+    result,
+    width: float,
+    height: float,
+    *,
+    focal_scale: float = 1.0,
+) -> CameraUncertainty:
     roll = _optional_scalar(result.get("roll_uncertainty"))
     pitch = _optional_scalar(result.get("pitch_uncertainty"))
     focal = _optional_scalar(result.get("focal_uncertainty"))
+    if focal is not None:
+        focal *= focal_scale
     diagonal = math.hypot(width, height)
     normalized = [
         min(1.0, value / math.pi) for value in (roll, pitch) if value is not None
@@ -431,3 +468,32 @@ def _weights_hash(path_string: str | None) -> str | None:
         for block in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def _resize_geocalib_input(
+    image_rgb: np.ndarray,
+    max_edge: int,
+) -> tuple[np.ndarray, bool]:
+    """Bound GeoCalib's full-resolution post-processing memory use.
+
+    GeoCalib resizes its network input internally, but then expands dense fields
+    back to the size supplied by the caller.  Passing a many-megapixel photo
+    therefore creates large full-resolution tensors despite the small network
+    input.  Resize only the backend copy and map its scalar geometry back to
+    the original request coordinate space in ``_to_camera_estimate``.
+    """
+
+    height, width = image_rgb.shape[:2]
+    largest_edge = max(width, height)
+    if largest_edge <= max_edge:
+        return image_rgb, False
+    scale = max_edge / largest_edge
+    resized_size = (
+        max(1, round(width * scale)),
+        max(1, round(height * scale)),
+    )
+    resized = Image.fromarray(image_rgb).resize(
+        resized_size,
+        resample=Image.Resampling.LANCZOS,
+    )
+    return np.asarray(resized).copy(), True

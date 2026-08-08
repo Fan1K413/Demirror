@@ -218,6 +218,7 @@ class CameraBackendConfig(BaseModel):
     geocalib_camera_model: Literal[
         "pinhole", "simple_radial", "radial", "simple_divisional"
     ] = "pinhole"
+    geocalib_max_input_edge: int = Field(default=1280, ge=320, le=4096)
     perspective_fields_model_version: Literal[
         "Paramnet-360Cities-edina-uncentered",
     ] = "Paramnet-360Cities-edina-uncentered"

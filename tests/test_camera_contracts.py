@@ -8,7 +8,11 @@ import time
 import numpy as np
 import pytest
 
-from image_trust.camera.backends import CameraBackendInput, resolve_camera_backend
+from image_trust.camera.backends import (
+    CameraBackendInput,
+    _resize_geocalib_input,
+    resolve_camera_backend,
+)
 from image_trust.camera.contracts import (
     CameraBackendConfig,
     CameraBackendProvenance,
@@ -70,6 +74,16 @@ def test_geocalib_requires_a_local_weight_with_reproducibility_metadata() -> Non
     assert "weights_license_not_recorded" in result.limitations
     assert "expected_weights_sha256_not_recorded" in result.limitations
     assert "p1_backend_inference_not_implemented" not in result.limitations
+
+
+def test_geocalib_resizes_only_its_large_input_copy() -> None:
+    image = np.zeros((2000, 4000, 3), dtype=np.uint8)
+
+    resized, did_resize = _resize_geocalib_input(image, max_edge=1280)
+
+    assert did_resize is True
+    assert resized.shape == (640, 1280, 3)
+    assert _resize_geocalib_input(resized, max_edge=1280)[1] is False
 
 
 @pytest.mark.skipif(
@@ -159,18 +173,22 @@ def test_geocalib_result_conversion_uses_the_local_api_without_loading_weights()
         torch,
         time.perf_counter(),
         "cpu",
+        output_size=(1280, 960),
+        input_was_downscaled=True,
     )
 
     assert result.status is CameraEstimateStatus.OK
     assert result.camera_model is CameraModel.PINHOLE
-    assert result.principal_point == Point(x=320.0, y=240.0)
+    assert result.principal_point == Point(x=640.0, y=480.0)
     assert result.horizon is not None
+    assert result.horizon.p2.x == 1280.0
     assert result.vfov_or_focal is not None
     assert result.vfov_or_focal.kind is IntrinsicKind.VFOV_DEG
     assert result.applicability == pytest.approx(0.8)
     assert result.coverage == 1.0
     assert result.uncertainty.overall is not None
     assert "geocalib_principal_point_is_assumed_center_not_optimized" in result.limitations
+    assert "geocalib_input_downscaled_to_max_edge:1280" in result.limitations
 
 
 def test_crop_mapping_returns_principal_point_horizon_and_focal_to_canonical() -> None:

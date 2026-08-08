@@ -1,5 +1,18 @@
 # Demirror
 
+## 本地网页演示
+
+在已安装项目依赖的环境中运行：
+
+    .venv\Scripts\python -m image_trust.cli serve
+
+然后打开 `http://127.0.0.1:8765`。服务只绑定本机地址；上传文件、持久化的
+作业状态和证据叠图会写入已忽略的 `.demirror_web_jobs/`，不会调用外部 API 或
+自动下载模型。P0 几何链路始终会被尝试；C2PA 或 P1 相机链路不可用时，页面会
+明确显示“部分完成”和相应限制，而不会伪造结果。
+如果本地 Python 进程意外停止，下一次启动服务会把未完成的网页作业标成失败，
+避免浏览器无限等待。
+
 ## P1 audit commands
 
 `camera-calibration-summary` accepts only result files made with the same P1
@@ -120,6 +133,8 @@ GeoCalib 已在本地安装且权重文件存在时，可使用 `configs\p1_geoc
 权重路径、官方代码提交、CC-BY-4.0 权重许可、推理设备和相机模型写入每次结果；若缺少
 任一必需项，结果仍是 `unavailable`。GeoCalib 默认假定主点在图像中心且不优化它，此限制
 会写入输出，不能将它与能估计主点的后端直接混合为同一阈值。
+为避免高像素照片在其全分辨率后处理阶段耗尽内存，`geocalib_max_input_edge` 默认限制
+模型副本的最长边为 1280 像素；相机几何结果会映射回原图坐标，并在结果中留下限制记录。
 
 已确认符合非商业用途时，Perspective Fields 使用独立的
 `configs\p1_perspective_fields.yaml`。当前固定的是能预测主点偏移的
