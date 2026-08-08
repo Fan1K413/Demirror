@@ -1,0 +1,61 @@
+config_version: p0-2026-08-08.2
+
+ingest:
+  max_file_bytes: 52428800
+  max_pixels: 40000000
+  min_side_px: 64
+  allow_filename_format_mismatch: true
+
+analysis:
+  max_long_side: 1280
+
+line_backend:
+  name: opencv_lsd
+  allow_fallback: false
+  deeplsd_weights: null
+  opencv_refine: std
+  min_length_px: 24.0
+  min_quality: 0.0
+  max_lines: 750
+  suppress_curve_fragments: true
+  curve_max_segment_length_px: 96.0
+  curve_neighbor_gap_px: 24.0
+  curve_neighbor_angle_deg: 28.0
+  curve_min_component_lines: 5
+  curve_min_direction_span_deg: 30.0
+  curve_min_contiguous_direction_bins: 4
+
+applicability:
+  target_line_count: 40
+  target_total_length: 12.0
+  target_spatial_coverage: 0.25
+  min_line_count: 8
+  min_total_length: 1.5
+  min_spatial_coverage: 0.04
+  grid_size: 8
+  direction_bins: 18
+  special_imaging_cap: 0.20
+  anomaly_min_applicability: 0.45
+
+vanishing_points:
+  max_families: 4
+  max_hypotheses: 500
+  pair_min_angle_deg: 5.0
+  inlier_angle_deg: 2.5
+  min_family_lines: 4
+  min_family_weight: 80.0
+  bootstrap_rounds: 8
+  bootstrap_fraction: 0.8
+  family_jaccard_merge: 0.70
+  max_parallel_families: 6
+  parallel_inlier_angle_deg: 2.5
+  local_family_grid_size: 3
+  local_families_per_cell: 2
+  max_local_families: 8
+  local_min_family_weight: 40.0
+  local_direction_families_per_cell: 5
+  local_direction_inlier_angle_deg: 5.0
+
+overlays:
+  line_width: 2
+  draw_line_ids: false
