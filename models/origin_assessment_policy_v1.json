@@ -2,7 +2,7 @@
   "schema_version": "origin-assessment-policy-v1",
   "policy_version": "origin-assessment-v1",
   "decisions": {
-    "possible_ai": "A verified C2PA AI declaration or a DDA score at/above its pre-registered high-confidence threshold.",
+    "possible_ai": "A verified C2PA AI declaration or any registered P3 pixel detector score at/above its pre-registered high-confidence threshold.",
     "no_ai_signal": "No high-confidence AI signal and no qualifying positive camera-capture evidence.",
     "possible_camera": "No high-confidence AI signal, plus either a trusted C2PA digitalCapture/computationalCapture declaration (high strength) or coherent camera/time/physical EXIF after a completed AI check (limited strength)."
   },

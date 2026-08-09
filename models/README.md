@@ -38,3 +38,13 @@ explicit and local:
   --output-features outputs\p2_projective_geometry_pilot_v1\features.jsonl `
   --work-dir data\p2_projective_geometry_v1\p0_work
 ```
+
+## P3 Nonescape Mini complementary audit record
+
+`ai_likelihood_nonescape_mini_v1.json` records a strict, hash-pinned
+Nonescape Mini complementary signal.  Its high threshold is frozen from a
+separate PixArt real-photo calibration cohort.  It is not a standalone model:
+on the registered four-generator test it adds only zero-new-false-positive
+high-score hits to the existing Community Forensics high rule.  The audit
+includes both original-decode and independently JPEG-85-reencoded held-out
+results, plus the metadata-stripped complex generated-image regression.

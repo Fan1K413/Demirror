@@ -20,6 +20,18 @@ def test_parse_ids_and_generators_are_bounded() -> None:
     assert module._parse_generators("SDXL,Pixart") == ("SDXL", "Pixart")
 
 
+def test_parse_probe_jpeg_qualities_is_explicit_and_bounded() -> None:
+    module = _load_module()
+    assert module._parse_jpeg_qualities("85, 75") == (85, 75)
+    assert module._parse_jpeg_qualities("") == ()
+    try:
+        module._parse_jpeg_qualities("101")
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("out-of-range JPEG quality must be rejected")
+
+
 def test_summary_uses_upstream_zero_logit_threshold() -> None:
     module = _load_module()
     summary = module._summary(

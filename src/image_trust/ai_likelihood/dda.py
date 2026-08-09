@@ -41,6 +41,13 @@ from image_trust.ai_likelihood.forensic_clip import (
     ForensicClipUnavailableError,
     score_forensic_clip_isolated,
 )
+from image_trust.ai_likelihood.nonescape import (
+    DEFAULT_AUDIT_PATH as DEFAULT_NONESCAPE_MINI_AUDIT_PATH,
+    DEFAULT_CHECKPOINT_PATH as DEFAULT_NONESCAPE_MINI_CHECKPOINT_PATH,
+    NONESCAPE_MINI_HIGH_CONFIDENCE_THRESHOLD,
+    NonescapeMiniUnavailableError,
+    score_nonescape_mini_isolated,
+)
 from image_trust.ai_likelihood.safe import (
     DEFAULT_AUDIT_PATH as DEFAULT_SAFE_AUDIT_PATH,
     DEFAULT_CHECKPOINT_PATH as DEFAULT_SAFE_CHECKPOINT_PATH,
@@ -86,6 +93,8 @@ def assess_high_confidence_ai(
     forensic_clip_audit_path: Path = DEFAULT_FORENSIC_CLIP_AUDIT_PATH,
     community_forensics_model_root: Path = DEFAULT_COMMUNITY_FORENSICS_MODEL_ROOT,
     community_forensics_audit_path: Path = DEFAULT_COMMUNITY_FORENSICS_AUDIT_PATH,
+    nonescape_mini_checkpoint_path: Path = DEFAULT_NONESCAPE_MINI_CHECKPOINT_PATH,
+    nonescape_mini_audit_path: Path = DEFAULT_NONESCAPE_MINI_AUDIT_PATH,
 ) -> AiLikelihoodResult:
     """Return verified provenance or complementary high-confidence pixel signals."""
 
@@ -363,6 +372,72 @@ def assess_high_confidence_ai(
             )
         )
 
+    try:
+        nonescape_audit = _load_audit(
+            nonescape_mini_audit_path,
+            NONESCAPE_MINI_HIGH_CONFIDENCE_THRESHOLD,
+        )
+        nonescape_threshold = float(nonescape_audit["high_confidence_threshold"])
+        limitations.extend(nonescape_audit.get("limitations", []))
+        evaluation["nonescape_mini"] = dict(nonescape_audit.get("evaluation", {}))
+        nonescape_scored = score_nonescape_mini_isolated(
+            input_path,
+            checkpoint_path=nonescape_mini_checkpoint_path,
+        )
+        available_scores.append(
+            (
+                "nonescape_mini",
+                nonescape_scored.score,
+                nonescape_threshold,
+                not static_webp_limited_review,
+            )
+        )
+        limited_ai_signal = limited_ai_signal or (
+            static_webp_limited_review and nonescape_scored.score >= nonescape_threshold
+        )
+        if primary_threshold is None:
+            primary_threshold = nonescape_threshold
+        signals.append(
+            AiSignal(
+                name="nonescape_mini_detector",
+                status="available",
+                value=nonescape_scored.score,
+                interpretation=(
+                    "The Nonescape Mini score crosses its registered high-confidence threshold, "
+                    "but static WebP is limited to review strength."
+                    if nonescape_scored.score >= nonescape_threshold and static_webp_limited_review
+                    else (
+                        "The Nonescape Mini score crosses its registered high-confidence threshold."
+                        if nonescape_scored.score >= nonescape_threshold
+                        else "The Nonescape Mini score is below its registered threshold; this is indeterminate, not camera evidence."
+                    )
+                ),
+                details={
+                    "high_confidence_threshold": nonescape_threshold,
+                    "high_confidence_eligible": not static_webp_limited_review,
+                    "preprocessing": nonescape_scored.preprocessing,
+                    "checkpoint_sha256": nonescape_audit.get("checkpoint_sha256"),
+                    "scope": "strict-zero-new-false-positive-complement",
+                },
+                limitations=list(nonescape_audit.get("limitations", [])),
+            )
+        )
+    except (OSError, ValueError, KeyError, TypeError, NonescapeMiniUnavailableError) as error:
+        code = (
+            str(error)
+            if isinstance(error, NonescapeMiniUnavailableError)
+            else f"nonescape_mini_audit_record_unavailable:{type(error).__name__}"
+        )
+        limitations.append(code)
+        signals.append(
+            AiSignal(
+                name="nonescape_mini_detector",
+                status="unavailable",
+                interpretation="The Nonescape Mini pixel detector did not produce a score.",
+                limitations=[code],
+            )
+        )
+
     if not available_scores:
         return AiLikelihoodResult(
             status="unavailable",
@@ -384,8 +459,8 @@ def assess_high_confidence_ai(
         risk_band="high" if high_confidence else ("medium" if limited_ai_signal else "unknown"),
         reliability=0.85 if high_confidence else (0.65 if limited_ai_signal else 0.5),
         reliability_label="high" if high_confidence else "limited",
-        target_definition="Complementary registered DDA, SAFE, forensic CLIP, and Community Forensics pixel signals.",
-        model_version="dda-safe-forensic-clip-community-forensics-v1",
+        target_definition="Complementary registered DDA, SAFE, forensic CLIP, Community Forensics, and Nonescape Mini pixel signals.",
+        model_version="dda-safe-forensic-clip-community-forensics-nonescape-mini-v1",
         decision_threshold=primary_threshold,
         signals=signals,
         evaluation=evaluation,

@@ -1,7 +1,7 @@
 {
-  "schema_version": "external-detector-candidate-screen-v1",
+  "schema_version": "external-detector-candidate-screen-v2",
   "candidate": "B-Free / BFREE_dino2reg4",
-  "status": "deferred_before_inference",
+  "status": "cpu_reproduced_not_integrated",
   "upstream": {
     "repository": "https://github.com/grip-unina/B-Free",
     "revision": "c6a9f898782fb466b29af01f21960b67415afb0e",
@@ -23,28 +23,52 @@
   "official_weight": {
     "url": "https://www.grip.unina.it/download/prog/B-Free/weights/BFREE_dino2reg4.zip",
     "expected_md5": "f3f53fa647848b16cf81c913f148a198",
-    "http_content_length_bytes": 321653488,
-    "local_state": "partial_download_not_usable"
+    "verified_archive_md5": "f3f53fa647848b16cf81c913f148a198",
+    "verified_archive_sha256": "8230fd3f0f3a64a6403acb692ce1663718ed16f36a5a4de4a68c0d273781769f",
+    "verified_model_sha256": "5948ca78f4d94e820c250d24cdf155035b4a85960443800bfe6bb7f06bffe947",
+    "config_sha256": "1f0cb4988933de06a4c2427b1b5b015baa18cea7bc5223a9f54ca5e077ec8d40"
   },
   "local_environment_screen": {
-    "torch": "available_cpu",
-    "torchvision": "available",
-    "timm": "available",
-    "additional_python_dependency_installation": "not_required_before_weight_test"
+    "device": "cpu",
+    "cpu_threads": 2,
+    "runtime_isolation": "one short-lived Python process per candidate run",
+    "unneeded_upstream_pandas_import": "bypassed by reading the verified config directly; the official source tree is unchanged"
   },
-  "motivation": {
-    "observed_gap": "A single local, metadata-stripped complex AI-image smoke test remained AI-positive after JPEG85 but was indeterminate after a 125-percent display-scale plus WebP80 transform.",
-    "interpretation": "This is one regression-style smoke observation, not an accuracy estimate or threshold-selection dataset."
+  "observations": {
+    "smoke_sdxl_original_id_426": {
+      "report": "outputs/bfree_candidate_smoke_v1/report.json",
+      "count": 4,
+      "accuracy_at_upstream_default": 1.0,
+      "true_positive_rate": 1.0,
+      "false_positive_rate": 0.0,
+      "interpretation": "Only a runtime smoke test; this sample cannot estimate accuracy."
+    },
+    "pilot_sdxl_jpeg85_ids_426_427": {
+      "report": "outputs/bfree_candidate_sdxl_jpeg85_pilot_v1/report.json",
+      "count": 8,
+      "accuracy_at_upstream_default": 0.875,
+      "true_positive_rate": 0.75,
+      "false_positive_rate": 0.0,
+      "interpretation": "A tiny transformed pilot only; it is not threshold calibration or a pass of any integration gate."
+    },
+    "complex_generated_station_regression": {
+      "report": "outputs/bfree_normal_station_probe_v1/report.json",
+      "input_protocol": "normal complex image generated for this regression, metadata stripped; in-memory JPEG-85 variant",
+      "original_decode_logit": -3.8739891052246094,
+      "jpeg85_logit": -4.314679145812988,
+      "upstream_default_logit_threshold": 0.0,
+      "result": "Both variants are negative at the released threshold; this candidate misses the regression image."
+    }
   },
   "decision": {
     "integration": "not_allowed",
-    "reason": "No complete, hash-verified weight file or local inference result exists. The detector has not passed a frozen cross-generator and transformed-real evaluation.",
+    "reason": "The candidate misses the local complex generated-image regression in both original and JPEG-85 forms. A small Projective Geometry pilot cannot override this failure or establish a safe threshold.",
     "next_gate": [
-      "verify the complete official weight against the published MD5",
-      "run one bounded CPU subprocess to measure peak memory and single-image latency",
-      "freeze a calibration protocol without target-generator leakage",
-      "require an independently held-out cross-generator and WebP/screenshot-style evaluation before any product contribution"
+      "keep the regression image in every future detector comparison",
+      "freeze a calibration split without target-generator leakage",
+      "require independently held-out cross-generator, transformed-real, and self-generated-regression performance before any product contribution",
+      "measure peak memory and p95 latency before considering a web-worker implementation"
     ]
   },
-  "scope": "B-Free is a candidate pixel-forensic complement. It is not P0 projective geometry, not provenance evidence, and must not change the origin decision until it clears the recorded gates."
+  "scope": "B-Free is a candidate pixel-forensic complement. It is not P0 projective geometry, not provenance evidence, and does not change the origin decision."
 }

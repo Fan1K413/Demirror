@@ -1,0 +1,106 @@
+{
+  "schema_version": "modern-detector-availability-audit-v1",
+  "purpose": "Screen published AI-image detector candidates before downloading large weights or changing product decisions.",
+  "environment_constraints": {
+    "device": "CPU-only PyTorch 2.13.0",
+    "operational_requirement": "A candidate must support a bounded, short-lived CPU inference process and independently auditable assets before it can enter an offline evaluation.",
+    "safety_context": "Previous concurrent Python model work caused a high-memory application failure, so unbounded large-model loading is excluded."
+  },
+  "candidates": [
+    {
+      "name": "AIDE",
+      "upstream": "https://github.com/shilinyan99/AIDE",
+      "source_license": "MIT",
+      "local_source": "data/vendor/AIDE",
+      "observations": [
+        "The upstream README specifies CUDA 11.8 and distributes checkpoints only through a Google Drive folder.",
+        "No publisher checksum was supplied for the checkpoint link.",
+        "The model builds ConvNeXt-XXLarge and the official evaluation path calls model.cuda() and torch.cuda.synchronize()."
+      ],
+      "decision": "reject_before_download",
+      "reason": "No hash-verifiable weight chain and no safe CPU evaluation path in the published implementation."
+    },
+    {
+      "name": "LASTED",
+      "upstream": "https://github.com/HighwayWu/LASTED",
+      "source_license": "MIT",
+      "observations": [
+        "The published dependency list targets torch 1.9.0 and clip 1.0.",
+        "Pretrained weights and datasets are served via Google Drive; the README requests a license form for the associated test data.",
+        "No publisher checksum is listed for the pretrained detector weights."
+      ],
+      "decision": "reject_before_download",
+      "reason": "The pretrained asset cannot be independently verified and the published environment is materially older than the local runtime."
+    },
+    {
+      "name": "UniversalFakeDetect / UnivFD",
+      "upstream": "https://github.com/Yuheng-Li/UniversalFakeDetect",
+      "source_license": "MIT",
+      "local_source": "data/vendor/UniversalFakeDetect",
+      "observations": [
+        "The local OpenAI CLIP ViT-L/14 file is SHA-256 b8cca3fd41ae0c99ba7e8951adf17d267cdb84cd88be6f7c2e0eca1737a03836 and its bundled downloader verifies the publisher hash.",
+        "The upstream validation script forces CUDA, but the backbone itself can load on CPU.",
+        "Existing local controls report original AUC 0.28 and JPEG-75 AUC 0.12666666666666665; mean AI scores are lower than real scores."
+      ],
+      "evidence_report": "outputs/univfd_local_controls_v1/report.json",
+      "decision": "reject_after_local_screen",
+      "reason": "It fails the local control screen and is not a useful complementary signal."
+    },
+    {
+      "name": "AntiFakePrompt",
+      "upstream": "https://github.com/nctu-eva-lab/AntifakePrompt",
+      "source_license": "BSD-3-Clause",
+      "observations": [
+        "Official inference requires frozen Vicuna 7B weights in addition to the prompt-tuned checkpoint.",
+        "Published checkpoints are Google Drive downloads with no listed cryptographic checksum.",
+        "The dependency size exceeds the bounded CPU worker budget."
+      ],
+      "decision": "reject_before_download",
+      "reason": "The full VLM stack is not safe or practical for this CPU-only desktop inference path."
+    },
+    {
+      "name": "C2P-CLIP",
+      "upstream": "https://github.com/chuangchuangtan/C2P-CLIP-DeepfakeDetection",
+      "source_license": "not stated in the upstream repository root",
+      "observations": [
+        "The official README distributes pretrained models via Google Drive and lists no checkpoint checksum.",
+        "The stated inference checkpoint is trained on GenImage and has no local transformed-real calibration result."
+      ],
+      "decision": "reject_before_download",
+      "reason": "No explicit reusable license or hash-verifiable detector checkpoint, so it cannot enter an auditable product evaluation."
+    },
+    {
+      "name": "GAPL",
+      "upstream": "https://github.com/UltraCapture/GAPL",
+      "source_revision": "ea32aeb2d619b548daffa6db83296ee1aee70605",
+      "model_card": "https://huggingface.co/AbyssLumine/GAPL",
+      "source_license": "not stated in the source repository root",
+      "model_card_license": "MIT",
+      "observations": [
+        "The public checkpoint is 1.22 GB and uses PyTorch pickle serialization; the model also requires a separate CLIP ViT-L/14 backbone.",
+        "models.py hard-codes an author-local Linux Hugging Face cache path and uses local_files_only=True.",
+        "inference_image.py selects a CPU device when CUDA is unavailable, but instantiates GAPLModel without passing that device; the model constructor defaults to cuda and moves the backbone before inference can proceed."
+      ],
+      "decision": "reject_before_download",
+      "reason": "The published single-image path is not CPU-reproducible and would require multi-gigabyte unbounded memory before a first score."
+    },
+    {
+      "name": "FusionDetect / AIGI-Holmes / RIGID / WaRPAD / SSAFE",
+      "upstreams": [
+        "https://github.com/amir-aman/FusionDetect",
+        "https://github.com/wyczzy/AIGI-Holmes",
+        "https://arxiv.org/abs/2405.20112",
+        "https://arxiv.org/abs/2511.14030",
+        "https://arxiv.org/abs/2606.08634"
+      ],
+      "observations": [
+        "FusionDetect's official repository currently says Coming Soon and has no implementation or weights.",
+        "AIGI-Holmes publishes a 15.1 GB model and documents multi-GPU vLLM inference.",
+        "For RIGID, WaRPAD, and SSAFE this audit found papers but no official runnable pretrained implementation and checksum-verifiable model release."
+      ],
+      "decision": "unavailable",
+      "reason": "No bounded, reproducible CPU inference asset is currently published."
+    }
+  ],
+  "conclusion": "No screened candidate is eligible to change Demirror's AI conclusion. This is a negative research result, not evidence that the remaining detectors are sufficient."
+}

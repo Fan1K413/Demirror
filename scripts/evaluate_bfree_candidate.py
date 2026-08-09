@@ -21,6 +21,7 @@ from typing import Any, Iterable
 import numpy as np
 from PIL import Image
 from sklearn.metrics import roc_auc_score
+import yaml
 
 
 DEFAULT_SCENES = ("Indoor", "Outdoor")
@@ -57,6 +58,17 @@ def _parse_generators(text: str) -> tuple[str, ...]:
     unknown = sorted(set(values).difference(DEFAULT_GENERATORS))
     if unknown:
         raise ValueError(f"Unknown local generator folders: {', '.join(unknown)}")
+    return values
+
+
+def _parse_jpeg_qualities(text: str) -> tuple[int, ...]:
+    """Parse a small, explicit list of in-memory JPEG re-encodes."""
+
+    if not text.strip():
+        return ()
+    values = tuple(int(part.strip()) for part in text.split(",") if part.strip())
+    if not values or any(not 1 <= value <= 100 for value in values):
+        raise ValueError("JPEG qualities must be a comma-separated list within [1, 100]")
     return values
 
 
@@ -109,11 +121,20 @@ def _load_model(source_dir: Path, weights_dir: Path, model_name: str) -> tuple[A
     from torchvision.transforms import Compose
 
     sys.path.insert(0, str(source_dir.resolve()))
-    from main_bfree_single import get_config  # type: ignore[import-not-found]
     from networks import get_network, load_weights  # type: ignore[import-not-found]
     from utils.normalization import get_list_norm  # type: ignore[import-not-found]
 
-    _, model_path, arch, norm_type = get_config(model_name, weights_dir=str(weights_dir))
+    config_path = weights_dir / model_name / "config.yaml"
+    with config_path.open("r", encoding="utf-8") as handle:
+        config = yaml.safe_load(handle)
+    if not isinstance(config, dict):
+        raise ValueError(f"Invalid B-Free config mapping: {config_path}")
+    try:
+        model_path = weights_dir / model_name / str(config["weights_file"])
+        arch = str(config["arch"])
+        norm_type = str(config["norm_type"])
+    except KeyError as error:
+        raise ValueError(f"Missing B-Free config key {error.args[0]!r}: {config_path}") from error
     model = load_weights(get_network(arch), model_path).to("cpu").eval()
     return model, Compose(get_list_norm(norm_type)), str(model_path)
 
@@ -128,6 +149,20 @@ def _model_input(path: Path, jpeg_quality: int | None) -> Image.Image:
     buffer.seek(0)
     with Image.open(buffer) as recompressed:
         return recompressed.convert("RGB")
+
+
+def _score_image(model: Any, transform: Any, path: Path, jpeg_quality: int | None) -> float:
+    """Return the upstream single-logit score for one decoded image variant."""
+
+    import torch
+
+    image = _model_input(path, jpeg_quality)
+    values = transform(image).unsqueeze(0)
+    with torch.inference_mode():
+        output = model(values).detach().cpu().numpy()
+    if output.shape != (1, 1):
+        raise ValueError(f"Unexpected B-Free output shape: {output.shape}")
+    return float(output[0, 0])
 
 
 def evaluate(args: argparse.Namespace) -> dict[str, Any]:
@@ -149,24 +184,18 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     model, transform, model_path_text = _load_model(args.source_dir, args.weights_dir, args.model_name)
     model_path = Path(model_path_text)
     rows: list[dict[str, Any]] = []
-    with torch.inference_mode():
-        for index, (generator, scene, image_id, path, label) in enumerate(samples, start=1):
-            image = _model_input(path, args.jpeg_quality)
-            values = transform(image).unsqueeze(0)
-            output = model(values).detach().cpu().numpy()
-            if output.shape != (1, 1):
-                raise ValueError(f"Unexpected B-Free output shape: {output.shape}")
-            rows.append(
-                {
-                    "generator": generator,
-                    "scene": scene,
-                    "id": image_id,
-                    "label": label,
-                    "input_sha256": _sha256(path),
-                    "ai_logit": float(output[0, 0]),
-                }
-            )
-            print(f"scored={index}/{len(samples)} generator={generator} scene={scene} id={image_id} label={label}", flush=True)
+    for index, (generator, scene, image_id, path, label) in enumerate(samples, start=1):
+        rows.append(
+            {
+                "generator": generator,
+                "scene": scene,
+                "id": image_id,
+                "label": label,
+                "input_sha256": _sha256(path),
+                "ai_logit": _score_image(model, transform, path, args.jpeg_quality),
+            }
+        )
+        print(f"scored={index}/{len(samples)} generator={generator} scene={scene} id={image_id} label={label}", flush=True)
 
     report = {
         "schema_version": "bfree-candidate-screen-v1",
@@ -202,6 +231,60 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     return report
 
 
+def probe_image(args: argparse.Namespace) -> dict[str, Any]:
+    """Score one local image and explicit JPEG variants without assigning a label."""
+
+    if args.probe_image is None or not args.probe_image.is_file():
+        raise FileNotFoundError(f"Probe image does not exist: {args.probe_image}")
+    if not args.source_dir.is_dir():
+        raise FileNotFoundError(f"B-Free source directory does not exist: {args.source_dir}")
+    config_path = args.weights_dir / args.model_name / "config.yaml"
+    if not config_path.is_file():
+        raise FileNotFoundError(f"Verified B-Free config does not exist: {config_path}")
+
+    import torch
+
+    torch.set_num_threads(max(1, args.cpu_threads))
+    torch.set_num_interop_threads(1)
+    model, transform, model_path_text = _load_model(args.source_dir, args.weights_dir, args.model_name)
+    variants = (None, *_parse_jpeg_qualities(args.probe_jpeg_qualities))
+    scores = []
+    for jpeg_quality in variants:
+        scores.append(
+            {
+                "input_transform": "original_decode" if jpeg_quality is None else f"jpeg_reencode_quality={jpeg_quality}",
+                "ai_logit": _score_image(model, transform, args.probe_image, jpeg_quality),
+            }
+        )
+        print(f"scored_probe={scores[-1]['input_transform']}", flush=True)
+
+    report = {
+        "schema_version": "bfree-image-probe-v1",
+        "purpose": "Regression probe only; scores are not product thresholds or AI probabilities.",
+        "model": {
+            "upstream_repository": "https://github.com/grip-unina/B-Free",
+            "source_dir": str(args.source_dir),
+            "model_name": args.model_name,
+            "model_sha256": _sha256(Path(model_path_text)),
+            "config_sha256": _sha256(config_path),
+            "device": "cpu",
+            "cpu_threads": args.cpu_threads,
+            "preprocessing": "upstream five-crop 504px wrapper with published normalization",
+        },
+        "input": {"path": str(args.probe_image), "sha256": _sha256(args.probe_image)},
+        "scores": scores,
+        "limitations": [
+            "This probe has no real-image control set and cannot choose a decision threshold.",
+            "A positive score here is not evidence of calibrated performance or provenance.",
+        ],
+    }
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    (args.output_dir / "report.json").write_text(
+        json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    return report
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-root", type=Path, default=Path("data/p3_aigc_v2/extracted"))
@@ -212,14 +295,20 @@ def main() -> int:
     parser.add_argument("--ids", default="426:427", help="Small frozen pilot range; inclusive, e.g. 426:427.")
     parser.add_argument("--generators", default="Deepfloyd,Kandinsky,Pixart,SDXL")
     parser.add_argument("--jpeg-quality", type=int, default=None)
+    parser.add_argument("--probe-image", type=Path, default=None, help="Optional local image for an unlabeled regression probe.")
+    parser.add_argument("--probe-jpeg-qualities", default="85", help="Comma-separated JPEG qualities for --probe-image; blank disables variants.")
     parser.add_argument("--cpu-threads", type=int, default=2)
     args = parser.parse_args()
     if args.jpeg_quality is not None and not 1 <= args.jpeg_quality <= 100:
         raise ValueError("jpeg-quality must be within [1, 100]")
     if args.cpu_threads < 1:
         raise ValueError("cpu-threads must be at least 1")
-    report = evaluate(args)
-    print(json.dumps(report["evaluation"], sort_keys=True))
+    if args.probe_image is not None:
+        report = probe_image(args)
+        print(json.dumps(report["scores"], sort_keys=True))
+    else:
+        report = evaluate(args)
+        print(json.dumps(report["evaluation"], sort_keys=True))
     return 0
 
 

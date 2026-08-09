@@ -1,17 +1,32 @@
 from __future__ import annotations
 
 from PIL import Image
+import pytest
 
 from image_trust.ai_likelihood.dda import DdaScore, assess_high_confidence_ai
 from image_trust.ai_likelihood.community_forensics import CommunityForensicsScore
 from image_trust.ai_likelihood.forensic_clip import ForensicClipScore
 from image_trust.ai_likelihood.safe import SafeScore
+from image_trust.ai_likelihood.nonescape import NonescapeMiniScore
 from image_trust.provenance.contracts import (
     C2paRecord,
     C2paRecordStatus,
     C2paSignatureValidationStatus,
     C2paTrustStatus,
 )
+
+
+@pytest.fixture(autouse=True)
+def _default_nonescape_score(monkeypatch) -> None:
+    """Keep unrelated policy tests free of a real child-model invocation."""
+
+    monkeypatch.setattr(
+        "image_trust.ai_likelihood.dda.score_nonescape_mini_isolated",
+        lambda *_args, **_kwargs: NonescapeMiniScore(
+            0.1,
+            "resize_256_center_crop_224_jpeg100_imagenet_normalization",
+        ),
+    )
 
 
 def _record(
@@ -149,6 +164,27 @@ def test_community_forensics_high_signal_is_auditable(monkeypatch, tmp_path) -> 
     detector = next(signal for signal in result.signals if signal.name == "community_forensics_detector")
     assert detector.value == 0.9
     assert detector.details["high_confidence_threshold"] == 0.8866265416145325
+
+
+def test_nonescape_high_signal_can_complement_other_low_scores(monkeypatch, tmp_path) -> None:
+    monkeypatch.setattr(
+        "image_trust.ai_likelihood.dda.score_dda_isolated",
+        lambda *_args, **_kwargs: DdaScore(0.2, "center_crop_336_clip_normalization"),
+    )
+    monkeypatch.setattr(
+        "image_trust.ai_likelihood.dda.score_nonescape_mini_isolated",
+        lambda *_args, **_kwargs: NonescapeMiniScore(
+            0.94,
+            "resize_256_center_crop_224_jpeg100_imagenet_normalization",
+        ),
+    )
+
+    result = assess_high_confidence_ai(tmp_path / "asset.png", _record())
+
+    assert result.risk_band == "high"
+    detector = next(signal for signal in result.signals if signal.name == "nonescape_mini_detector")
+    assert detector.value == 0.94
+    assert detector.details["high_confidence_threshold"] == 0.9260923266410828
 
 
 def test_static_webp_pixel_high_signal_is_limited_review_only(monkeypatch, tmp_path) -> None:

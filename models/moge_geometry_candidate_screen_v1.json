@@ -1,0 +1,59 @@
+{
+  "schema_version": "moge-geometry-candidate-screen-v1",
+  "candidate": "MoGe-2 normal-map geometry features",
+  "status": "rejected_after_generator_isolated_diagnostic",
+  "purpose": "Evaluate whether monocular geometry predictions can provide a stable AI-origin signal. This audit does not evaluate P0 line-family visualisation.",
+  "upstream": {
+    "repository": "https://github.com/microsoft/MoGe",
+    "checkpoint": "microsoft/MoGe MoGe-2 vits-normal",
+    "checkpoint_sha256": "79a16621928c2bf0ed04659218c55c01075e950507f40bb3332fb4c873d3e1dc"
+  },
+  "runtime_protocol": {
+    "device": "CPU",
+    "cpu_threads": 2,
+    "maximum_edge": 256,
+    "num_tokens": 1200,
+    "isolation": "Each 12-image shard loads the model once in a foreground Python process and then exits.",
+    "feature_constraint": "Only line geometry sampled from the predicted normal field; no RGB pixels, metadata, P3 score, or provenance signal."
+  },
+  "fixed_diagnostic_protocol": {
+    "orientation_source": "DeepFloyd indoor train, six real and six generated images",
+    "untouched_tests": [
+      "SDXL indoor test, six real and six generated images",
+      "SDXL outdoor test, six real and six generated images"
+    ],
+    "method": "For each of eleven predeclared geometry features, select only its score direction on DeepFloyd, then report rank AUC unchanged on each SDXL scene.",
+    "limitations": "Six images per class per set is deliberately a low-cost rejection screen, not an accuracy estimate or an integration acceptance test."
+  },
+  "artifacts": {
+    "deepfloyd_train": "outputs/moge_line_geometry_v1/diagnostic_deepfloyd_balanced_000.npz",
+    "sdxl_indoor_test": "outputs/moge_line_geometry_v1/diagnostic_sdxl_balanced_000.npz",
+    "sdxl_outdoor_test": "outputs/moge_line_geometry_v1/diagnostic_sdxl_balanced_075.npz"
+  },
+  "ranked_features": [
+    {
+      "feature": "moge_normal_step_change_p90",
+      "deepfloyd_train_auc_after_direction_selection": 0.9167,
+      "sdxl_indoor_auc": 0.4444,
+      "sdxl_outdoor_auc": 0.6667
+    },
+    {
+      "feature": "moge_line_count",
+      "deepfloyd_train_auc_after_direction_selection": 0.8611,
+      "sdxl_indoor_auc": 0.4444,
+      "sdxl_outdoor_auc": 0.3194
+    },
+    {
+      "feature": "moge_normal_step_change_p50",
+      "deepfloyd_train_auc_after_direction_selection": 0.8333,
+      "sdxl_indoor_auc": 0.3056,
+      "sdxl_outdoor_auc": 0.6111
+    }
+  ],
+  "decision": {
+    "integration": "not_allowed",
+    "reason": "The strongest features on the independent DeepFloyd direction-selection set collapse or reverse on isolated SDXL indoor and outdoor scenes. This is incompatible with a stable source signal and is far below the 0.80 validation target.",
+    "retained_use": "The bounded MoGe probe may remain a future explanatory geometry research tool, but it must not contribute to the product's AI-likelihood conclusion.",
+    "next_action": "Do not run a full multi-hour feature extraction unless a new, preregistered source-classification hypothesis has a separate validation protocol."
+  }
+}
