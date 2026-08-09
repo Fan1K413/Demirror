@@ -24,6 +24,7 @@ from image_trust.geometry.vanishing_points import (
     fit_local_parallel_families,
     fit_vanishing_families,
     identify_anomaly_candidates,
+    identify_compact_component_conflict_candidates,
     identify_competing_vanishing_family_candidates,
     identify_parallel_anomaly_candidates,
 )
@@ -195,18 +196,29 @@ def analyze_image(
             assessment.score,
             config.applicability.anomaly_min_applicability,
         )
+        compact_component_anomalies = identify_compact_component_conflict_candidates(
+            lines,
+            families,
+            parallel_families,
+            ingested.summary.analysis_size,
+            config.vanishing_points,
+            assessment.score,
+            config.applicability.anomaly_min_applicability,
+        )
         anomalies_by_line = {
             anomaly.line_id: anomaly
             for anomaly in [
                 *global_anomalies,
                 *parallel_anomalies,
                 *competing_vp_anomalies,
+                *compact_component_anomalies,
             ]
         }
         for anomaly in [
             *global_anomalies,
             *parallel_anomalies,
             *competing_vp_anomalies,
+            *compact_component_anomalies,
         ]:
             existing = anomalies_by_line.get(anomaly.line_id)
             if existing is None or anomaly.anomaly_candidate_score > existing.anomaly_candidate_score:

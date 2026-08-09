@@ -1,0 +1,41 @@
+{
+  "schema_version": "external-detector-screen-v1",
+  "candidate": "Polimi synthetic-image-detection synthetic-vs-real",
+  "status": "rejected_after_frozen_pilot",
+  "upstream": {
+    "repository": "https://github.com/polimi-ispl/synthetic-image-detection",
+    "revision": "345fdd88c90274d963a48f75619aeaaea08109aa",
+    "license": "MIT",
+    "architecture": "EfficientNet-B4 patch forensic detector"
+  },
+  "asset": {
+    "filename": "synth_vs_real.pth",
+    "sha256": "c39a5af9a4f5afaaad5ae00c1a82ef8941a87fc7bdb9fc2dfa2b78642629f90d",
+    "local_path": "weights/polimi-synthetic-image-detection/synth_vs_real.pth",
+    "git_tracked": false
+  },
+  "execution": {
+    "device": "cpu",
+    "torch_threads": 2,
+    "released_sampler": "fixed random seed 21; 800 random 96x96 patches; ImageNet normalization",
+    "memory_safety_change": "forward in batches of 32 rather than materializing an 800-patch tensor",
+    "aggregation": "mean of top 600 class-1 raw logits"
+  },
+  "frozen_pilot": {
+    "dataset": "https://huggingface.co/datasets/amitabh3/Projective-Geometry",
+    "generator": "Recent_SDXL",
+    "ids": "426:430",
+    "scenes": ["Indoor", "Outdoor"],
+    "sample_count": 20,
+    "decision_threshold": 0.0,
+    "accuracy": 0.5,
+    "roc_auc": 0.44,
+    "true_positive_rate": 0.3,
+    "false_positive_rate": 0.3
+  },
+  "decision": {
+    "integration": "not_allowed",
+    "reason": "The untouched official threshold performs below the 0.5 no-skill ranking baseline on this frozen SDXL pilot, so a complete evaluation or threshold fitting would not be informative.",
+    "scope": "This is a pixel-forensic candidate, not a projective-geometry result or a provenance claim."
+  }
+}

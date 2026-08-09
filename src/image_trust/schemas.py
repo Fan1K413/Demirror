@@ -178,6 +178,9 @@ class LineBackendConfig(BaseModel):
     name: str = "opencv_lsd"
     allow_fallback: bool = False
     deeplsd_weights: str | None = None
+    deeplsd_max_side: int = Field(default=512, ge=128, le=1536)
+    deeplsd_threads: int = Field(default=2, ge=1, le=4)
+    deeplsd_timeout_seconds: float = Field(default=45.0, ge=5.0, le=120.0)
     opencv_refine: str = "std"
     min_length_px: float = Field(default=24.0, ge=0.0)
     min_quality: float = Field(default=0.0, ge=0.0, le=1.0)
@@ -218,6 +221,15 @@ class VanishingPointConfig(BaseModel):
     max_parallel_families: int = Field(default=6, ge=1)
     parallel_inlier_angle_deg: float = Field(default=2.5, gt=0.0, lt=90.0)
     competing_family_max_extent_ratio: float = Field(default=0.60, gt=0.0, le=1.0)
+    compact_component_min_lines: int = Field(default=2, ge=2)
+    compact_component_max_extent_ratio: float = Field(default=0.18, gt=0.0, le=1.0)
+    compact_component_link_distance_ratio: float = Field(default=0.10, gt=0.0, le=1.0)
+    compact_component_max_link_distance_px: float = Field(default=12.0, gt=0.0)
+    compact_component_min_line_length_ratio: float = Field(default=0.06, gt=0.0, le=1.0)
+    compact_component_max_family_inlier_ratio: float = Field(default=0.18, gt=0.0, le=1.0)
+    compact_component_max_family_weight_ratio: float = Field(default=0.65, gt=0.0, le=1.0)
+    compact_component_nearby_distance_ratio: float = Field(default=0.10, gt=0.0, le=1.0)
+    compact_component_max_nearby_distance_px: float = Field(default=20.0, gt=0.0)
     unassigned_candidate_min_length_ratio: float = Field(default=0.08, gt=0.0, le=1.0)
     local_family_grid_size: int = Field(default=3, ge=1)
     local_families_per_cell: int = Field(default=2, ge=1)
@@ -225,6 +237,8 @@ class VanishingPointConfig(BaseModel):
     local_min_family_weight: float = Field(default=40.0, ge=0.0)
     local_direction_families_per_cell: int = Field(default=5, ge=1)
     local_direction_inlier_angle_deg: float = Field(default=5.0, gt=0.0, lt=90.0)
+    local_direction_component_gap_ratio: float = Field(default=0.08, gt=0.0, le=1.0)
+    local_direction_component_max_gap_px: float = Field(default=36.0, gt=0.0)
 
 
 class OverlayConfig(BaseModel):

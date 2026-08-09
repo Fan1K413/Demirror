@@ -1,0 +1,44 @@
+{
+  "schema_version": "p0-candidate-corroboration-screen-v1",
+  "candidate": "Canny plus probabilistic-Hough corroboration of existing OpenCV-LSD P0 candidates",
+  "status": "rejected_after_frozen_holdout",
+  "execution": {
+    "dependency": "OpenCV only; no external model, download, or persistent process",
+    "candidate_match": "axis angle <= 7.5 degrees; finite-segment distance <= 4 analysis pixels; overlap >= 30 percent of the shorter segment",
+    "selection": "maximize development target-localization recall, then minimize development clean candidate count; holdout never selects parameters"
+  },
+  "frozen_localization_benchmark": {
+    "manifest": "data/p0_natural_line_mutation_indoor_final_v1/manifest.json",
+    "manifest_sha256": "6d4f812ca475a7587632bd9496a6f0e1c286edf1c9fd76b5d292b1a6f29c3b2c",
+    "p0_candidate_source": "outputs/p0_natural_line_mutation_indoor_final_v1/artifacts",
+    "selected_hough_setting": {
+      "threshold": 45,
+      "minimum_length": 32,
+      "maximum_gap": 4
+    },
+    "selected_development": {
+      "target_localization_recall": 0.6666666666666666,
+      "mean_clean_candidate_count": 2.0
+    },
+    "selected_holdout": {
+      "target_localization_recall": 0.3333333333333333,
+      "mean_clean_candidate_count": 1.1666666666666667
+    },
+    "selected_overall": {
+      "target_localization_recall": 0.5,
+      "mean_clean_candidate_count": 1.5833333333333333
+    },
+    "reference_opencv_lsd": {
+      "development_target_localization_recall": 0.6666666666666666,
+      "holdout_target_localization_recall": 1.0,
+      "overall_target_localization_recall": 0.8333333333333334,
+      "overall_mean_clean_candidate_count": 4.083333333333333
+    },
+    "result_path": "outputs/p0_hough_corroboration_screen_v1/report.json"
+  },
+  "decision": {
+    "integration": "not_allowed",
+    "reason": "The selected setting reduced clean review candidates on development, but collapsed unseen holdout target localization from 6/6 to 2/6. Independent low-level detector agreement is therefore not a reliable proxy for a semantically meaningful geometric relation in this benchmark.",
+    "scope": "This is a P0 review-candidate localization screen, not AI-origin classification."
+  }
+}

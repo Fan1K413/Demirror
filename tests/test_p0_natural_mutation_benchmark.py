@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 
@@ -83,3 +84,44 @@ def test_baseline_eligibility_rejects_not_applicable_measurements() -> None:
 
     assert builder.baseline_is_eligible(usable, 0.45)
     assert not builder.baseline_is_eligible(rejected, 0.45)
+
+
+def test_evaluator_records_a_safe_backend_failure_without_aborting(tmp_path: Path, monkeypatch) -> None:
+    input_path = tmp_path / "sample.jpg"
+    input_path.write_bytes(b"fixture")
+    evidence = SimpleNamespace(
+        run_status=SimpleNamespace(value="failed"),
+        applicability=0.0,
+        coverage=0.0,
+        features={},
+    )
+    monkeypatch.setattr(evaluator, "analyze_image", lambda *_args, **_kwargs: SimpleNamespace(evidence=evidence))
+
+    row = evaluator._one_run(
+        input_path,
+        {"p1": [0.0, 0.0], "p2": [1.0, 1.0], "tolerance_px": 1.0},
+        object(),
+        tmp_path / "artifacts",
+        0.5,
+    )
+
+    assert row["run_status"] == "failed"
+    assert row["candidate_count"] == 0
+    assert row["target_detected"] is False
+    assert row["measurement_error"] == "lines_artifact_unavailable"
+
+
+def test_checkpoint_round_trip_rejects_duplicate_sample_ids(tmp_path: Path) -> None:
+    checkpoint = tmp_path / "records.jsonl"
+    rows = [{"sample_id": "sample-a"}, {"sample_id": "sample-b"}]
+
+    evaluator._write_records(checkpoint, rows)
+
+    assert evaluator._load_records(checkpoint) == {"sample-a": rows[0], "sample-b": rows[1]}
+    checkpoint.write_text('{"sample_id": "sample-a"}\n{"sample_id": "sample-a"}\n', encoding="utf-8")
+    try:
+        evaluator._load_records(checkpoint)
+    except ValueError as error:
+        assert "duplicate" in str(error)
+    else:
+        raise AssertionError("Duplicate checkpoint IDs must be rejected")

@@ -325,9 +325,15 @@ def fit_local_parallel_families(
                 candidates.append((scoped, support_weight))
     candidates.sort(key=lambda item: (-item[1], item[0].family_id))
     merged: list[tuple[VPFamily, float]] = []
+    merge_gap = min(
+        math.hypot(width, height) * config.local_direction_component_gap_ratio,
+        config.local_direction_component_max_gap_px,
+    )
     for component in _merge_adjacent_local_direction_components(
         [family for family, _ in candidates],
         config.local_direction_inlier_angle_deg,
+        line_by_id,
+        merge_gap,
     ):
         member_ids = {
             line_id for family in component for line_id in family.member_line_ids
@@ -381,8 +387,18 @@ def fit_local_parallel_families(
 def _merge_adjacent_local_direction_components(
     families: list[VPFamily],
     angle_threshold_deg: float,
+    line_by_id: dict[str, LineRecord],
+    maximum_segment_gap: float,
 ) -> list[list[VPFamily]]:
-    """Join a local direction only when its support crosses a cell boundary."""
+    """Join a local direction only when visible support continues across cells.
+
+    Spatial cells share a border by construction.  Treating that shared border
+    as sufficient evidence merged unrelated facade, roof, or street features
+    that happened to have a similar image-plane direction.  Two groups now
+    need both an adjacent-cell direction match and genuinely nearby finite
+    segments, which is still permissive enough for a structural line split by
+    the detector at a cell boundary.
+    """
     components: list[list[VPFamily]] = []
     for family in families:
         matching = [
@@ -390,7 +406,11 @@ def _merge_adjacent_local_direction_components(
             for index, component in enumerate(components)
             if any(
                 _local_directions_are_continuous(
-                    family, existing, angle_threshold_deg
+                    family,
+                    existing,
+                    angle_threshold_deg,
+                    line_by_id,
+                    maximum_segment_gap,
                 )
                 for existing in component
             )
@@ -409,6 +429,8 @@ def _local_directions_are_continuous(
     first: VPFamily,
     second: VPFamily,
     angle_threshold_deg: float,
+    line_by_id: dict[str, LineRecord],
+    maximum_segment_gap: float,
 ) -> bool:
     if first.direction_analysis is None or second.direction_analysis is None:
         return False
@@ -427,12 +449,23 @@ def _local_directions_are_continuous(
         return False
     first_x0, first_y0, first_x1, first_y1 = first.spatial_window_analysis
     second_x0, second_y0, second_x1, second_y1 = second.spatial_window_analysis
-    return (
+    adjacent_windows = (
         first_x0 <= second_x1 + 1e-6
         and second_x0 <= first_x1 + 1e-6
         and first_y0 <= second_y1 + 1e-6
         and second_y0 <= first_y1 + 1e-6
     )
+    if not adjacent_windows:
+        return False
+    first_lines = [line_by_id[line_id] for line_id in first.member_line_ids if line_id in line_by_id]
+    second_lines = [line_by_id[line_id] for line_id in second.member_line_ids if line_id in line_by_id]
+    if not first_lines or not second_lines:
+        return False
+    return min(
+        _segment_distance(first_line, second_line)
+        for first_line in first_lines
+        for second_line in second_lines
+    ) <= maximum_segment_gap
 
 
 def _combined_spatial_window(
@@ -619,6 +652,155 @@ def identify_competing_vanishing_family_candidates(
     )
 
 
+def identify_compact_component_conflict_candidates(
+    lines: list[LineRecord],
+    families: list[VPFamily],
+    parallel_families: list[VPFamily],
+    image_size: tuple[int, int],
+    config: VanishingPointConfig,
+    applicability: float,
+    minimum_applicability: float,
+) -> list[AnomalyCandidate]:
+    """Find a compact direction component hidden inside a broad VP family.
+
+    Global RANSAC can occasionally group two nearby edges of one local stroke
+    with remote fragments that happen to intersect at the same point.  Marking
+    every member of that global family as ``explained`` would hide a useful
+    review cue: a compact component can still disagree sharply with an
+    immediately adjacent, dominant parallel direction.  This rule only emits
+    an overlay candidate; it makes no source or AI-origin claim.
+    """
+
+    if applicability < minimum_applicability:
+        return []
+    line_by_id = {line.line_id: line for line in lines}
+    diagonal = math.hypot(*image_size)
+    stable_global = [
+        family
+        for family in families
+        if family.stable
+        and family.vp_type == "finite"
+        and family.weighted_inlier_ratio <= config.compact_component_max_family_inlier_ratio
+    ]
+    stable_parallel = [
+        family
+        for family in parallel_families
+        if family.stable and family.direction_analysis is not None
+    ]
+    candidates_by_line: dict[str, AnomalyCandidate] = {}
+    for family in stable_global:
+        family_lines = [
+            line_by_id[line_id]
+            for line_id in family.member_line_ids
+            if line_id in line_by_id
+        ]
+        if len(family_lines) < config.compact_component_min_lines:
+            continue
+        family_weight = sum(
+            line.length_analysis * max(line.quality, 0.05) for line in family_lines
+        )
+        if family_weight <= 0.0:
+            continue
+        for component in _spatial_line_components(
+            family_lines,
+            min(
+                diagonal * config.compact_component_link_distance_ratio,
+                config.compact_component_max_link_distance_px,
+            ),
+        ):
+            if len(component) < config.compact_component_min_lines:
+                continue
+            if any(
+                line.length_analysis
+                < diagonal * config.compact_component_min_line_length_ratio
+                for line in component
+            ):
+                continue
+            extent = _family_midpoint_extent_ratio(component, diagonal)
+            if extent > config.compact_component_max_extent_ratio:
+                continue
+            component_weight = sum(
+                line.length_analysis * max(line.quality, 0.05) for line in component
+            )
+            if (
+                component_weight
+                / family_weight
+                > config.compact_component_max_family_weight_ratio
+            ):
+                continue
+            for dominant in stable_parallel:
+                if dominant.weighted_inlier_ratio < family.weighted_inlier_ratio * 1.5:
+                    continue
+                dominant_lines = [
+                    line_by_id[line_id]
+                    for line_id in dominant.member_line_ids
+                    if line_id in line_by_id
+                    and line_id not in {member.line_id for member in component}
+                ]
+                if not dominant_lines:
+                    continue
+                proximity = _component_to_lines_distance_ratio(
+                    component,
+                    dominant_lines,
+                    diagonal,
+                )
+                nearby_limit = min(
+                    diagonal * config.compact_component_nearby_distance_ratio,
+                    config.compact_component_max_nearby_distance_px,
+                )
+                if proximity * diagonal > nearby_limit:
+                    continue
+                residuals = [
+                    _residual_to_serialized_family(_axis(line), _midpoint(line), dominant)
+                    for line in component
+                ]
+                residual = float(np.median(residuals))
+                if residual <= config.parallel_inlier_angle_deg * 3.0:
+                    continue
+                residual_component = min(
+                    1.0,
+                    residual / max(config.parallel_inlier_angle_deg * 6.0, 1e-6),
+                )
+                dominance = min(
+                    1.0,
+                    1.0
+                    - family.weighted_inlier_ratio
+                    / max(dominant.weighted_inlier_ratio, 1e-9),
+                )
+                compactness = 1.0 - min(
+                    1.0,
+                    extent / max(config.compact_component_max_extent_ratio, 1e-9),
+                )
+                proximity_component = 1.0 - min(
+                    1.0,
+                    proximity * diagonal / max(nearby_limit, 1e-9),
+                )
+                score = (
+                    0.45 * residual_component
+                    + 0.25 * dominance
+                    + 0.15 * compactness
+                    + 0.15 * proximity_component
+                )
+                for line in component:
+                    candidate = AnomalyCandidate(
+                        line_id=line.line_id,
+                        anomaly_candidate_score=float(max(0.0, min(score, 1.0))),
+                        nearest_family_id=dominant.family_id,
+                        residual_deg=residual,
+                        reason="compact_global_component_conflicts_with_nearby_parallel_family",
+                    )
+                    existing = candidates_by_line.get(line.line_id)
+                    if (
+                        existing is None
+                        or candidate.anomaly_candidate_score > existing.anomaly_candidate_score
+                    ):
+                        candidates_by_line[line.line_id] = candidate
+    return sorted(
+        candidates_by_line.values(),
+        key=lambda item: (-item.anomaly_candidate_score, item.line_id),
+    )
+
+
 def _competing_family_candidates(
     lines: list[LineRecord],
     families: list[VPFamily],
@@ -733,6 +915,83 @@ def _family_midpoint_extent_ratio(lines: list[LineRecord], diagonal: float) -> f
     midpoints = np.asarray([_midpoint(line) for line in lines], dtype=float)
     extent = float(np.linalg.norm(midpoints.max(axis=0) - midpoints.min(axis=0)))
     return extent / max(diagonal, 1e-9)
+
+
+def _spatial_line_components(
+    lines: list[LineRecord],
+    link_distance: float,
+) -> list[list[LineRecord]]:
+    """Join line records only when their visible segments touch or stay close."""
+
+    remaining = {line.line_id: line for line in lines}
+    components: list[list[LineRecord]] = []
+    while remaining:
+        first_id = min(remaining)
+        component = [remaining.pop(first_id)]
+        cursor = 0
+        while cursor < len(component):
+            current = component[cursor]
+            adjacent_ids = [
+                line_id
+                for line_id, candidate in remaining.items()
+                if _segment_distance(current, candidate) <= link_distance
+            ]
+            for line_id in adjacent_ids:
+                component.append(remaining.pop(line_id))
+            cursor += 1
+        components.append(component)
+    return components
+
+
+def _component_to_lines_distance_ratio(
+    component: list[LineRecord],
+    other_lines: list[LineRecord],
+    diagonal: float,
+) -> float:
+    if not component or not other_lines:
+        return 1.0
+    distance = min(
+        _segment_distance(first, second)
+        for first in component
+        for second in other_lines
+    )
+    return distance / max(diagonal, 1e-9)
+
+
+def _segment_distance(first: LineRecord, second: LineRecord) -> float:
+    """Symmetric endpoint-to-segment distance for two 2-D finite segments."""
+
+    first_start = (first.p1_analysis.x, first.p1_analysis.y)
+    first_end = (first.p2_analysis.x, first.p2_analysis.y)
+    second_start = (second.p1_analysis.x, second.p1_analysis.y)
+    second_end = (second.p2_analysis.x, second.p2_analysis.y)
+    return min(
+        _point_to_segment_distance(first_start, second_start, second_end),
+        _point_to_segment_distance(first_end, second_start, second_end),
+        _point_to_segment_distance(second_start, first_start, first_end),
+        _point_to_segment_distance(second_end, first_start, first_end),
+    )
+
+
+def _point_to_segment_distance(
+    point: tuple[float, float],
+    start: tuple[float, float],
+    end: tuple[float, float],
+) -> float:
+    axis = np.asarray(end, dtype=float) - np.asarray(start, dtype=float)
+    denominator = float(np.dot(axis, axis))
+    if denominator <= 1e-12:
+        return math.dist(point, start)
+    scale = float(
+        np.clip(
+            np.dot(np.asarray(point, dtype=float) - np.asarray(start, dtype=float), axis)
+            / denominator,
+            0.0,
+            1.0,
+        )
+    )
+    projection = np.asarray(start, dtype=float) + scale * axis
+    return float(np.linalg.norm(np.asarray(point, dtype=float) - projection))
 
 
 def _parallel_family_comparison(

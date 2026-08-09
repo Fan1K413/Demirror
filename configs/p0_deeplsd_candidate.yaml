@@ -1,4 +1,4 @@
-config_version: p0-2026-08-10.1
+config_version: p0-deeplsd-candidate-2026-08-10.2
 
 ingest:
   max_file_bytes: 52428800
@@ -10,9 +10,12 @@ analysis:
   max_long_side: 1280
 
 line_backend:
-  name: opencv_lsd
+  name: deeplsd
   allow_fallback: false
-  deeplsd_weights: null
+  deeplsd_weights: weights/deeplsd/deeplsd_md.safetensors
+  deeplsd_max_side: 512
+  deeplsd_threads: 2
+  deeplsd_timeout_seconds: 45
   opencv_refine: std
   min_length_px: 24.0
   min_quality: 0.0

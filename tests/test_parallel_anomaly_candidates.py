@@ -1,15 +1,19 @@
 from __future__ import annotations
 
+import math
+
 from image_trust.geometry.vanishing_points import (
     fit_parallel_families,
     fit_vanishing_families,
     identify_anomaly_candidates,
+    identify_compact_component_conflict_candidates,
     identify_parallel_anomaly_candidates,
 )
 from image_trust.schemas import (
     LineRecord,
     Point,
     VanishingPointConfig,
+    VPFamily,
 )
 from image_trust.utils.coordinates import CoordinateTransform
 
@@ -132,6 +136,142 @@ def test_unassigned_fragment_is_not_a_geometric_contradiction() -> None:
     assert candidates == []
 
 
+def test_compact_component_can_be_reviewed_when_global_vp_fit_hides_it() -> None:
+    """Two nearby conflicting edges must not be hidden by remote VP fragments."""
+
+    compact = [
+        _line("diag1", 130, 70, 150, 120),
+        _line("diag2", 133, 70, 153, 120),
+    ]
+    remote = [
+        _line("remote1", 10, 10, 30, 60),
+        _line("remote2", 30, 150, 50, 200),
+        _line("remote3", 20, 100, 40, 150),
+    ]
+    vertical = [
+        _line("vertical1", 150, 20, 150, 180),
+        _line("vertical2", 170, 20, 170, 180),
+        _line("vertical3", 190, 20, 190, 180),
+        _line("vertical4", 110, 20, 110, 180),
+    ]
+    skew_family = _family(
+        "vp-small",
+        "finite",
+        [line.line_id for line in [*compact, *remote]],
+        weighted_inlier_ratio=0.10,
+    )
+    dominant_parallel = _family(
+        "parallel-dominant",
+        "infinite",
+        [line.line_id for line in vertical],
+        weighted_inlier_ratio=0.50,
+        direction_analysis=math.pi / 2.0,
+    )
+    candidates = identify_compact_component_conflict_candidates(
+        [*compact, *remote, *vertical],
+        [skew_family],
+        [dominant_parallel],
+        (200, 200),
+        VanishingPointConfig(),
+        applicability=1.0,
+        minimum_applicability=0.45,
+    )
+
+    assert [candidate.line_id for candidate in candidates] == ["diag1", "diag2"]
+    assert all(
+        candidate.reason
+        == "compact_global_component_conflicts_with_nearby_parallel_family"
+        for candidate in candidates
+    )
+
+
+def test_compact_component_rule_requires_multiple_nearby_family_members() -> None:
+    single = _line("diag", 130, 70, 150, 120)
+    remote = [
+        _line("remote1", 10, 10, 30, 60),
+        _line("remote2", 30, 150, 50, 200),
+        _line("remote3", 20, 100, 40, 150),
+    ]
+    vertical = [
+        _line("vertical1", 150, 20, 150, 180),
+        _line("vertical2", 170, 20, 170, 180),
+        _line("vertical3", 190, 20, 190, 180),
+        _line("vertical4", 110, 20, 110, 180),
+    ]
+    candidates = identify_compact_component_conflict_candidates(
+        [single, *remote, *vertical],
+        [
+            _family(
+                "vp-small",
+                "finite",
+                [single.line_id, *(line.line_id for line in remote)],
+                weighted_inlier_ratio=0.10,
+            )
+        ],
+        [
+            _family(
+                "parallel-dominant",
+                "infinite",
+                [line.line_id for line in vertical],
+                weighted_inlier_ratio=0.50,
+                direction_analysis=math.pi / 2.0,
+            )
+        ],
+        (200, 200),
+        VanishingPointConfig(),
+        applicability=1.0,
+        minimum_applicability=0.45,
+    )
+
+    assert candidates == []
+
+
+def test_compact_component_rule_rejects_short_duplicate_edges() -> None:
+    """Texture-scale duplicate edges are too short for structural review."""
+
+    compact = [
+        _line("short1", 130, 70, 136, 85),
+        _line("short2", 132, 70, 138, 85),
+    ]
+    remote = [
+        _line("remote1", 10, 10, 30, 60),
+        _line("remote2", 30, 150, 50, 200),
+        _line("remote3", 20, 100, 40, 150),
+    ]
+    vertical = [
+        _line("vertical1", 150, 20, 150, 180),
+        _line("vertical2", 170, 20, 170, 180),
+        _line("vertical3", 190, 20, 190, 180),
+        _line("vertical4", 110, 20, 110, 180),
+    ]
+    candidates = identify_compact_component_conflict_candidates(
+        [*compact, *remote, *vertical],
+        [
+            _family(
+                "vp-small",
+                "finite",
+                [*(line.line_id for line in compact), *(line.line_id for line in remote)],
+                weighted_inlier_ratio=0.10,
+            )
+        ],
+        [
+            _family(
+                "parallel-dominant",
+                "infinite",
+                [line.line_id for line in vertical],
+                weighted_inlier_ratio=0.50,
+                direction_analysis=math.pi / 2.0,
+            )
+        ],
+        (200, 200),
+        VanishingPointConfig(),
+        applicability=1.0,
+        minimum_applicability=0.45,
+    )
+
+    assert candidates == []
+
+
 def _line(line_id: str, x1: float, y1: float, x2: float, y2: float) -> LineRecord:
     return LineRecord(
         line_id=line_id,
@@ -144,4 +284,26 @@ def _line(line_id: str, x1: float, y1: float, x2: float, y2: float) -> LineRecor
         angle_rad=0.0,
         quality=1.0,
         selected=True,
+    )
+
+
+def _family(
+    family_id: str,
+    vp_type: str,
+    member_line_ids: list[str],
+    *,
+    weighted_inlier_ratio: float,
+    direction_analysis: float | None = None,
+) -> VPFamily:
+    return VPFamily(
+        family_id=family_id,
+        vp_type=vp_type,
+        direction_analysis=direction_analysis,
+        member_line_ids=member_line_ids,
+        weighted_inlier_ratio=weighted_inlier_ratio,
+        weighted_median_residual_deg=0.5,
+        spatial_support=0.4,
+        bootstrap_stability=0.9,
+        residual_quantiles_deg={"p50": 0.5, "p90": 1.0, "p95": 1.5},
+        stable=True,
     )

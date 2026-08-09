@@ -119,7 +119,23 @@ def _one_run(
     minimum_candidate_score: float,
 ) -> dict[str, Any]:
     result = analyze_image(path, config, artifact_dir)
-    lines = json.loads((artifact_dir / "lines.json").read_text(encoding="utf-8"))
+    lines_path = artifact_dir / "lines.json"
+    if not lines_path.is_file():
+        # A candidate backend may fail safely (for example, a bounded external
+        # worker may time out).  Preserve that failed measurement in the
+        # paired report instead of aborting the whole frozen evaluation.
+        return {
+            "input_sha256": _sha256(path),
+            "run_status": result.evidence.run_status.value,
+            "applicability": result.evidence.applicability,
+            "coverage": result.evidence.coverage,
+            "candidate_count": 0,
+            "matched_target_line_ids": [],
+            "target_detected": False,
+            "review_overlay": None,
+            "measurement_error": "lines_artifact_unavailable",
+        }
+    lines = json.loads(lines_path.read_text(encoding="utf-8"))
     candidates = [
         dict(candidate)
         for candidate in result.evidence.features.get("anomalous_lines", [])
@@ -163,6 +179,33 @@ def _summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _write_records(path: Path, rows: list[dict[str, Any]]) -> None:
+    """Atomically checkpoint completed pairs so a bounded runner can resume."""
+
+    temporary_path = path.with_suffix(".jsonl.tmp")
+    temporary_path.write_text(
+        "".join(json.dumps(row, sort_keys=True) + "\n" for row in rows), encoding="utf-8"
+    )
+    temporary_path.replace(path)
+
+
+def _load_records(path: Path) -> dict[str, dict[str, Any]]:
+    if not path.is_file():
+        return {}
+    loaded: dict[str, dict[str, Any]] = {}
+    for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        if not line.strip():
+            continue
+        row = json.loads(line)
+        sample_id = row.get("sample_id")
+        if not isinstance(sample_id, str) or not sample_id:
+            raise ValueError(f"Checkpoint row {line_number} has no sample_id")
+        if sample_id in loaded:
+            raise ValueError(f"Checkpoint has duplicate sample_id: {sample_id}")
+        loaded[sample_id] = row
+    return loaded
+
+
 def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
     expected = "Natural-background injected projective-line localization benchmark; not AI-origin classification."
@@ -172,10 +215,20 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     if not isinstance(records, list) or not records:
         raise ValueError("Benchmark manifest has no records")
     config = load_config(args.config)
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    records_path = args.output_dir / "records.jsonl"
+    completed_by_id = _load_records(records_path)
     evaluated: list[dict[str, Any]] = []
+    new_pair_count = 0
     for index, record in enumerate(records, start=1):
         if not isinstance(record, dict):
             raise ValueError("Benchmark record is not an object")
+        sample_id = str(record["sample_id"])
+        prior = completed_by_id.get(sample_id)
+        if prior is not None:
+            evaluated.append(prior)
+            print(f"reused={index}/{len(records)} sample={sample_id}", flush=True)
+            continue
         artifact_root = args.output_dir / "artifacts" / str(record["sample_id"])
         clean = _one_run(
             args.manifest.parent / str(record["clean_relative_path"]),
@@ -193,14 +246,18 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         )
         evaluated.append(
             {
-                "sample_id": record["sample_id"],
+                "sample_id": sample_id,
                 "role": record["role"],
                 "target_segment": record["target_segment"],
                 "clean": clean,
                 "mutated": mutated,
             }
         )
-        print(f"evaluated={index}/{len(records)} sample={record['sample_id']}", flush=True)
+        _write_records(records_path, evaluated)
+        new_pair_count += 1
+        print(f"evaluated={index}/{len(records)} sample={sample_id}", flush=True)
+        if args.max_new_pairs is not None and new_pair_count >= args.max_new_pairs:
+            break
     by_role = {
         role: _summary([row for row in evaluated if row["role"] == role])
         for role in sorted({str(row["role"]) for row in evaluated})
@@ -211,6 +268,9 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         "manifest_sha256": _sha256(args.manifest),
         "p0_config_sha256": _sha256(args.config),
         "minimum_candidate_score": args.minimum_candidate_score,
+        "expected_pair_count": len(records),
+        "evaluated_pair_count": len(evaluated),
+        "evaluation_complete": len(evaluated) == len(records),
         "overall": _summary(evaluated),
         "by_role": by_role,
         "limitations": [
@@ -219,10 +279,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
             "The global clean candidate rate is reported separately because P0 remains a review-candidate locator.",
         ],
     }
-    args.output_dir.mkdir(parents=True, exist_ok=True)
-    (args.output_dir / "records.jsonl").write_text(
-        "".join(json.dumps(row, sort_keys=True) + "\n" for row in evaluated), encoding="utf-8"
-    )
+    _write_records(records_path, evaluated)
     (args.output_dir / "report.json").write_text(
         json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
@@ -235,9 +292,17 @@ def main() -> int:
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--minimum-candidate-score", type=float, default=0.50)
+    parser.add_argument(
+        "--max-new-pairs",
+        type=int,
+        default=None,
+        help="Evaluate at most this many new pairs, checkpointing each; rerun with the same output to resume.",
+    )
     args = parser.parse_args()
     if not 0.0 <= args.minimum_candidate_score <= 1.0:
         raise ValueError("minimum-candidate-score must be within [0, 1]")
+    if args.max_new_pairs is not None and args.max_new_pairs < 1:
+        raise ValueError("max-new-pairs must be at least 1")
     report = evaluate(args)
     print(json.dumps(report["overall"], sort_keys=True))
     return 0

@@ -1,0 +1,45 @@
+{
+  "schema_version": "p0-line-backend-screen-v1",
+  "candidate": "Official DeepLSD line-detector backend",
+  "status": "rejected_as_default_after_frozen_localization_benchmark",
+  "upstream": {
+    "repository": "https://github.com/cvg/DeepLSD",
+    "checkpoint": "deeplsd_md.tar",
+    "architecture": "DeepLSD inference model with official normal filtering parameters"
+  },
+  "asset": {
+    "original_checkpoint_path": "weights/deeplsd/deeplsd_md.tar",
+    "original_checkpoint_sha256": "56e9bae263977caa289ae49802987a67d4f00f376ae7e542176c8ae0a6cc2083",
+    "runtime_checkpoint_path": "weights/deeplsd/deeplsd_md.safetensors",
+    "runtime_checkpoint_sha256": "adce92128fc931db4a13cc8204acca9ff00758c82be62640b62376120952038b",
+    "git_tracked": false,
+    "runtime_serialization": "safetensors state dict converted once from the trusted original checkpoint"
+  },
+  "execution": {
+    "device": "cpu",
+    "model_max_side_px": 512,
+    "torch_threads": 2,
+    "isolation": "one spawned child process per image, with a 45-second result timeout",
+    "queue_safety": "parent reads the result queue before waiting for the child, preventing dense-line queue backpressure deadlock",
+    "runtime_pickle_policy": "not permitted; the P0 backend accepts only .safetensors weights"
+  },
+  "frozen_localization_benchmark": {
+    "manifest": "data/p0_natural_line_mutation_indoor_final_v1/manifest.json",
+    "manifest_sha256": "6d4f812ca475a7587632bd9496a6f0e1c286edf1c9fd76b5d292b1a6f29c3b2c",
+    "config": "configs/p0_deeplsd_candidate.yaml",
+    "pair_count": 12,
+    "target_localization_recall": 0.5,
+    "paired_target_localization_accuracy": 0.75,
+    "clean_any_candidate_rate": 1.0,
+    "mean_clean_candidate_count": 11.25,
+    "reference_opencv_lsd_target_localization_recall": 0.8333333333333334,
+    "reference_opencv_lsd_mean_clean_candidate_count": 4.083333333333333,
+    "result_path": "outputs/p0_deeplsd_natural_mutation_indoor_v3/report.json"
+  },
+  "decision": {
+    "integration": "alternative_experimental_config_only",
+    "default_backend_change": "not_allowed",
+    "reason": "The official DeepLSD backend is resource-contained and reproducible, but it localizes fewer injected projective-line targets and produces substantially more clean-image review candidates than the frozen OpenCV-LSD reference.",
+    "scope": "This evaluates P0 review-candidate localization on paired real-image line edits; it does not estimate AI-origin classification accuracy."
+  }
+}
