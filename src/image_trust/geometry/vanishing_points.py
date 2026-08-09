@@ -640,6 +640,7 @@ def identify_parallel_anomaly_candidates(
         image_size,
         config,
         reason="small_parallel_family_conflicts_with_nearby_dominant_family",
+        protected_line_ids=explained_line_ids,
     )
     for line in lines:
         if line.line_id in member_ids or line.length_analysis < diagonal * 0.08:
@@ -866,6 +867,7 @@ def _competing_family_candidates(
     config: VanishingPointConfig,
     *,
     reason: str,
+    protected_line_ids: set[str] | None = None,
 ) -> list[AnomalyCandidate]:
     """Return member lines from a smaller locally competing direction family."""
 
@@ -880,6 +882,18 @@ def _competing_family_candidates(
         ]
         if len(smaller_lines) < config.min_family_lines:
             continue
+        # A whole direction family that is already explained by an independent
+        # stable global/local fit is a valid second structure (for example a
+        # station roof truss beside platform horizontals), not evidence that
+        # the structure bends.  Competing-family review is reserved for a
+        # genuinely independent minor family.  This also leaves the complete
+        # family visible in the coloured overlay instead of repainting it red.
+        if protected_line_ids:
+            protected_fraction = sum(
+                line.line_id in protected_line_ids for line in smaller_lines
+            ) / len(smaller_lines)
+            if protected_fraction >= 0.5:
+                continue
         # A global scene legitimately contains several directions (for example
         # facade verticals, road depth and overhead wires).  A family scattered
         # across the frame therefore cannot establish that its members depict

@@ -103,6 +103,46 @@ def test_competing_parallel_family_must_be_spatially_compact() -> None:
     assert candidates == []
 
 
+def test_parallel_family_already_explained_by_another_fit_is_not_repainted_as_anomaly() -> None:
+    """A complete roof/rail family must remain a family, even near a dominant axis."""
+
+    lines = [
+        _line(f"dominant{index}", 10, 20 + index * 24, 190, 20 + index * 24)
+        for index in range(6)
+    ]
+    roof = [
+        _line(f"roof{index}", 115 + index * 5, 25, 165 + index * 5, 48)
+        for index in range(4)
+    ]
+    lines.extend(roof)
+    config = VanishingPointConfig(
+        min_family_lines=4,
+        min_family_weight=20.0,
+        bootstrap_rounds=4,
+        parallel_inlier_angle_deg=2.5,
+    )
+    transform = CoordinateTransform(
+        encoded_size=(200, 200),
+        canonical_size=(200, 200),
+        analysis_size=(200, 200),
+        exif_orientation=1,
+        orientation_applied=False,
+    )
+    families = fit_parallel_families(lines, (200, 200), transform, config, seed=17)
+
+    candidates = identify_parallel_anomaly_candidates(
+        lines,
+        families,
+        (200, 200),
+        config,
+        applicability=1.0,
+        minimum_applicability=0.45,
+        explained_line_ids={line.line_id for line in roof},
+    )
+
+    assert candidates == []
+
+
 def test_unassigned_fragment_is_not_a_geometric_contradiction() -> None:
     lines = [
         _line(f"base{index}", 10, 20 + index * 28, 190, 20 + index * 28)

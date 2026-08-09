@@ -1,0 +1,35 @@
+{
+  "schema_version": "official-projective-line-segment-reproducibility-audit-v1",
+  "status": "not_reproducible_on_new_images",
+  "purpose": "Audit whether the official Projective Geometry line-segment checkpoint can be evaluated on Demirror images without substituting an unverified preprocessing pipeline.",
+  "source": {
+    "repository": "https://github.com/hanlinm2/projective-geometry",
+    "repository_commit": "19ec65258a3198d324de5dc4bf58b37faba3dad9",
+    "submodule": "line_segment"
+  },
+  "local_checkpoints": {
+    "indoor": {
+      "path": "weights/projective-geometry-lines/Lines_indoor.pt",
+      "sha256": "e758874238f6be87c204cc6f7241ca5d953052e53cc40fa2b7a046037d2c8797"
+    },
+    "outdoor": {
+      "path": "weights/projective-geometry-lines/Lines_outdoor.pt",
+      "sha256": "f79596424a9519d389e7ad42465312dc75020adad9c5f82653f4358531755232"
+    }
+  },
+  "inspection": {
+    "checkpoint_input_contract": "lines_dataset.py indexes a per-image image_path_to_lines.pkl mapping, randomly resampling or duplicating entries to exactly 250 rows of four values.",
+    "dataset_directory_state": "data/vendor/projective-geometry/dataset contains only README.md, which states that it is an empty placeholder and the dataset must be downloaded.",
+    "missing_preprocessing": [
+      "No script in the pinned repository constructs image_path_to_lines.pkl from a new image.",
+      "No public specification fixes the line detector, coordinate normalization, line ordering, filtering, or cache serialization used to train the supplied checkpoint."
+    ],
+    "non_equivalence_risk": "Demirror's OpenCV-LSD endpoint rows are geometry measurements, but there is no evidence that they are equivalent to the checkpoint's training representation. Feeding them to the checkpoint would be an unvalidated preprocessing substitution."
+  },
+  "decision": {
+    "product_integration": "rejected",
+    "benchmark_integration": "rejected",
+    "reason": "The required checkpoint input representation cannot be reproduced or verified for new images. Any resulting score would not be an audit of the official method.",
+    "allowed_future_use": "Reconsider only if the authors release the cache-generation pipeline or a precise input-format specification that can be validated against a reference cache."
+  }
+}

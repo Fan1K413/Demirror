@@ -1,0 +1,71 @@
+{
+  "schema_version": "p0-parallel-family-protection-audit-v1",
+  "purpose": "Verify that an independently explained, stable parallel line family remains a review grouping rather than being repainted as a geometric anomaly.",
+  "implementation": {
+    "commit": "c36c7daaa16bbf9c50d8f93244e828a05062bc50",
+    "p0_config": "configs/p0.yaml",
+    "p0_config_sha256": "0ecbec89f45457753b3e367962ce669c5f7743902d8c932b9244f19ec3bff4b3",
+    "protection": "A competing parallel family with at least half of its member lines already explained by an independent stable global or local family is not emitted as a conflict candidate."
+  },
+  "unit_and_regression_checks": {
+    "targeted_pytest": "29 passed: tests/test_parallel_anomaly_candidates.py, tests/test_vanishing_points.py, tests/test_geometry_smoke.py, tests/test_p0_natural_mutation_benchmark.py",
+    "paired_natural_mutation_benchmark": {
+      "dataset": "data/p0_natural_line_mutation_outdoor_final_v1",
+      "pair_count": 24,
+      "new_result": {
+        "paired_target_localization_accuracy": 0.8541666666666666,
+        "target_localization_recall": 0.7083333333333334,
+        "clean_target_specificity": 1.0,
+        "clean_any_candidate_rate": 0.9166666666666666,
+        "mean_clean_candidate_count": 5.541666666666667
+      },
+      "frozen_prechange_reference": {
+        "paired_target_localization_accuracy": 0.8541666666666666,
+        "target_localization_recall": 0.7083333333333334,
+        "clean_target_specificity": 1.0,
+        "clean_any_candidate_rate": 1.0,
+        "mean_clean_candidate_count": 7.166666666666667
+      },
+      "interpretation": "The known injected-line localization result did not decrease, while review-candidate noise on clean paired photographs decreased. This is not AI-origin accuracy."
+    }
+  },
+  "metadata-free_generated_scene_smoke": {
+    "input": {
+      "path": "data/p0_self_generated/normal_station_v1_stripped.png",
+      "sha256": "a6eb8193fc3acbda5f8aa339f5c4252acd84a275e5efbd202d6bd0d697762378",
+      "generation_intent": "A normal, complex, physically plausible busy railway-station photograph with people, train, roof trusses, cables, reflections and ordinary clutter; no deliberate geometric conflict.",
+      "metadata_check": {
+        "exif_entries": 0,
+        "format_info_keys": []
+      }
+    },
+    "p0_before_protection": {
+      "parallel_family_count": 6,
+      "local_family_count": 8,
+      "anomaly_candidate_count": 30,
+      "only_reason": "small_parallel_family_conflicts_with_nearby_dominant_family"
+    },
+    "p0_after_protection": {
+      "parallel_family_count": 6,
+      "local_family_count": 8,
+      "anomaly_candidate_count": 0,
+      "observation": "negative"
+    },
+    "independent_pixel_signals": {
+      "c2pa_status": "not_observed",
+      "dda_score": 0.9879580140113831,
+      "dda_high_threshold": 0.94,
+      "safe_score": 0.9325476288795471,
+      "safe_high_threshold": 0.9,
+      "forensic_clip_score": 0.9803727269172668,
+      "community_forensics_score": 0.02530847117304802,
+      "combined_pixel_risk_band": "high"
+    },
+    "interpretation": "A normally composed AI image can have stable, mutually coherent projected line families. P0 correctly no longer calls those families anomalous; P0 is therefore not used as source evidence. Independent pixel signals detected this particular image without metadata."
+  },
+  "limitations": [
+    "One generated scene is a smoke test, not an estimate of source-detection accuracy or a replacement for a generator-isolated benchmark.",
+    "The natural-mutation benchmark measures localization of deliberate line edits on real photographs, not the prevalence of geometric errors in either camera or generated images.",
+    "No P0 output contributes to the current AI-origin decision."
+  ]
+}
