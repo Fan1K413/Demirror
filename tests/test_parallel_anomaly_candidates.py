@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from image_trust.geometry.vanishing_points import (
     fit_parallel_families,
+    fit_vanishing_families,
+    identify_anomaly_candidates,
     identify_parallel_anomaly_candidates,
 )
 from image_trust.schemas import (
@@ -51,6 +53,83 @@ def test_parallel_detector_flags_only_the_nearby_direction_outlier() -> None:
     assert candidates[0].reason == "unassigned_line_deviates_from_nearby_parallel_family"
     assert candidates[0].residual_deg is not None
     assert candidates[0].residual_deg > config.parallel_inlier_angle_deg
+
+
+def test_competing_parallel_family_must_be_spatially_compact() -> None:
+    lines = [
+        _line(f"dominant{index}", 10, 20 + index * 28, 190, 20 + index * 28)
+        for index in range(6)
+    ]
+    # These diagonal lines share an orientation but occur in four distant
+    # places.  They are a valid second scene direction, not evidence that one
+    # local structural stroke bends.
+    lines.extend(
+        [
+            _line("scattered1", 15, 15, 65, 35),
+            _line("scattered2", 125, 25, 175, 45),
+            _line("scattered3", 20, 150, 70, 170),
+            _line("scattered4", 130, 155, 180, 175),
+        ]
+    )
+    config = VanishingPointConfig(
+        min_family_lines=4,
+        min_family_weight=20.0,
+        bootstrap_rounds=4,
+        parallel_inlier_angle_deg=2.5,
+        competing_family_max_extent_ratio=0.60,
+    )
+    transform = CoordinateTransform(
+        encoded_size=(200, 200),
+        canonical_size=(200, 200),
+        analysis_size=(200, 200),
+        exif_orientation=1,
+        orientation_applied=False,
+    )
+    families = fit_parallel_families(lines, (200, 200), transform, config, seed=11)
+
+    candidates = identify_parallel_anomaly_candidates(
+        lines,
+        families,
+        (200, 200),
+        config,
+        applicability=1.0,
+        minimum_applicability=0.45,
+    )
+
+    assert candidates == []
+
+
+def test_unassigned_fragment_is_not_a_geometric_contradiction() -> None:
+    lines = [
+        _line(f"base{index}", 10, 20 + index * 28, 190, 20 + index * 28)
+        for index in range(5)
+    ]
+    lines.append(_line("fragment", 92, 105, 112, 112))
+    config = VanishingPointConfig(
+        min_family_lines=4,
+        min_family_weight=20.0,
+        bootstrap_rounds=4,
+        unassigned_candidate_min_length_ratio=0.08,
+    )
+    transform = CoordinateTransform(
+        encoded_size=(200, 200),
+        canonical_size=(200, 200),
+        analysis_size=(200, 200),
+        exif_orientation=1,
+        orientation_applied=False,
+    )
+    families = fit_vanishing_families(lines, (200, 200), transform, config, seed=13)
+
+    candidates = identify_anomaly_candidates(
+        lines,
+        families,
+        (200, 200),
+        config,
+        applicability=1.0,
+        minimum_applicability=0.45,
+    )
+
+    assert candidates == []
 
 
 def _line(line_id: str, x1: float, y1: float, x2: float, y2: float) -> LineRecord:

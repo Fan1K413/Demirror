@@ -217,6 +217,8 @@ class VanishingPointConfig(BaseModel):
     stable_family_min_bootstrap: float = Field(default=0.50, ge=0.0, le=1.0)
     max_parallel_families: int = Field(default=6, ge=1)
     parallel_inlier_angle_deg: float = Field(default=2.5, gt=0.0, lt=90.0)
+    competing_family_max_extent_ratio: float = Field(default=0.60, gt=0.0, le=1.0)
+    unassigned_candidate_min_length_ratio: float = Field(default=0.08, gt=0.0, le=1.0)
     local_family_grid_size: int = Field(default=3, ge=1)
     local_families_per_cell: int = Field(default=2, ge=1)
     max_local_families: int = Field(default=8, ge=1)

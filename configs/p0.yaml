@@ -1,4 +1,4 @@
-config_version: p0-2026-08-08.2
+config_version: p0-2026-08-09.3
 
 ingest:
   max_file_bytes: 52428800
@@ -49,6 +49,8 @@ vanishing_points:
   family_jaccard_merge: 0.70
   max_parallel_families: 6
   parallel_inlier_angle_deg: 2.5
+  competing_family_max_extent_ratio: 0.60
+  unassigned_candidate_min_length_ratio: 0.08
   local_family_grid_size: 3
   local_families_per_cell: 2
   max_local_families: 8

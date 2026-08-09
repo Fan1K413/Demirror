@@ -472,6 +472,12 @@ def identify_anomaly_candidates(
     for line in lines:
         if line.line_id in member_ids:
             continue
+        # A short LSD fragment rarely identifies one physical edge.  It may be
+        # a texture boundary, a person or a fragment of a curved contour.  It
+        # cannot by itself establish a projective contradiction; compact groups
+        # of fragments are handled by the separate competing-family route.
+        if line.length_analysis < diagonal * config.unassigned_candidate_min_length_ratio:
+            continue
         axis = _axis(line)
         midpoint = _midpoint(line)
         residuals = [
@@ -634,6 +640,17 @@ def _competing_family_candidates(
         ]
         if len(smaller_lines) < config.min_family_lines:
             continue
+        # A global scene legitimately contains several directions (for example
+        # facade verticals, road depth and overhead wires).  A family scattered
+        # across the frame therefore cannot establish that its members depict
+        # one physical stroke or plane, even when its axis differs from a
+        # dominant family.  Limit this review rule to compact families; the
+        # broad family remains available in the coloured grouping overlay.
+        if (
+            _family_midpoint_extent_ratio(smaller_lines, diagonal)
+            > config.competing_family_max_extent_ratio
+        ):
+            continue
         for dominant in families:
             if dominant.family_id == smaller.family_id:
                 continue
@@ -706,6 +723,16 @@ def _family_midpoint_proximity(
         outside = np.maximum(lower - midpoint, 0.0) + np.maximum(midpoint - upper, 0.0)
         distances.append(float(np.linalg.norm(outside)))
     return min(1.0, float(np.median(distances)) / max(diagonal * 0.12, 1e-9))
+
+
+def _family_midpoint_extent_ratio(lines: list[LineRecord], diagonal: float) -> float:
+    """Return the midpoint-bounding-box diagonal relative to image diagonal."""
+
+    if not lines:
+        return 1.0
+    midpoints = np.asarray([_midpoint(line) for line in lines], dtype=float)
+    extent = float(np.linalg.norm(midpoints.max(axis=0) - midpoints.min(axis=0)))
+    return extent / max(diagonal, 1e-9)
 
 
 def _parallel_family_comparison(
