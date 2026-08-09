@@ -215,5 +215,55 @@ def test_forensic_clip_limited_signal_yields_limited_possible_ai() -> None:
     assert assessment.supporting_evidence == ["耐压缩像素检测（有限强度）"]
 
 
+def test_community_forensics_high_signal_has_a_specific_evidence_label() -> None:
+    source = _fixture("f6_01_railway_perspective.jpg")
+    result = _ai("high").model_copy(
+        update={
+            "signals": [
+                AiSignal(
+                    name="community_forensics_detector",
+                    status="available",
+                    value=0.9,
+                    interpretation="test",
+                    details={"high_confidence_threshold": 0.8866265416145325},
+                )
+            ]
+        }
+    )
+
+    assessment = assess_origin(source, result, _c2pa())
+
+    assert assessment.supporting_evidence == ["高置信跨生成器像素检测"]
+
+
+def test_community_forensics_limited_signal_yields_limited_possible_ai() -> None:
+    source = _fixture("f6_01_railway_perspective.jpg")
+    result = _ai().model_copy(
+        update={
+            "risk_band": "medium",
+            "reliability": 0.65,
+            "reliability_label": "limited",
+            "signals": [
+                AiSignal(
+                    name="community_forensics_detector",
+                    status="available",
+                    value=0.6,
+                    interpretation="test",
+                    details={
+                        "high_confidence_threshold": 0.8866265416145325,
+                        "limited_review_threshold": 0.5,
+                    },
+                )
+            ],
+        }
+    )
+
+    assessment = assess_origin(source, result, _c2pa())
+
+    assert assessment.decision == "possible_ai"
+    assert assessment.evidence_strength == "limited"
+    assert assessment.supporting_evidence == ["跨生成器像素检测（有限强度）"]
+
+
 def _fixture(name: str) -> Path:
     return Path(__file__).resolve().parents[1] / "data" / "p0_f6_real_v2" / "images" / name

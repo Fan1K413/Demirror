@@ -26,6 +26,13 @@ from pathlib import Path
 from typing import Any
 
 from image_trust.ai_likelihood.contracts import AiLikelihoodResult, AiSignal
+from image_trust.ai_likelihood.community_forensics import (
+    COMMUNITY_FORENSICS_HIGH_CONFIDENCE_THRESHOLD,
+    DEFAULT_AUDIT_PATH as DEFAULT_COMMUNITY_FORENSICS_AUDIT_PATH,
+    DEFAULT_MODEL_ROOT as DEFAULT_COMMUNITY_FORENSICS_MODEL_ROOT,
+    CommunityForensicsUnavailableError,
+    score_community_forensics_isolated,
+)
 from image_trust.ai_likelihood.forensic_clip import (
     DEFAULT_AUDIT_PATH as DEFAULT_FORENSIC_CLIP_AUDIT_PATH,
     DEFAULT_MODEL_ROOT as DEFAULT_FORENSIC_CLIP_MODEL_ROOT,
@@ -77,6 +84,8 @@ def assess_high_confidence_ai(
     safe_audit_path: Path = DEFAULT_SAFE_AUDIT_PATH,
     forensic_clip_model_root: Path = DEFAULT_FORENSIC_CLIP_MODEL_ROOT,
     forensic_clip_audit_path: Path = DEFAULT_FORENSIC_CLIP_AUDIT_PATH,
+    community_forensics_model_root: Path = DEFAULT_COMMUNITY_FORENSICS_MODEL_ROOT,
+    community_forensics_audit_path: Path = DEFAULT_COMMUNITY_FORENSICS_AUDIT_PATH,
 ) -> AiLikelihoodResult:
     """Return verified provenance or complementary high-confidence pixel signals."""
 
@@ -241,6 +250,66 @@ def assess_high_confidence_ai(
             )
         )
 
+    try:
+        community_audit = _load_audit(
+            community_forensics_audit_path,
+            COMMUNITY_FORENSICS_HIGH_CONFIDENCE_THRESHOLD,
+        )
+        community_threshold = float(community_audit["high_confidence_threshold"])
+        community_limited_threshold = float(community_audit["limited_review_threshold"])
+        if community_limited_threshold >= community_threshold:
+            raise ValueError("community_forensics_limited_threshold_not_below_high_threshold")
+        limitations.extend(community_audit.get("limitations", []))
+        evaluation["community_forensics"] = dict(community_audit.get("evaluation", {}))
+        community_scored = score_community_forensics_isolated(
+            input_path,
+            model_root=community_forensics_model_root,
+        )
+        available_scores.append(("community_forensics", community_scored.score, community_threshold))
+        limited_ai_signal = limited_ai_signal or community_scored.score >= community_limited_threshold
+        if primary_threshold is None:
+            primary_threshold = community_threshold
+        signals.append(
+            AiSignal(
+                name="community_forensics_detector",
+                status="available",
+                value=community_scored.score,
+                interpretation=(
+                    "The Community Forensics score crosses its registered high-confidence threshold."
+                    if community_scored.score >= community_threshold
+                    else (
+                        "The Community Forensics score crosses its recall-oriented limited-review threshold."
+                        if community_scored.score >= community_limited_threshold
+                        else "The Community Forensics score is below its thresholds; this is indeterminate, not camera evidence."
+                    )
+                ),
+                details={
+                    "high_confidence_threshold": community_threshold,
+                    "limited_review_threshold": community_limited_threshold,
+                    "preprocessing": community_scored.preprocessing,
+                    "checkpoint_sha256": community_audit.get("checkpoint_sha256"),
+                    "config_sha256": community_audit.get("config_sha256"),
+                    "scope": "cross_generator_pixel_detector_with_jpeg85_audit",
+                },
+                limitations=list(community_audit.get("limitations", [])),
+            )
+        )
+    except (OSError, ValueError, KeyError, TypeError, CommunityForensicsUnavailableError) as error:
+        code = (
+            str(error)
+            if isinstance(error, CommunityForensicsUnavailableError)
+            else f"community_forensics_audit_record_unavailable:{type(error).__name__}"
+        )
+        limitations.append(code)
+        signals.append(
+            AiSignal(
+                name="community_forensics_detector",
+                status="unavailable",
+                interpretation="The Community Forensics pixel detector did not produce a score.",
+                limitations=[code],
+            )
+        )
+
     if not available_scores:
         return AiLikelihoodResult(
             status="unavailable",
@@ -259,8 +328,8 @@ def assess_high_confidence_ai(
         risk_band="high" if high_confidence else ("medium" if limited_ai_signal else "unknown"),
         reliability=0.85 if high_confidence else (0.65 if limited_ai_signal else 0.5),
         reliability_label="high" if high_confidence else "limited",
-        target_definition="Complementary registered high-confidence DDA, SAFE, and compression-stable forensic pixel signals.",
-        model_version="dda-safe-forensic-clip-high-confidence-v1",
+        target_definition="Complementary registered DDA, SAFE, forensic CLIP, and Community Forensics pixel signals.",
+        model_version="dda-safe-forensic-clip-community-forensics-v1",
         decision_threshold=primary_threshold,
         signals=signals,
         evaluation=evaluation,

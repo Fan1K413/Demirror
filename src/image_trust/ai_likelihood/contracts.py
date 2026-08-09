@@ -20,6 +20,7 @@ class AiSignal(BaseModel):
         "dda_pixel_detector",
         "safe_pixel_detector",
         "forensic_clip_detector",
+        "community_forensics_detector",
     ]
     status: Literal["available", "neutral", "not_run", "unavailable", "failed"]
     value: float | None = None

@@ -58,6 +58,14 @@
     forensic_clip_indoor_recall_is_lower_than_outdoor_recall: "该通道对室内场景的检出率明显低于室外场景。",
     forensic_clip_score_below_threshold_is_not_camera_evidence: "耐压缩分数低于阈值不支持相机来源。",
     forensic_clip_high_confidence_indicator_is_not_provenance_or_authenticity_proof: "耐压缩高信号不是来源、真实性或编辑史证明。",
+    community_forensics_config_not_available: "跨生成器补充模型的本地配置不可用。",
+    community_forensics_checkpoint_not_available: "跨生成器补充模型的本地检查点不可用。",
+    community_forensics_worker_failed: "跨生成器补充模型的隔离分析进程未完成。",
+    community_forensics_worker_timed_out: "跨生成器补充模型的隔离分析超时。",
+    community_forensics_score_is_a_detector_score_not_a_real_world_ai_prevalence_probability: "跨生成器模型分数是检测信号，不是现实世界的 AI 占比。",
+    community_forensics_limited_threshold_has_13_5_percent_cross_generator_real_false_positive_rate: "偏召回的有限阈值在登记的跨生成器留出集中有 13.5% 实拍误报，因此只能给出有限强度结论。",
+    community_forensics_no_signal_is_not_evidence_of_camera_origin: "跨生成器模型未命中不支持相机来源。",
+    community_forensics_high_signal_is_not_provenance_or_authenticity_proof: "跨生成器高信号不是来源、真实性或编辑史证明。",
     exif_metadata_can_be_copied_or_edited: "相机 EXIF 可以被复制或编辑，因此只能在 AI 检测已完成且未命中时支持有限强度的“可能为实拍”。",
     implicit_watermark_detector_not_configured: "尚未配置兼容的本地隐式水印检测器。",
     camera_consistency_not_calibrated_for_origin_decision: "拍摄参数一致性尚未按来源类别校准，因此不参与三档判断。",
@@ -191,6 +199,7 @@
     const dda = signals.find((signal) => signal.name === "dda_pixel_detector");
     const safe = signals.find((signal) => signal.name === "safe_pixel_detector");
     const forensic = signals.find((signal) => signal.name === "forensic_clip_detector");
+    const community = signals.find((signal) => signal.name === "community_forensics_detector");
     const high = p3.status === "available" && p3.risk_band === "high";
 
     if (verified) {
@@ -205,7 +214,7 @@
       setCard("overall", "高度疑似 AI 生成", "原因：AI 像素检测命中严格的高置信标准。画面几何、拍摄参数和一般元数据只用于解释或复核，不会被换算成 AI 概率。", [
         ["判断强度", "高"],
         ["主要依据", "AI 像素检测"],
-        ["检测分数", percentage(dda?.value ?? safe?.value ?? forensic?.value)],
+        ["检测分数", percentage(dda?.value ?? safe?.value ?? forensic?.value ?? community?.value)],
       ]);
       return;
     }
@@ -251,6 +260,7 @@
     const dda = signals.find((signal) => signal.name === "dda_pixel_detector");
     const safe = signals.find((signal) => signal.name === "safe_pixel_detector");
     const forensic = signals.find((signal) => signal.name === "forensic_clip_detector");
+    const community = signals.find((signal) => signal.name === "community_forensics_detector");
     const evaluation = p3.evaluation?.dda?.at_high_confidence_threshold || p3.evaluation?.at_high_confidence_threshold || {};
     if (verified) {
       setCard("p3", "已确认包含 AI 生成内容", "原因：图片自带且已验证的来源记录，明确说明它由 AI 生成。这是来源记录，不是对像素的猜测。", [
@@ -266,6 +276,7 @@
       dda_pixel_detector: "DDA 主模型",
       safe_pixel_detector: "SAFE 无损补充",
       forensic_clip_detector: "耐压缩补充",
+      community_forensics_detector: "跨生成器补充",
     };
     const hitChannels = signals
       .filter((signal) => signal.status === "available"
@@ -283,6 +294,8 @@
       .map((signal) => channelNames[signal.name])
       .filter(Boolean);
     const compressedEvaluation = p3.evaluation?.forensic_clip?.held_out_sdxl_jpeg75?.at_high_confidence_threshold || {};
+    const communityEvaluation = p3.evaluation?.community_forensics?.held_out_sdxl?.at_high_confidence_threshold || {};
+    const communityCompressedEvaluation = p3.evaluation?.community_forensics?.held_out_sdxl_jpeg85?.at_high_confidence_threshold || {};
     setCard(
       "p3",
       high ? "检测信号达到高标准" : (limited ? "检测到有限 AI 信号" : "未达到高标准"),
@@ -298,8 +311,11 @@
             ["DDA 主模型", detectorMetric(dda)],
             ["SAFE 无损补充", detectorMetric(safe)],
             ["耐压缩补充", detectorMetric(forensic)],
+            ["跨生成器补充", detectorMetric(community)],
             ["DDA 留出验证", `检出 ${percentage(evaluation.recall)}，误报 ${percentage(evaluation.false_positive_rate)}`],
             ["JPEG 75 留出验证", `补充检出 ${percentage(compressedEvaluation.recall)}，误报 ${percentage(compressedEvaluation.false_positive_rate)}`],
+            ["跨生成器留出验证", `检出 ${percentage(communityEvaluation.recall)}，误报 ${percentage(communityEvaluation.false_positive_rate)}`],
+            ["JPEG 85 留出验证", `跨生成器检出 ${percentage(communityCompressedEvaluation.recall)}，误报 ${percentage(communityCompressedEvaluation.false_positive_rate)}`],
             ["技术详情", asText(p3.model_version)],
           ]
         : limited
@@ -309,6 +325,7 @@
               ["DDA 主模型", detectorMetric(dda)],
               ["SAFE 无损补充", detectorMetric(safe)],
               ["耐压缩补充", detectorMetric(forensic, "limited_review_threshold", "有限阈值")],
+              ["跨生成器补充", detectorMetric(community, "limited_review_threshold", "有限阈值")],
               ["JPEG 75 留出验证", "有限阈值：检出 28.0%，误报 14.0%"],
               ["复核要求", "建议取得原始文件，并结合结构、来源记录与人工检查"],
               ["技术详情", asText(p3.model_version)],
@@ -319,6 +336,7 @@
             ["DDA 主模型", detectorMetric(dda)],
             ["SAFE 无损补充", detectorMetric(safe)],
             ["耐压缩补充", detectorMetric(forensic)],
+            ["跨生成器补充", detectorMetric(community)],
             ["注意", "压缩或缩放会降低灵敏度"],
             ["技术详情", asText(p3.model_version)],
           ],

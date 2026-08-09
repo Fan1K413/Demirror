@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from image_trust.ai_likelihood.dda import DdaScore, assess_high_confidence_ai
+from image_trust.ai_likelihood.community_forensics import CommunityForensicsScore
 from image_trust.ai_likelihood.forensic_clip import ForensicClipScore
 from image_trust.ai_likelihood.safe import SafeScore
 from image_trust.provenance.contracts import (
@@ -125,6 +126,48 @@ def test_recall_oriented_forensic_threshold_emits_only_limited_ai_signal(monkeyp
     assert result.reliability_label == "limited"
     detector = next(signal for signal in result.signals if signal.name == "forensic_clip_detector")
     assert detector.details["limited_review_threshold"] == 0.9919478297233582
+
+
+def test_community_forensics_high_signal_is_auditable(monkeypatch, tmp_path) -> None:
+    monkeypatch.setattr(
+        "image_trust.ai_likelihood.dda.score_dda_isolated",
+        lambda *_args, **_kwargs: DdaScore(0.2, "center_crop_336_clip_normalization"),
+    )
+    monkeypatch.setattr(
+        "image_trust.ai_likelihood.dda.score_community_forensics_isolated",
+        lambda *_args, **_kwargs: CommunityForensicsScore(
+            0.9,
+            "resize_shorter_256_center_crop_224_imagenet_normalization",
+        ),
+    )
+
+    result = assess_high_confidence_ai(tmp_path / "asset.png", _record())
+
+    assert result.risk_band == "high"
+    detector = next(signal for signal in result.signals if signal.name == "community_forensics_detector")
+    assert detector.value == 0.9
+    assert detector.details["high_confidence_threshold"] == 0.8866265416145325
+
+
+def test_community_forensics_limited_signal_is_not_camera_evidence(monkeypatch, tmp_path) -> None:
+    monkeypatch.setattr(
+        "image_trust.ai_likelihood.dda.score_dda_isolated",
+        lambda *_args, **_kwargs: DdaScore(0.2, "center_crop_336_clip_normalization"),
+    )
+    monkeypatch.setattr(
+        "image_trust.ai_likelihood.dda.score_community_forensics_isolated",
+        lambda *_args, **_kwargs: CommunityForensicsScore(
+            0.6,
+            "resize_shorter_256_center_crop_224_imagenet_normalization",
+        ),
+    )
+
+    result = assess_high_confidence_ai(tmp_path / "asset.png", _record())
+
+    assert result.risk_band == "medium"
+    assert "no_high_confidence_pixel_signal_is_not_camera_evidence" in result.limitations
+    detector = next(signal for signal in result.signals if signal.name == "community_forensics_detector")
+    assert detector.details["limited_review_threshold"] == 0.5
 
 
 def test_verified_ai_c2pa_declaration_has_an_explicit_provenance_path(tmp_path) -> None:

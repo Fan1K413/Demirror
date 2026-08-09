@@ -1,0 +1,56 @@
+{
+  "schema_version": "demirror-community-forensics-audit-v1",
+  "model_version": "community-forensics-224-v1",
+  "source_model": "OwensLab/commfor-model-224",
+  "source_license": "MIT",
+  "checkpoint_sha256": "a6cc439d5a6d2dfadd60c77d27a2838ad55b34e601ecd30f46ad97266d6ac4e0",
+  "config_sha256": "9826208c73a17bb20c85d6624aa16b4a118508d89ff2c86d71e4b553474ff702",
+  "high_confidence_threshold": 0.8866265416145325,
+  "limited_review_threshold": 0.5,
+  "threshold_selection": "The high-confidence threshold is the 95th percentile (higher interpolation) of 300 real PixArt controls: IDs 351--425 across indoor/outdoor, evaluated as original and JPEG-85. It was frozen before all IDs 426--500 evaluations.",
+  "limited_threshold_selection": "0.5 is the released classifier decision threshold. It is a recall-oriented possible-AI review signal only, never a general AI prevalence probability or camera-origin test.",
+  "target_definition": "A local, auditable Community Forensics ViT pixel signal that complements P0 geometry review and other pixel detectors.",
+  "evaluation": {
+    "calibration_pixart_original": {
+      "generated_count": 150,
+      "real_count": 150,
+      "roc_auc": 0.9531555555555556,
+      "at_limited_review_threshold": {"recall": 0.9066666666666666, "false_positive_rate": 0.14666666666666667}
+    },
+    "calibration_pixart_jpeg85": {
+      "generated_count": 150,
+      "real_count": 150,
+      "roc_auc": 0.9482222222222222,
+      "at_limited_review_threshold": {"recall": 0.8933333333333333, "false_positive_rate": 0.12666666666666668}
+    },
+    "held_out_sdxl": {
+      "generated_count": 150,
+      "real_count": 150,
+      "roc_auc": 0.9865333333333333,
+      "at_high_confidence_threshold": {"recall": 0.9, "false_positive_rate": 0.04, "accuracy": 0.93},
+      "at_limited_review_threshold": {"recall": 0.9666666666666667, "false_positive_rate": 0.13333333333333333, "accuracy": 0.9166666666666666}
+    },
+    "held_out_sdxl_jpeg85": {
+      "generated_count": 150,
+      "real_count": 150,
+      "roc_auc": 0.9796888888888888,
+      "at_high_confidence_threshold": {"recall": 0.8666666666666667, "false_positive_rate": 0.03333333333333333, "accuracy": 0.9166666666666666},
+      "at_limited_review_threshold": {"recall": 0.96, "false_positive_rate": 0.12, "accuracy": 0.92}
+    },
+    "held_out_cross_generator_original": {
+      "generators": ["Deepfloyd", "Kandinsky", "Pixart", "SDXL"],
+      "generated_count": 525,
+      "real_count": 525,
+      "roc_auc": 0.9656888888888889,
+      "at_high_confidence_threshold": {"recall": 0.8076190476190476, "false_positive_rate": 0.0419047619047619, "accuracy": 0.8828571428571429},
+      "at_limited_review_threshold": {"recall": 0.9276190476190476, "false_positive_rate": 0.13523809523809524, "accuracy": 0.8961904761904762}
+    }
+  },
+  "limitations": [
+    "community_forensics_score_is_a_detector_score_not_a_real_world_ai_prevalence_probability",
+    "community_forensics_limited_threshold_has_13_5_percent_cross_generator_real_false_positive_rate",
+    "community_forensics_no_signal_is_not_evidence_of_camera_origin",
+    "community_forensics_high_signal_is_not_provenance_or_authenticity_proof",
+    "community_forensics_scope_is_limited_to_the_registered_projective_geometry_holdouts_and_jpeg85_protocol"
+  ]
+}

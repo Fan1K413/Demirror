@@ -248,6 +248,14 @@ def _ai_evidence_labels(result: AiLikelihoodResult) -> list[str]:
                 limited_threshold = float(signal.details.get("limited_review_threshold", 1.0))
                 if signal.value is not None and signal.value >= limited_threshold:
                     labels.append("耐压缩像素检测（有限强度）")
+        elif signal.name == "community_forensics_detector":
+            threshold = float(signal.details.get("high_confidence_threshold", 0.8866265416145325))
+            if signal.value is not None and signal.value >= threshold:
+                labels.append("高置信跨生成器像素检测")
+            else:
+                limited_threshold = float(signal.details.get("limited_review_threshold", 1.0))
+                if signal.value is not None and signal.value >= limited_threshold:
+                    labels.append("跨生成器像素检测（有限强度）")
     return labels or ["高置信 AI 信号"]
 
 
