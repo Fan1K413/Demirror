@@ -143,6 +143,7 @@ def inspect_c2pa_asset(input_path: Path, config: P1C2paConfig) -> C2paRecord:
         active_manifest_label=_active_manifest_label(manifest_store, active_manifest),
         assertion_labels=_assertion_labels(active_manifest),
         declared_actions=_declared_actions(active_manifest),
+        declared_digital_source_types=_digital_source_types(active_manifest),
         validation_state=_as_text(validation_state),
         validation_status_codes=validation_codes,
         signature_validation_status=signature_status,
@@ -294,6 +295,27 @@ def _declared_actions(active_manifest: dict[str, Any]) -> list[str]:
             continue
         _collect_actions(payload, actions)
     return sorted(actions)
+
+
+def _digital_source_types(active_manifest: dict[str, Any]) -> list[str]:
+    """Record declared C2PA source types without treating them as ground truth."""
+
+    source_types: set[str] = set()
+    _collect_digital_source_types(active_manifest, source_types)
+    return sorted(source_types)
+
+
+def _collect_digital_source_types(value: Any, source_types: set[str]) -> None:
+    if isinstance(value, dict):
+        for key in ("digitalSourceType", "digital_source_type"):
+            candidate = value.get(key)
+            if isinstance(candidate, str) and candidate.strip():
+                source_types.add(candidate.strip())
+        for nested in value.values():
+            _collect_digital_source_types(nested, source_types)
+    elif isinstance(value, list):
+        for nested in value:
+            _collect_digital_source_types(nested, source_types)
 
 
 def _iter_assertions(active_manifest: dict[str, Any]):

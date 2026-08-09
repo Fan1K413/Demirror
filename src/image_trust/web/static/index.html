@@ -23,7 +23,7 @@
             <p class="eyebrow">Projection geometry evidence</p>
             <h1 id="page-title">让透视线索<br>回到可审阅的证据。</h1>
           </div>
-          <p class="intro-copy">上传一张静态图片，生成可复核的线段族叠图、候选异常线、相机参数一致性记录与离线 C2PA 读取结果。</p>
+          <p class="intro-copy">上传一张静态图片，生成三档 AI 内容判断，并展开 AI 像素信号、相机元数据、几何线索、拍摄参数与离线来源记录。</p>
         </section>
 
         <section class="workspace" aria-label="上传与分析">
@@ -42,12 +42,12 @@
           </form>
 
           <aside class="method-card" aria-label="分析边界">
-            <p class="eyebrow">审阅边界</p>
-            <h2>测量，不下结论</h2>
+            <p class="eyebrow">怎么看结果</p>
+            <h2>先看判断，再看依据</h2>
             <ul>
-              <li><span>01</span>线段与消失方向族用于几何审阅</li>
-              <li><span>02</span>相机参数仅检查全图与局部裁剪的一致性</li>
-              <li><span>03</span>C2PA 仅读取已嵌入且可离线验证的信息</li>
+              <li><span>01</span>先呈现本次分析能支持的判断</li>
+              <li><span>02</span>再展开图片结构和拍摄参数等依据</li>
+              <li><span>03</span>有可验证的来源记录时，才作为额外依据</li>
             </ul>
           </aside>
         </section>
@@ -67,29 +67,61 @@
           <div class="section-heading">
             <div>
               <p class="eyebrow">Evidence review</p>
-              <h2 id="result-title">本次分析结果</h2>
+              <h2 id="result-title">AI 内容可能性评估</h2>
             </div>
             <button id="new-analysis" class="quiet-button" type="button">分析另一张图片</button>
           </div>
 
+          <article class="summary-card overall-summary">
+            <p class="card-kicker">总判断</p>
+            <p id="overall-observation" class="result-value">等待结果</p>
+            <p id="overall-description" class="card-description"></p>
+            <div id="overall-metrics" class="metric-grid"></div>
+          </article>
+
+          <div class="section-heading compact-heading evidence-heading">
+            <div>
+              <p class="eyebrow">Supporting evidence</p>
+              <h2>判断依据</h2>
+            </div>
+            <p class="section-note">AI 像素与来源记录主导判断；相机 EXIF 只支持有限实拍可能性，几何与拍摄参数用于一致性复核。</p>
+          </div>
           <div class="summary-grid">
-            <article class="summary-card primary-summary">
-              <p class="card-kicker">P0 · 投影几何</p>
+            <article class="summary-card">
+              <p class="card-kicker">AI 像素检测</p>
+              <p id="p3-observation" class="result-value">等待结果</p>
+              <p id="p3-description" class="card-description"></p>
+              <div id="p3-metrics" class="metric-grid"></div>
+            </article>
+            <article class="summary-card">
+              <p class="card-kicker">来源记录</p>
+              <p id="c2pa-observation" class="result-value">等待结果</p>
+              <p id="c2pa-description" class="card-description"></p>
+              <div id="c2pa-metrics" class="metric-grid"></div>
+            </article>
+            <article class="summary-card">
+              <p class="card-kicker">相机元数据</p>
+              <p id="metadata-observation" class="result-value">等待结果</p>
+              <p id="metadata-description" class="card-description"></p>
+              <div id="metadata-metrics" class="metric-grid"></div>
+            </article>
+            <article class="summary-card">
+              <p class="card-kicker">画面几何检查</p>
               <p id="p0-observation" class="result-value">等待结果</p>
               <p id="p0-description" class="card-description"></p>
               <div id="p0-metrics" class="metric-grid"></div>
             </article>
             <article class="summary-card">
-              <p class="card-kicker">P1 · 相机一致性</p>
+              <p class="card-kicker">拍摄参数检查</p>
               <p id="camera-observation" class="result-value">等待结果</p>
               <p id="camera-description" class="card-description"></p>
               <div id="camera-metrics" class="metric-grid"></div>
             </article>
             <article class="summary-card">
-              <p class="card-kicker">C2PA · 嵌入记录</p>
-              <p id="c2pa-observation" class="result-value">等待结果</p>
-              <p id="c2pa-description" class="card-description"></p>
-              <div id="c2pa-metrics" class="metric-grid"></div>
+              <p class="card-kicker">隐式水印</p>
+              <p id="watermark-observation" class="result-value">等待结果</p>
+              <p id="watermark-description" class="card-description"></p>
+              <div id="watermark-metrics" class="metric-grid"></div>
             </article>
           </div>
 

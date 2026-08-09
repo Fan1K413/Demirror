@@ -51,7 +51,8 @@ class ManifestReader:
                         "actions": [
                             {"action": "c2pa.opened"},
                             {"action": "c2pa.created"},
-                        ]
+                        ],
+                        "digitalSourceType": "trainedAlgorithmicMedia",
                     },
                 },
                 {"label": "c2pa.hash.data", "data": {}},
@@ -110,6 +111,7 @@ def test_manifest_claims_are_recorded_without_interpreting_them(monkeypatch, tmp
     assert record.status.value == "present"
     assert record.assertion_labels == ["c2pa.actions.v2", "c2pa.hash.data"]
     assert record.declared_actions == ["c2pa.created", "c2pa.opened"]
+    assert record.declared_digital_source_types == ["trainedAlgorithmicMedia"]
     assert record.signature_validation_status.value == "valid"
     assert record.trust_status.value == "trusted"
     assert json.loads(output.read_text(encoding="utf-8"))["network_access"] == "disabled"

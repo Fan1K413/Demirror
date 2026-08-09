@@ -5,7 +5,7 @@
   const stateLabels = {
     queued: ["正在排队", "已创建本地作业，等待开始。"],
     validating: ["正在验证文件", "正在检查图片格式、大小与解码边界。"],
-    running: ["正在分析", "正在生成几何证据、相机一致性记录和离线 C2PA 读取结果。"],
+    running: ["正在分析", "正在生成 AI 像素信号、相机元数据、几何证据、相机一致性记录和离线来源记录。"],
     completed: ["分析完成", "全部已配置的分析链路已完成。"],
     partial: ["分析部分完成", "基础几何结果已保留；部分附加分析未形成可用观测。"],
     rejected: ["文件未被接受", "图片未通过输入验证，因此没有继续分析。"],
@@ -32,6 +32,44 @@
     p1_camera_analysis_failed: "相机一致性分析发生错误，其他结果仍已保留。",
     p0_input_rejected: "几何分析拒绝了该输入。",
     p0_analysis_not_available: "几何分析未能完成。",
+    dda_checkpoint_not_available: "DDA 本地检查点不可用，未以启发式分数替代。",
+    dda_dinov2_source_not_initialized: "DDA 本地运行时尚未初始化，未以启发式分数替代。",
+    dda_worker_failed: "DDA 隔离分析进程未完成，未以启发式分数替代。",
+    dda_worker_timed_out: "DDA 隔离分析超时，未以启发式分数替代。",
+    dda_input_too_small: "图片短边小于 336 像素，DDA 按登记输入门槛未运行。",
+    dda_high_confidence_indicator_is_not_provenance_or_authenticity_proof: "高置信像素信号不是来源、真实性、版权或编辑史的证明。",
+    dda_score_below_threshold_is_not_evidence_of_camera_origin: "分数未达阈值并不支持“相机拍摄”结论。",
+    dda_no_high_confidence_pixel_signal_is_not_camera_evidence: "未形成高置信 AI 像素信号，不等同于相机照片。",
+    dda_jpeg_compression_or_resizing_can_reduce_sensitivity: "JPEG 重编码或缩放会降低此检测器的灵敏度，因此这类结果应视为不确定。",
+    dda_scope_is_limited_to_the_registered_generator_holdout_and_unmodified_upload_protocol: "阈值只在登记的 Pixart 校准与原始 SDXL 留出集上审计；未外推为通用 AI 判定。",
+    no_high_confidence_pixel_signal_is_not_camera_evidence: "三路像素检测均未达到各自的高置信标准，这仍不等同于相机照片。",
+    safe_signal_is_scoped_to_lossless_or_unmodified_uploads: "SAFE 补充信号只对无损或未经重编码的上传登记有效。",
+    safe_jpeg_reencoding_destroyed_sensitivity_in_local_controls: "本地 JPEG 75 复测中 SAFE 灵敏度消失；传输重编码后不得依赖该信号。",
+    safe_failed_the_registered_sdxl_cross_generator_gate: "SAFE 未通过 SDXL 跨生成器门槛，因此只作为范围明确的补充通道。",
+    safe_score_below_threshold_is_not_camera_evidence: "SAFE 分数低于阈值不支持相机来源。",
+    safe_high_confidence_indicator_is_not_provenance_or_authenticity_proof: "SAFE 高信号不是来源、真实性或编辑史证明。",
+    forensic_clip_config_not_available: "耐压缩补充模型的本地配置不可用。",
+    forensic_clip_checkpoint_not_available: "耐压缩补充模型的本地检查点不可用。",
+    forensic_clip_worker_failed: "耐压缩补充模型的隔离分析进程未完成。",
+    forensic_clip_worker_timed_out: "耐压缩补充模型的隔离分析超时。",
+    forensic_clip_is_a_low_recall_complement_not_a_general_probability: "耐压缩模型是低召回补充通道，其原始分数不是通用 AI 概率。",
+    forensic_clip_registered_holdout_false_positive_rate_is_6_7_percent: "在登记的未见 SDXL 留出集上，该通道的实拍误报率为 6.7%。",
+    forensic_clip_limited_review_threshold_has_14_percent_jpeg_holdout_false_positive_rate: "偏向 AI 召回的有限阈值在 JPEG 75 留出集上的实拍误报率为 14%，因此只能给出有限强度结论。",
+    forensic_clip_indoor_recall_is_lower_than_outdoor_recall: "该通道对室内场景的检出率明显低于室外场景。",
+    forensic_clip_score_below_threshold_is_not_camera_evidence: "耐压缩分数低于阈值不支持相机来源。",
+    forensic_clip_high_confidence_indicator_is_not_provenance_or_authenticity_proof: "耐压缩高信号不是来源、真实性或编辑史证明。",
+    exif_metadata_can_be_copied_or_edited: "相机 EXIF 可以被复制或编辑，因此只能在 AI 检测已完成且未命中时支持有限强度的“可能为实拍”。",
+    implicit_watermark_detector_not_configured: "尚未配置兼容的本地隐式水印检测器。",
+    camera_consistency_not_calibrated_for_origin_decision: "拍摄参数一致性尚未按来源类别校准，因此不参与三档判断。",
+    c2pa_capture_declaration_not_trusted_for_camera_decision: "C2PA 捕获声明虽可读取，但未通过受信任来源链验证，因此不作为“可能为实拍”的依据。",
+    opencv_lsd_quality_is_backend_relative_not_probability: "线段质量是 OpenCV LSD 内部相对量，不是来源概率。",
+    p0_geometry_is_uncalibrated_not_ai_evidence: "几何候选尚未通过来源盲测门槛，不作为 AI 证据。",
+    special_imaging_is_only_metadata_gated_in_p0: "特殊成像目前只通过元数据门控，尚未进行视觉识别。",
+    special_imaging_not_assessed_without_metadata_or_manual_tag: "没有元数据或人工标签时，系统不判断是否属于特殊成像。",
+    p1_e_cam_is_an_uncalibrated_camera_measurement_not_source_evidence: "E_cam 尚未完成来源校准，只是相机参数一致性测量。",
+    e_cam_requires_a_qualified_full_image_and_at_least_three_qualified_crops: "E_cam 需要合格的整图估计和至少三个合格裁剪。",
+    "full_image_excluded:uncertainty_above_gate": "整图相机估计的不确定性超过测量门槛，E_cam 未形成。",
+    trust_list_version_not_configured: "尚未配置离线 C2PA 信任列表版本。",
     web_analysis_failed: "本地分析服务发生未处理错误。",
   };
 
@@ -53,6 +91,18 @@
   const asText = (value, fallback = "—") => value === null || value === undefined || value === "" ? fallback : String(value);
   const percentage = (value) => Number.isFinite(value) ? `${(value * 100).toFixed(1)}%` : "—";
   const degrees = (value) => Number.isFinite(value) ? `${(value * 180 / Math.PI).toFixed(2)}°` : "—";
+
+  function detectorMetric(signal, thresholdKey = "high_confidence_threshold", thresholdLabel = "阈值") {
+    if (!signal) return "未配置";
+    if (signal.status !== "available" || !Number.isFinite(signal.value)) {
+      const reason = Array.isArray(signal.limitations) ? signal.limitations[0] : null;
+      return reason ? humanizeLimitation(reason) : "本次未形成分数";
+    }
+    const threshold = signal.details?.[thresholdKey];
+    return Number.isFinite(threshold)
+      ? `${percentage(signal.value)} / ${thresholdLabel} ${percentage(threshold)}`
+      : percentage(signal.value);
+  }
 
   function setSelected(file) {
     selected = file || null;
@@ -104,14 +154,76 @@
     metrics.forEach(([label, metricValue]) => addMetric(metricGrid, label, metricValue));
   }
 
+  function renderOverall(result) {
+    const origin = result.origin || {};
+    if (origin.decision) {
+      const metadata = origin.camera_metadata || {};
+      const evidence = Array.isArray(origin.supporting_evidence) ? origin.supporting_evidence : [];
+      const sharedMetrics = [
+        ["判断强度", origin.evidence_strength === "high" ? "高" : "有限"],
+        ["主要依据", evidence.join("、") || "未形成可用依据"],
+      ];
+      if (origin.decision === "possible_ai") {
+        setCard("overall", "可能为 AI", `原因：${asText(origin.explanation)}`, [
+          ...sharedMetrics,
+          ["相机元数据", metadata.status === "coherent" ? "存在，但不能推翻 AI 信号" : "未形成强相机证据"],
+        ]);
+        return;
+      }
+      if (origin.decision === "possible_camera") {
+        setCard("overall", "可能为实拍", `原因：${asText(origin.explanation)}`, [
+          ...sharedMetrics,
+          ["AI 像素检测", "未检出高置信 AI 信号"],
+        ]);
+        return;
+      }
+      setCard("overall", "未检出 AI 信号", `原因：${asText(origin.explanation)}`, [
+        ...sharedMetrics,
+        ["相机元数据", metadata.status === "partial" ? "信息不完整" : "未形成正向相机证据"],
+      ]);
+      return;
+    }
+
+    // Compatibility view for local jobs completed before the three-band policy.
+    const p3 = result.p3 || {};
+    const signals = Array.isArray(p3.signals) ? p3.signals : [];
+    const verified = signals.find((signal) => signal.name === "verified_c2pa" && signal.status === "available");
+    const dda = signals.find((signal) => signal.name === "dda_pixel_detector");
+    const safe = signals.find((signal) => signal.name === "safe_pixel_detector");
+    const forensic = signals.find((signal) => signal.name === "forensic_clip_detector");
+    const high = p3.status === "available" && p3.risk_band === "high";
+
+    if (verified) {
+      setCard("overall", "已确认包含 AI 生成内容", "原因：已验证的图片来源记录明确声明其由 AI 生成。这个结论优先于像素检测；画面几何和拍摄参数不参与这一判断。", [
+        ["判断强度", "已确认"],
+        ["主要依据", "已验证的来源记录"],
+        ["像素检测", dda?.status === "available" ? "已完成" : "未参与"],
+      ]);
+      return;
+    }
+    if (high) {
+      setCard("overall", "高度疑似 AI 生成", "原因：AI 像素检测命中严格的高置信标准。画面几何、拍摄参数和一般元数据只用于解释或复核，不会被换算成 AI 概率。", [
+        ["判断强度", "高"],
+        ["主要依据", "AI 像素检测"],
+        ["检测分数", percentage(dda?.value ?? safe?.value ?? forensic?.value)],
+      ]);
+      return;
+    }
+    setCard("overall", "目前无法可靠判断", "原因：没有出现足以支持高置信 AI 判断的直接证据。这不表示图片一定由相机拍摄；几何或拍摄参数也不会被当作反向证明。", [
+      ["判断状态", "不确定"],
+      ["AI 像素检测", p3.status === "available" ? "未达到高置信标准" : "未形成可用结果"],
+      ["来源记录", "未发现已验证的 AI 声明"],
+    ]);
+  }
+
   function renderP0(result) {
     const p0 = result.p0 || {};
     const evidence = p0.evidence || {};
     const features = evidence.features || {};
-    const value = directionLabels[evidence.direction] || observationLabels[evidence.observation] || asText(evidence.run_status, "未形成结果");
+    const value = evidence.run_status === "ok" ? "结构线索已提取" : "未形成结构线索";
     const description = evidence.run_status === "not_applicable"
-      ? "当前图片不满足稳定的投影几何测量条件。"
-      : "叠图显示的是可复核的线段与平行／消失方向族，不是 AI 概率。";
+      ? "当前图片不满足稳定的几何测量条件；不会强行把缺失测量换算成来源结论。"
+      : "已检查线条、平行族和消失方向。三种几何判别实验在未见 SDXL 上均未通过门槛，因此当前作为可审阅的一致性证据，不会伪装成可靠 AI 概率。";
     setCard("p0", value, description, [
       ["运行状态", asText(evidence.run_status)],
       ["适用性", percentage(evidence.applicability)],
@@ -120,6 +232,97 @@
       ["稳定线族", asText(features.families?.length, "0")],
       ["候选异常线", asText(features.anomalous_lines?.length, "0")],
     ]);
+  }
+
+  function renderP3(result) {
+    const p3 = result.p3 || {};
+    if (!Object.keys(p3).length) {
+      setCard("p3", "未运行", "本次没有得到 AI 内容判断。", []);
+      return;
+    }
+    if (p3.status !== "available") {
+      setCard("p3", "目前无法可靠判断", "原因：本次检测未能完成，因此不会用不可靠的替代分数下结论。", [
+        ["检测状态", asText(p3.status)],
+      ]);
+      return;
+    }
+    const signals = Array.isArray(p3.signals) ? p3.signals : [];
+    const verified = signals.find((signal) => signal.name === "verified_c2pa" && signal.status === "available");
+    const dda = signals.find((signal) => signal.name === "dda_pixel_detector");
+    const safe = signals.find((signal) => signal.name === "safe_pixel_detector");
+    const forensic = signals.find((signal) => signal.name === "forensic_clip_detector");
+    const evaluation = p3.evaluation?.dda?.at_high_confidence_threshold || p3.evaluation?.at_high_confidence_threshold || {};
+    if (verified) {
+      setCard("p3", "已确认包含 AI 生成内容", "原因：图片自带且已验证的来源记录，明确说明它由 AI 生成。这是来源记录，不是对像素的猜测。", [
+        ["判断依据", "已验证的来源记录"],
+        ["可靠程度", percentage(p3.reliability)],
+        ["技术记录", "C2PA · trained algorithmic media"],
+      ]);
+      return;
+    }
+    const high = p3.risk_band === "high";
+    const limited = p3.risk_band === "medium";
+    const channelNames = {
+      dda_pixel_detector: "DDA 主模型",
+      safe_pixel_detector: "SAFE 无损补充",
+      forensic_clip_detector: "耐压缩补充",
+    };
+    const hitChannels = signals
+      .filter((signal) => signal.status === "available"
+        && Number.isFinite(signal.value)
+        && Number.isFinite(signal.details?.high_confidence_threshold)
+        && signal.value >= signal.details.high_confidence_threshold)
+      .map((signal) => channelNames[signal.name])
+      .filter(Boolean);
+    const limitedChannels = signals
+      .filter((signal) => signal.status === "available"
+        && Number.isFinite(signal.value)
+        && Number.isFinite(signal.details?.limited_review_threshold)
+        && signal.value >= signal.details.limited_review_threshold
+        && signal.value < signal.details.high_confidence_threshold)
+      .map((signal) => channelNames[signal.name])
+      .filter(Boolean);
+    const compressedEvaluation = p3.evaluation?.forensic_clip?.held_out_sdxl_jpeg75?.at_high_confidence_threshold || {};
+    setCard(
+      "p3",
+      high ? "检测信号达到高标准" : (limited ? "检测到有限 AI 信号" : "未达到高标准"),
+      high
+        ? "该检测是总判断的主要依据：图片的像素特征与已知生成图模式高度相符。它支持进一步复核，但不能证明来源或真实性。"
+        : (limited
+          ? "耐压缩模型达到偏向 AI 检出率的复核阈值，因此总判断为“可能为 AI（有限）”。该档在 JPEG 75 留出集的实拍误报率为 14%，必须结合原图和人工复核。"
+          : "该检测没有提供高置信 AI 依据。这不表示它一定是相机照片；压缩、缩放等处理也可能减弱检测信号。"),
+      high
+        ? [
+            ["判断强度", "高"],
+            ["命中通道", hitChannels.join("、") || "像素检测"],
+            ["DDA 主模型", detectorMetric(dda)],
+            ["SAFE 无损补充", detectorMetric(safe)],
+            ["耐压缩补充", detectorMetric(forensic)],
+            ["DDA 留出验证", `检出 ${percentage(evaluation.recall)}，误报 ${percentage(evaluation.false_positive_rate)}`],
+            ["JPEG 75 留出验证", `补充检出 ${percentage(compressedEvaluation.recall)}，误报 ${percentage(compressedEvaluation.false_positive_rate)}`],
+            ["技术详情", asText(p3.model_version)],
+          ]
+        : limited
+          ? [
+              ["判断强度", "有限"],
+              ["命中通道", limitedChannels.join("、") || "耐压缩补充"],
+              ["DDA 主模型", detectorMetric(dda)],
+              ["SAFE 无损补充", detectorMetric(safe)],
+              ["耐压缩补充", detectorMetric(forensic, "limited_review_threshold", "有限阈值")],
+              ["JPEG 75 留出验证", "有限阈值：检出 28.0%，误报 14.0%"],
+              ["复核要求", "建议取得原始文件，并结合结构、来源记录与人工检查"],
+              ["技术详情", asText(p3.model_version)],
+            ]
+          : [
+            ["判断状态", "不确定"],
+            ["主要原因", "信号未达到高置信标准"],
+            ["DDA 主模型", detectorMetric(dda)],
+            ["SAFE 无损补充", detectorMetric(safe)],
+            ["耐压缩补充", detectorMetric(forensic)],
+            ["注意", "压缩或缩放会降低灵敏度"],
+            ["技术详情", asText(p3.model_version)],
+          ],
+    );
   }
 
   function renderCamera(result) {
@@ -134,8 +337,8 @@
       setCard("camera", "未完成", "相机一致性分析失败，不能据此作任何推断。", []);
       return;
     }
-    const value = fullImage.status === "ok" ? observationLabels[eCam.observation] || "已生成相机测量" : "未形成可用相机测量";
-    setCard("camera", value, "全图与局部裁剪的相机参数一致性尚未校准为来源结论。", [
+    const value = fullImage.status === "ok" ? "拍摄参数已测量" : "未形成可用测量";
+    setCard("camera", value, "用于检查全图和局部裁剪之间的参数关系。本地真实/AI 对照未形成稳定区分，因此不独立改变来源结论。", [
       ["后端状态", asText(fullImage.status)],
       ["E_cam", asText(eCam.observation)],
       ["Roll", degrees(fullImage.roll)],
@@ -152,12 +355,52 @@
       return;
     }
     const value = c2pa.manifest_present ? "发现嵌入式清单" : "未发现嵌入式清单";
-    setCard("c2pa", value, "只读取图像中已有的嵌入信息；离线模式不会检索远程清单。", [
+    setCard("c2pa", value, "只读取图像中已有的嵌入信息；只有已验证且受信任的数字拍摄来源链才可支持“可能为实拍”。离线模式不会检索远程清单。", [
       ["读取状态", asText(c2pa.status)],
       ["签名状态", asText(c2pa.signature_validation_status)],
+      ["信任状态", asText(c2pa.trust_status)],
+      ["信任列表版本", asText(c2pa.trust_list_version)],
+      ["来源类型", (c2pa.declared_digital_source_types || []).join("、") || "—"],
       ["网络访问", asText(c2pa.network_access)],
       ["声明动作", asText(c2pa.declared_actions?.length, "0")],
     ]);
+  }
+
+  function renderMetadata(result) {
+    const metadata = result.origin?.camera_metadata || {};
+    if (!Object.keys(metadata).length) {
+      setCard("metadata", "未运行", "该作业没有相机元数据审阅结果。", []);
+      return;
+    }
+    if (metadata.status === "coherent") {
+      setCard("metadata", "发现完整相机元数据", "相机品牌、型号、拍摄时间以及至少三项拍摄参数彼此完整。在 AI 像素检测已完成且未命中时，它支持有限强度的“可能为实拍”；EXIF 可被复制或编辑，不能作为真实性证明。", [
+        ["相机", `${asText(metadata.camera_make)} · ${asText(metadata.camera_model)}`],
+        ["拍摄时间", asText(metadata.captured_at_local)],
+        ["物理参数", (metadata.physical_capture_fields || []).join("、") || "—"],
+        ["编辑软件", asText(metadata.software)],
+      ]);
+      return;
+    }
+    if (metadata.status === "partial") {
+      setCard("metadata", "相机元数据不完整", "发现了部分相机信息，但不足以作为“可能为实拍”的正向依据。", [
+        ["相机", `${asText(metadata.camera_make)} · ${asText(metadata.camera_model)}`],
+        ["拍摄时间", asText(metadata.captured_at_local)],
+        ["物理参数", (metadata.physical_capture_fields || []).join("、") || "—"],
+      ]);
+      return;
+    }
+    setCard("metadata", "未发现相机元数据", "没有可用的相机 EXIF 信息；这很常见，也不表示图片一定是 AI 生成。", []);
+  }
+
+  function renderWatermark(result) {
+    const status = result.origin?.implicit_watermark;
+    if (status === "not_configured") {
+      setCard("watermark", "尚未接入检测", "当前没有兼容的本地隐式水印检测器，因此它不参与本次 AI 或实拍判断。", [
+        ["检测状态", "未配置"],
+      ]);
+      return;
+    }
+    setCard("watermark", "未运行", "该作业没有隐式水印检测结果。", []);
   }
 
   function addVisual(container, title, caption, src) {
@@ -198,6 +441,7 @@
       ...(job.limitations || []),
       ...(result.limitations || []),
       ...(result.p0?.evidence?.limitations || []),
+      ...(result.p3?.limitations || []),
       ...(result.camera?.limitations || []),
       ...(result.camera?.e_cam?.limitations || []),
       ...(result.c2pa?.limitations || []),
@@ -215,9 +459,13 @@
 
   function renderResult(job, result) {
     resultPanel.hidden = false;
+    renderOverall(result);
     renderP0(result);
+    renderP3(result);
     renderCamera(result);
     renderC2pa(result);
+    renderMetadata(result);
+    renderWatermark(result);
     renderVisuals(job, result);
     renderLimitations(job, result);
   }

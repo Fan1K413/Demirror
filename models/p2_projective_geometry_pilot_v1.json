@@ -1,0 +1,120 @@
+{
+  "schema_version": "p2-model-artifact-v1",
+  "model_version": "p2-projective-geometry-pilot-2026-08-08.1",
+  "feature_names": [
+    "applicability",
+    "coverage",
+    "line_count_log",
+    "total_length_normalized",
+    "spatial_coverage",
+    "spatial_entropy",
+    "direction_entropy",
+    "occupied_cells_normalized",
+    "vp_family_count_normalized",
+    "vp_inlier_ratio",
+    "vp_residual_deg_normalized",
+    "vp_residual_observed",
+    "family_stability",
+    "parallel_family_count_normalized",
+    "local_family_count_normalized",
+    "anomalous_line_count_normalized",
+    "curve_suppressed_line_count_normalized"
+  ],
+  "standardizer_mean": [
+    0.8437322599320295,
+    0.8081405141843969,
+    0.5898390208591249,
+    7.134958371998253,
+    0.7277814716312057,
+    0.8731208629599104,
+    0.5624158240915116,
+    0.7277814716312057,
+    0.785904255319149,
+    0.5092663158152979,
+    0.028402544811267652,
+    0.9946808510638298,
+    0.960665895374472,
+    0.5481678486997633,
+    0.024601063829787235,
+    0.25751773049645343,
+    0.05280141843971631
+  ],
+  "standardizer_scale": [
+    0.12826466559620317,
+    0.1439786082401271,
+    0.06502152379951566,
+    2.9791285979772453,
+    0.15308118676349292,
+    0.06265729203789835,
+    0.10261620279588307,
+    0.15308118676349292,
+    0.21402690404631686,
+    0.1427790016287311,
+    0.07256426125413443,
+    0.07273826771902853,
+    0.09003497922986455,
+    0.25341363703005954,
+    0.06253417844703443,
+    0.1441318153014227,
+    0.11227004677225061
+  ],
+  "base_coefficients": [
+    0.6114141369456805,
+    -0.10183942056652323,
+    -1.8380069578531308,
+    1.5407042919133491,
+    -0.647545955507847,
+    0.9572936217344787,
+    0.21161327735906593,
+    -0.647545955507847,
+    0.000713146663511695,
+    0.033029656442688266,
+    -0.9465953965347782,
+    -0.7602974461783388,
+    -0.05504351217019804,
+    0.10675628941014696,
+    -0.06817197576296453,
+    0.19542745990087299,
+    0.03242206297678346
+  ],
+  "base_intercept": 0.015781842873257335,
+  "platt_coefficient": 1.159900290931097,
+  "platt_intercept": 0.020215654160670192,
+  "target_definition": "Estimated probability of the AI-generated label in the registered Projective Geometry Recent Deepfloyd Indoor benchmark; not a determination of origin, authenticity, or editing.",
+  "calibration_dataset": {
+    "registry_schema_version": "p2-projective-geometry-registry-v1",
+    "source": {
+      "archive": {
+        "filename": "Recent_Deepfloyd_Indoor.zip",
+        "sha256": "4babcf7e4ac82a1268863ec29e0be0d318adbf38f3e1812f623f7ec5466fcb5d",
+        "size_bytes": 12172665
+      },
+      "dataset": "https://huggingface.co/datasets/amitabh3/Projective-Geometry",
+      "repository": "https://github.com/hanlinm2/projective-geometry/",
+      "subset": "Recent_Deepfloyd_Indoor/test/{real,gen}"
+    },
+    "split_protocol": "The same numeric paired_scene_id is always assigned to one split; SHA-256 deterministic bucket 0-1=test, 2-3=calibration, 4-9=train.",
+    "class_counts": {
+      "calibration:0": 111,
+      "calibration:1": 111,
+      "test:0": 107,
+      "test:1": 107,
+      "train:0": 282,
+      "train:1": 282
+    },
+    "p0_config": "configs\\p0.yaml"
+  },
+  "evaluation": {
+    "held_out_test_count": 214,
+    "held_out_test_roc_auc": 0.74111276093982,
+    "held_out_test_brier": 0.2077262099575116,
+    "held_out_test_accuracy_at_0_5": 0.6822429906542056,
+    "held_out_test_expected_calibration_error_10_bins": 0.0951037079653797
+  },
+  "limitations": [
+    "p2_experimental_model_not_provenance_proof",
+    "p2_projective_geometry_recent_deepfloyd_indoor_scope_only",
+    "p2_geometry_features_can_be_affected_by_scene_content_and_image_processing",
+    "p2_no_claim_for_unseen_generators_or_real_world_prevalence"
+  ]
+}

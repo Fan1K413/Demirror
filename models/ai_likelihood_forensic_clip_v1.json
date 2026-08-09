@@ -1,0 +1,74 @@
+{
+  "schema_version": "demirror-forensic-clip-audit-v1",
+  "model_version": "forensic-clip-jpeg-complement-v1",
+  "source_model": "wkaandemir/ai-image-detector",
+  "source_license": "MIT",
+  "checkpoint_sha256": "41ce93c6c206a4f3929e19cf9b43b663c63a47422ab27a9bbb67757db5f42339",
+  "config_sha256": "31d3678632a70c3b2ce8a62ad55dbdabf3390278d859e209aac9eefd2495ee5f",
+  "high_confidence_threshold": 0.9925177097320557,
+  "limited_review_threshold": 0.9919478297233582,
+  "threshold_selection": "The threshold was selected only from 150 PixArt calibration images and 150 real controls at an 8% target false-positive rate, then frozen before SDXL evaluation.",
+  "limited_threshold_selection": "A second AI-recall-oriented review threshold was selected on the same calibration real controls at a 12% target false-positive rate. It can emit only limited-strength possible-AI, never high-strength evidence.",
+  "target_definition": "A low-recall, compression-stable AI-oriented pixel signal that complements DDA and SAFE; the score is not a general AI probability.",
+  "evaluation": {
+    "calibration_pixart": {
+      "generated_count": 150,
+      "real_count": 150,
+      "roc_auc": 0.8212888888888888,
+      "at_high_confidence_threshold": {
+        "recall": 0.30666666666666664,
+        "false_positive_rate": 0.08
+      }
+    },
+    "held_out_sdxl": {
+      "generated_count": 150,
+      "real_count": 150,
+      "roc_auc": 0.7401333333333333,
+      "at_high_confidence_threshold": {
+        "recall": 0.16666666666666666,
+        "false_positive_rate": 0.06666666666666667
+      }
+    },
+    "held_out_sdxl_jpeg75": {
+      "generated_count": 150,
+      "real_count": 150,
+      "roc_auc": 0.7387999999999999,
+      "at_high_confidence_threshold": {
+        "recall": 0.17333333333333334,
+        "false_positive_rate": 0.06666666666666667
+      }
+    },
+    "held_out_scene_slices": {
+      "indoor": {
+        "original_recall": 0.08,
+        "original_false_positive_rate": 0.09333333333333334
+      },
+      "outdoor": {
+        "original_recall": 0.25333333333333335,
+        "original_false_positive_rate": 0.04
+      }
+    },
+    "at_limited_review_threshold": {
+      "calibration_pixart": {
+        "recall": 0.48,
+        "false_positive_rate": 0.12
+      },
+      "held_out_sdxl": {
+        "recall": 0.26666666666666666,
+        "false_positive_rate": 0.13333333333333333
+      },
+      "held_out_sdxl_jpeg75": {
+        "recall": 0.28,
+        "false_positive_rate": 0.14
+      }
+    }
+  },
+  "limitations": [
+    "forensic_clip_is_a_low_recall_complement_not_a_general_probability",
+    "forensic_clip_registered_holdout_false_positive_rate_is_6_7_percent",
+    "forensic_clip_limited_review_threshold_has_14_percent_jpeg_holdout_false_positive_rate",
+    "forensic_clip_indoor_recall_is_lower_than_outdoor_recall",
+    "forensic_clip_score_below_threshold_is_not_camera_evidence",
+    "forensic_clip_high_confidence_indicator_is_not_provenance_or_authenticity_proof"
+  ]
+}

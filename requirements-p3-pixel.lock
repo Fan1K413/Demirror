@@ -1,0 +1,6 @@
+# Optional P3 pixel detectors. Install after requirements.lock and the local
+# CPU torch/torchvision stack used by requirements-p1-geocalib.lock.
+timm==1.0.28
+safetensors==0.8.0
+pytorch-wavelets==1.3.0
+PyWavelets==1.8.0

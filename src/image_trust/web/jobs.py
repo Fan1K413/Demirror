@@ -18,6 +18,8 @@ from pydantic import BaseModel, ConfigDict, Field
 from image_trust.camera.config import load_camera_config
 from image_trust.camera.contracts import CameraEstimateStatus
 from image_trust.camera.pipeline import analyze_camera_image
+from image_trust.ai_likelihood.dda import assess_high_confidence_ai
+from image_trust.origin import assess_origin
 from image_trust.pipeline import analyze_image
 from image_trust.provenance.c2pa import inspect_c2pa_asset, write_c2pa_record
 from image_trust.provenance.config import load_c2pa_config
@@ -321,9 +323,12 @@ def build_local_runner(project_root: Path) -> JobRunner:
         c2pa_record = inspect_c2pa_asset(upload_path, c2pa_config)
         write_c2pa_record(job_dir / "c2pa" / "c2pa_result.json", c2pa_record)
         limitations = list(p0_result.evidence.limitations)
+        p3_result = assess_high_confidence_ai(upload_path, c2pa_record)
+        limitations.extend(p3_result.limitations)
         result: dict[str, Any] = {
             "schema_version": "demirror-web-result-v1",
             "p0": p0_dump,
+            "p3": p3_result.model_dump(mode="json"),
             "c2pa": c2pa_record.model_dump(mode="json"),
             "artifacts": {
                 "input_image": upload_path.name,
@@ -350,6 +355,10 @@ def build_local_runner(project_root: Path) -> JobRunner:
             }
             limitations.append("p1_camera_analysis_failed")
             status = WebJobStatus.PARTIAL
+            camera_result = None
+        origin = assess_origin(upload_path, p3_result, c2pa_record, camera_result)
+        result["origin"] = origin.model_dump(mode="json")
+        limitations.extend(origin.limitations)
         result["limitations"] = sorted(set(limitations))
         return WebJobOutcome(status=status, result=result, limitations=sorted(set(limitations)))
 

@@ -315,12 +315,13 @@ class GeoCalibBackend(_UnavailableCameraBackend):
         pitch = _scalar(gravity.rp[0, 1])
         vfov_deg = math.degrees(_scalar(camera.vfov[0]))
         horizon = _geocalib_horizon(camera, gravity, torch)[0]
-        confidence = _combined_confidence(result, torch)
+        dense_diagnostics = _geocalib_dense_diagnostics(result, torch)
         uncertainty = _geocalib_uncertainty(result, width, height, focal_scale=scale_y)
         limitations = [
             "geocalib_horizon_derived_from_camera_and_gravity",
             "geocalib_principal_point_is_assumed_center_not_optimized",
             "geocalib_prediction_confidence_is_not_source_confidence",
+            "geocalib_dense_confidence_is_an_optimizer_weight_not_a_probability",
             f"geocalib_camera_model:{self.config.geocalib_camera_model}",
         ]
         if input_was_downscaled:
@@ -343,8 +344,14 @@ class GeoCalibBackend(_UnavailableCameraBackend):
                 p2=Point(x=width, y=_scalar(horizon[1]) * scale_y),
             ),
             uncertainty=uncertainty,
-            applicability=confidence[0],
-            coverage=confidence[1],
+            # GeoCalib's dense confidence maps are per-pixel optimisation
+            # weights.  They commonly live far below 0.5 and are not a
+            # calibrated applicability probability.  A successful finite
+            # camera/gravity solution is therefore applicable; non-finite
+            # dense fields still reduce the recorded coverage.
+            applicability=1.0,
+            coverage=dense_diagnostics["geocalib_dense_finite_coverage"],
+            backend_diagnostics=dense_diagnostics,
             limitations=limitations,
             provenance=self._provenance(started, inference_device=device),
         )
@@ -386,16 +393,43 @@ def _scalar(value) -> float:
     return float(value.detach().cpu().reshape(-1)[0].item())
 
 
-def _combined_confidence(result, torch) -> tuple[float, float]:
+def _geocalib_dense_diagnostics(result, torch) -> dict[str, float]:
+    """Describe GeoCalib's dense optimiser weights without treating them as probability.
+
+    GeoCalib uses these values to weight residuals in its Levenberg--Marquardt
+    optimisation.  The package visualises them on a log scale, so a 0.5
+    probability-like threshold excludes normal successful calibrations.  Keep
+    their distribution for audit while relying on the backend's parameter
+    uncertainty for the P1 quality gate.
+    """
+
     up = result.get("up_confidence")
     latitude = result.get("latitude_confidence")
     if up is None or latitude is None:
-        return 0.0, 0.0
+        return {
+            "geocalib_dense_confidence_mean": 0.0,
+            "geocalib_dense_confidence_p10": 0.0,
+            "geocalib_dense_confidence_p90": 0.0,
+            "geocalib_dense_finite_coverage": 0.0,
+        }
     confidence = torch.minimum(up.detach(), latitude.detach())
-    confidence = torch.nan_to_num(confidence, nan=0.0, posinf=0.0, neginf=0.0)
-    applicability = float(confidence.mean().clamp(0.0, 1.0).cpu().item())
-    coverage = float((confidence >= 0.5).float().mean().cpu().item())
-    return applicability, coverage
+    finite = torch.isfinite(confidence)
+    finite_coverage = float(finite.float().mean().cpu().item())
+    values = confidence[finite]
+    if values.numel() == 0:
+        return {
+            "geocalib_dense_confidence_mean": 0.0,
+            "geocalib_dense_confidence_p10": 0.0,
+            "geocalib_dense_confidence_p90": 0.0,
+            "geocalib_dense_finite_coverage": finite_coverage,
+        }
+    values = values.clamp_min(0.0)
+    return {
+        "geocalib_dense_confidence_mean": float(values.mean().cpu().item()),
+        "geocalib_dense_confidence_p10": float(torch.quantile(values, 0.10).cpu().item()),
+        "geocalib_dense_confidence_p90": float(torch.quantile(values, 0.90).cpu().item()),
+        "geocalib_dense_finite_coverage": finite_coverage,
+    }
 
 
 def _geocalib_horizon(camera, gravity, torch):

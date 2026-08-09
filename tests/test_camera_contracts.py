@@ -184,10 +184,16 @@ def test_geocalib_result_conversion_uses_the_local_api_without_loading_weights()
     assert result.horizon.p2.x == 1280.0
     assert result.vfov_or_focal is not None
     assert result.vfov_or_focal.kind is IntrinsicKind.VFOV_DEG
-    assert result.applicability == pytest.approx(0.8)
+    assert result.applicability == pytest.approx(1.0)
     assert result.coverage == 1.0
+    assert result.backend_diagnostics["geocalib_dense_confidence_mean"] == pytest.approx(0.8)
+    assert (
+        result.backend_diagnostics["geocalib_dense_finite_coverage"]
+        == pytest.approx(1.0)
+    )
     assert result.uncertainty.overall is not None
     assert "geocalib_principal_point_is_assumed_center_not_optimized" in result.limitations
+    assert "geocalib_dense_confidence_is_an_optimizer_weight_not_a_probability" in result.limitations
     assert "geocalib_input_downscaled_to_max_edge:1280" in result.limitations
 
 

@@ -63,6 +63,7 @@ class C2paRecord(BaseModel):
     active_manifest_label: str | None = None
     assertion_labels: list[str] = Field(default_factory=list)
     declared_actions: list[str] = Field(default_factory=list)
+    declared_digital_source_types: list[str] = Field(default_factory=list)
     validation_state: str | None = None
     validation_status_codes: list[str] = Field(default_factory=list)
     signature_validation_status: C2paSignatureValidationStatus

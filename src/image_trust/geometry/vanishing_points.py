@@ -503,6 +503,242 @@ def identify_anomaly_candidates(
     )[:50]
 
 
+def identify_parallel_anomaly_candidates(
+    lines: list[LineRecord],
+    families: list[VPFamily],
+    image_size: tuple[int, int],
+    config: VanishingPointConfig,
+    applicability: float,
+    minimum_applicability: float,
+    explained_line_ids: set[str] | None = None,
+) -> list[AnomalyCandidate]:
+    """Flag a long unassigned line that conflicts with a nearby parallel family.
+
+    A line with a different direction elsewhere in the picture is ordinary
+    scene content, not an anomaly.  This detector therefore considers only
+    stable image-plane parallel families and requires the candidate midpoint
+    to sit near that family's spatial support.  The result remains a review
+    candidate, never a source or AI-origin conclusion.
+    """
+
+    stable_families = [
+        family
+        for family in families
+        if family.stable and family.direction_analysis is not None
+    ]
+    if applicability < minimum_applicability or not stable_families:
+        return []
+    line_by_id = {line.line_id: line for line in lines}
+    member_ids = {
+        line_id
+        for family in stable_families
+        for line_id in family.member_line_ids
+    }
+    if explained_line_ids:
+        member_ids.update(explained_line_ids)
+    diagonal = math.hypot(*image_size)
+    candidates = _competing_family_candidates(
+        lines,
+        stable_families,
+        image_size,
+        config,
+        reason="small_parallel_family_conflicts_with_nearby_dominant_family",
+    )
+    for line in lines:
+        if line.line_id in member_ids or line.length_analysis < diagonal * 0.08:
+            continue
+        midpoint = _midpoint(line)
+        comparisons = [
+            _parallel_family_comparison(line, midpoint, family, line_by_id, diagonal)
+            for family in stable_families
+        ]
+        usable = [comparison for comparison in comparisons if comparison is not None]
+        if not usable:
+            continue
+        residual, proximity, family = min(usable, key=lambda item: item[0])
+        if residual <= config.parallel_inlier_angle_deg:
+            continue
+        residual_component = min(
+            1.0,
+            residual / max(config.parallel_inlier_angle_deg * 3.0, 1e-6),
+        )
+        support_component = min(1.0, line.length_analysis / max(diagonal * 0.15, 1e-6))
+        proximity_component = 1.0 - proximity
+        score = (
+            0.55 * residual_component
+            + 0.25 * family.bootstrap_stability
+            + 0.20 * min(support_component, proximity_component)
+        )
+        candidates.append(
+            AnomalyCandidate(
+                line_id=line.line_id,
+                anomaly_candidate_score=float(max(0.0, min(score, 1.0))),
+                nearest_family_id=family.family_id,
+                residual_deg=float(residual),
+                reason="unassigned_line_deviates_from_nearby_parallel_family",
+            )
+        )
+    return sorted(
+        candidates,
+        key=lambda item: (-item.anomaly_candidate_score, item.line_id),
+    )[:50]
+
+
+def identify_competing_vanishing_family_candidates(
+    lines: list[LineRecord],
+    families: list[VPFamily],
+    image_size: tuple[int, int],
+    config: VanishingPointConfig,
+    applicability: float,
+    minimum_applicability: float,
+) -> list[AnomalyCandidate]:
+    """Flag a small local VP family that conflicts with a dominant nearby VP.
+
+    LSD often represents one visible structural stroke with several fragments.
+    If the fragments of an erroneous stroke are numerous enough, they form a
+    small, internally stable VP family instead of appearing as unassigned
+    lines.  This source-neutral review rule compares only spatially adjacent,
+    directionally competing families; it does not declare either source type.
+    """
+
+    stable_families = [family for family in families if family.stable]
+    if applicability < minimum_applicability or len(stable_families) < 2:
+        return []
+    return _competing_family_candidates(
+        lines,
+        stable_families,
+        image_size,
+        config,
+        reason="small_vanishing_family_conflicts_with_nearby_dominant_family",
+    )
+
+
+def _competing_family_candidates(
+    lines: list[LineRecord],
+    families: list[VPFamily],
+    image_size: tuple[int, int],
+    config: VanishingPointConfig,
+    *,
+    reason: str,
+) -> list[AnomalyCandidate]:
+    """Return member lines from a smaller locally competing direction family."""
+
+    line_by_id = {line.line_id: line for line in lines}
+    diagonal = math.hypot(*image_size)
+    candidates_by_line: dict[str, AnomalyCandidate] = {}
+    for smaller in families:
+        smaller_lines = [
+            line_by_id[line_id]
+            for line_id in smaller.member_line_ids
+            if line_id in line_by_id
+        ]
+        if len(smaller_lines) < config.min_family_lines:
+            continue
+        for dominant in families:
+            if dominant.family_id == smaller.family_id:
+                continue
+            if dominant.weighted_inlier_ratio < smaller.weighted_inlier_ratio * 1.5:
+                continue
+            proximity = _family_midpoint_proximity(
+                smaller_lines,
+                [
+                    line_by_id[line_id]
+                    for line_id in dominant.member_line_ids
+                    if line_id in line_by_id
+                ],
+                diagonal,
+            )
+            if proximity is None or proximity >= 1.0:
+                continue
+            residuals = [
+                _residual_to_serialized_family(_axis(line), _midpoint(line), dominant)
+                for line in smaller_lines
+            ]
+            residual = float(np.median(residuals))
+            if not config.parallel_inlier_angle_deg < residual <= config.parallel_inlier_angle_deg * 12.0:
+                continue
+            residual_component = min(
+                1.0,
+                residual / max(config.parallel_inlier_angle_deg * 4.0, 1e-6),
+            )
+            dominance = min(
+                1.0,
+                1.0 - smaller.weighted_inlier_ratio / max(dominant.weighted_inlier_ratio, 1e-9),
+            )
+            score = (
+                0.55 * residual_component
+                + 0.25 * dominant.bootstrap_stability
+                + 0.20 * dominance
+            ) * (0.5 + 0.5 * (1.0 - proximity))
+            for line in smaller_lines:
+                candidate = AnomalyCandidate(
+                    line_id=line.line_id,
+                    anomaly_candidate_score=float(max(0.0, min(score, 1.0))),
+                    nearest_family_id=dominant.family_id,
+                    residual_deg=residual,
+                    reason=reason,
+                )
+                existing = candidates_by_line.get(line.line_id)
+                if (
+                    existing is None
+                    or candidate.anomaly_candidate_score > existing.anomaly_candidate_score
+                ):
+                    candidates_by_line[line.line_id] = candidate
+    return sorted(
+        candidates_by_line.values(),
+        key=lambda item: (-item.anomaly_candidate_score, item.line_id),
+    )
+
+
+def _family_midpoint_proximity(
+    first: list[LineRecord],
+    second: list[LineRecord],
+    diagonal: float,
+) -> float | None:
+    if not first or not second:
+        return None
+    first_midpoints = np.asarray([_midpoint(line) for line in first], dtype=float)
+    second_midpoints = np.asarray([_midpoint(line) for line in second], dtype=float)
+    lower = second_midpoints.min(axis=0)
+    upper = second_midpoints.max(axis=0)
+    distances = []
+    for midpoint in first_midpoints:
+        outside = np.maximum(lower - midpoint, 0.0) + np.maximum(midpoint - upper, 0.0)
+        distances.append(float(np.linalg.norm(outside)))
+    return min(1.0, float(np.median(distances)) / max(diagonal * 0.12, 1e-9))
+
+
+def _parallel_family_comparison(
+    line: LineRecord,
+    midpoint: np.ndarray,
+    family: VPFamily,
+    line_by_id: dict[str, LineRecord],
+    diagonal: float,
+) -> tuple[float, float, VPFamily] | None:
+    """Return angle residual and spatial distance to one family, if reviewable."""
+
+    if family.direction_analysis is None:
+        return None
+    members = [line_by_id[line_id] for line_id in family.member_line_ids if line_id in line_by_id]
+    if len(members) < 2:
+        return None
+    member_midpoints = np.asarray([_midpoint(member) for member in members], dtype=float)
+    lower = member_midpoints.min(axis=0)
+    upper = member_midpoints.max(axis=0)
+    # A modest padding lets a line at the edge of a facade/roof be compared,
+    # while preventing unrelated objects across the image from being linked.
+    padding = diagonal * 0.12
+    outside = np.maximum(lower - midpoint, 0.0) + np.maximum(midpoint - upper, 0.0)
+    proximity = min(1.0, float(np.linalg.norm(outside)) / max(padding, 1e-9))
+    if proximity >= 1.0:
+        return None
+    target = np.array(
+        [math.cos(family.direction_analysis), math.sin(family.direction_analysis)]
+    )
+    residual = math.degrees(_axis_angle(_axis(line), target))
+    return residual, proximity, family
+
+
 def _to_geometry(index: int, line: LineRecord) -> _GeometryLine:
     p1 = np.array([line.p1_analysis.x, line.p1_analysis.y], dtype=float)
     p2 = np.array([line.p2_analysis.x, line.p2_analysis.y], dtype=float)

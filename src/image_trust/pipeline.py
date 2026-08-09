@@ -24,6 +24,8 @@ from image_trust.geometry.vanishing_points import (
     fit_local_parallel_families,
     fit_vanishing_families,
     identify_anomaly_candidates,
+    identify_competing_vanishing_family_candidates,
+    identify_parallel_anomaly_candidates,
 )
 from image_trust.ingest import InputRejectedError, ingest_image
 from image_trust.schemas import (
@@ -146,7 +148,7 @@ def analyze_image(
                 for line_id in family.member_line_ids
             },
         )
-        anomalies = identify_anomaly_candidates(
+        global_anomalies = identify_anomaly_candidates(
             lines,
             families,
             ingested.summary.analysis_size,
@@ -166,6 +168,53 @@ def analyze_image(
                 for line_id in family.member_line_ids
             },
         )
+        parallel_anomalies = identify_parallel_anomaly_candidates(
+            lines,
+            parallel_families,
+            ingested.summary.analysis_size,
+            config.vanishing_points,
+            assessment.score,
+            config.applicability.anomaly_min_applicability,
+            explained_line_ids={
+                line_id
+                for family in stable_global_families
+                for line_id in family.member_line_ids
+            }
+            | {
+                line_id
+                for family in local_direction_families
+                if family.stable
+                for line_id in family.member_line_ids
+            },
+        )
+        competing_vp_anomalies = identify_competing_vanishing_family_candidates(
+            lines,
+            families,
+            ingested.summary.analysis_size,
+            config.vanishing_points,
+            assessment.score,
+            config.applicability.anomaly_min_applicability,
+        )
+        anomalies_by_line = {
+            anomaly.line_id: anomaly
+            for anomaly in [
+                *global_anomalies,
+                *parallel_anomalies,
+                *competing_vp_anomalies,
+            ]
+        }
+        for anomaly in [
+            *global_anomalies,
+            *parallel_anomalies,
+            *competing_vp_anomalies,
+        ]:
+            existing = anomalies_by_line.get(anomaly.line_id)
+            if existing is None or anomaly.anomaly_candidate_score > existing.anomaly_candidate_score:
+                anomalies_by_line[anomaly.line_id] = anomaly
+        anomalies = sorted(
+            anomalies_by_line.values(),
+            key=lambda item: (-item.anomaly_candidate_score, item.line_id),
+        )[:50]
         metric_ms = _elapsed_ms(metric_started)
 
         overlay_started = time.perf_counter()

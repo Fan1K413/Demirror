@@ -1,0 +1,30 @@
+{
+  "schema_version": "demirror-dda-audit-v1",
+  "model_version": "dda-high-confidence-v1",
+  "official_checkpoint": "Junwei-Xi/Dual-Data-Alignment DDA_ckpt.pth",
+  "checkpoint_sha256": "b27a31d39374803ddeff02bfabb2be76e190b04300490cddfafb24f683f37e3e",
+  "high_confidence_threshold": 0.94,
+  "threshold_selection": "The threshold was set before the SDXL test to the Pixart calibration real-photo maximum (0.930655) rounded upward by 0.01. It is a high-precision indicator, not a general probability threshold.",
+  "target_definition": "A conservative local high-confidence DDA pixel signal for an unmodified upload. Scores below the threshold are indeterminate and must not be read as evidence of camera origin.",
+  "calibration": {
+    "dataset": "Projective Geometry Recent Pixart indoor/outdoor; 40 real and 40 generated images",
+    "raw_score_auc": 0.919375,
+    "real_score_max": 0.930655,
+    "generated_score_median": 0.716032
+  },
+  "evaluation": {
+    "external_generator_heldout": "Projective Geometry Recent SDXL indoor/outdoor; 40 real and 40 generated images",
+    "raw_score_auc": 0.99875,
+    "at_high_confidence_threshold": {
+      "recall": 0.85,
+      "false_positive_rate": 0.0,
+      "count": 80
+    }
+  },
+  "limitations": [
+    "dda_high_confidence_indicator_is_not_provenance_or_authenticity_proof",
+    "dda_score_below_threshold_is_not_evidence_of_camera_origin",
+    "dda_jpeg_compression_or_resizing_can_reduce_sensitivity",
+    "dda_scope_is_limited_to_the_registered_generator_holdout_and_unmodified_upload_protocol"
+  ]
+}

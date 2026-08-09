@@ -1,0 +1,6 @@
+# P2 experimental AI-confidence training environment, generated on 2026-08-08.
+# Install the base requirements first, then this optional training dependency set.
+joblib==1.5.3
+scikit-learn==1.7.2
+scipy==1.15.3
+threadpoolctl==3.6.0

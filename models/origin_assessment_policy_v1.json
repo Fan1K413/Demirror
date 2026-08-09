@@ -1,0 +1,26 @@
+{
+  "schema_version": "origin-assessment-policy-v1",
+  "policy_version": "origin-assessment-v1",
+  "decisions": {
+    "possible_ai": "A verified C2PA AI declaration or a DDA score at/above its pre-registered high-confidence threshold.",
+    "no_ai_signal": "No high-confidence AI signal and no qualifying positive camera-capture evidence.",
+    "possible_camera": "No high-confidence AI signal, plus either a trusted C2PA digitalCapture/computationalCapture declaration (high strength) or coherent camera/time/physical EXIF after a completed AI check (limited strength)."
+  },
+  "coherent_exif_requirements": [
+    "camera Make",
+    "camera Model",
+    "valid DateTimeOriginal or DateTime",
+    "at least three positive values among ExposureTime, FNumber, ISO, and FocalLength"
+  ],
+  "non_contributing_methods": {
+    "camera_consistency": "Displayed for review only: the local labeled-control audit did not establish stable source separation.",
+    "geometry": "Displayed for review only: official line classification, learned line sets, and explicit projective-consistency features all failed the held-out SDXL gate.",
+    "implicit_watermark": "No compatible local detector is configured, so it does not affect any decision."
+  },
+  "limitations": [
+    "EXIF metadata can be copied or edited; it can support only a limited possible-camera result and never overrides positive AI evidence.",
+    "Offline C2PA validation cannot establish current revocation state or signer trust when no trust list is configured.",
+    "possible_camera is not provenance or authenticity proof.",
+    "no_ai_signal is not evidence of camera origin."
+  ]
+}

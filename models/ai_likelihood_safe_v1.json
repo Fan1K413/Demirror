@@ -1,0 +1,37 @@
+{
+  "schema_version": "demirror-safe-audit-v1",
+  "model_version": "safe-lossless-high-confidence-v1",
+  "official_checkpoint": "HorizonTEL/AIGIBench SAFE-main/checkpoint-best.pth",
+  "checkpoint_sha256": "e168c6e6e4c3fa8f381fbebdb1a8299b3a3ad59ee7e8e697ba46a73752d4ffda",
+  "high_confidence_threshold": 0.9,
+  "threshold_selection": "A deliberately high complementary threshold registered against local C2PA-verified ChatGPT controls and ten camera-photo controls.",
+  "target_definition": "A high-confidence SAFE wavelet signal for unmodified or lossless uploads; it complements DDA but is not a general cross-generator probability.",
+  "evaluation": {
+    "local_lossless_controls": {
+      "generated_count": 15,
+      "real_count": 10,
+      "roc_auc": 1.0,
+      "at_high_confidence_threshold": {
+        "recall": 1.0,
+        "false_positive_rate": 0.0
+      }
+    },
+    "same_controls_jpeg75": {
+      "recall": 0.0,
+      "false_positive_rate": 0.0,
+      "roc_auc": 0.5866666666666667
+    },
+    "held_out_sdxl_projective_geometry": {
+      "roc_auc": 0.5790222222222222,
+      "at_high_confidence_threshold_recall": 0.0,
+      "decision_use": "rejected_for_this_generator_family"
+    }
+  },
+  "limitations": [
+    "safe_signal_is_scoped_to_lossless_or_unmodified_uploads",
+    "safe_jpeg_reencoding_destroyed_sensitivity_in_local_controls",
+    "safe_failed_the_registered_sdxl_cross_generator_gate",
+    "safe_score_below_threshold_is_not_camera_evidence",
+    "safe_high_confidence_indicator_is_not_provenance_or_authenticity_proof"
+  ]
+}

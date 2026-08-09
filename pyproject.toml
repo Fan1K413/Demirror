@@ -22,6 +22,9 @@ dependencies = [
 dev = [
   "pytest>=8,<9",
 ]
+p2 = [
+  "scikit-learn>=1.7,<2",
+]
 
 [project.scripts]
 image-trust = "image_trust.cli:main"

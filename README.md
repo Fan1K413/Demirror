@@ -13,6 +13,28 @@
 如果本地 Python 进程意外停止，下一次启动服务会把未完成的网页作业标成失败，
 避免浏览器无限等待。
 
+## P3 多路 AI 像素信号
+
+P3 不是把几个原始分数平均成“AI 概率”，而是并行执行三条已登记、作用范围不同的
+正向检测通道：
+
+- DDA 是跨生成器主模型；在固定阈值 0.94 的原始 SDXL 留出集上召回 85%、误报 0%。
+- SAFE 只补充无损或未经重编码的生成纹理；本地 15 张去来源 ChatGPT 图召回 100%，
+  但 JPEG 75 后召回降为 0%，因此不得外推到压缩图。
+- forensic CLIP 是低召回、耐 JPEG 的补充通道。高阈值 0.9925177 在未见 SDXL JPEG 75
+  上召回 17.3%、误报 6.7%；偏向 AI 检出的有限阈值 0.9919478 召回 28.0%、误报 14.0%，
+  只能触发“可能为 AI（有限）”。
+
+任一高阈值命中可触发“可能为 AI（高）”；有限阈值只触发有限强度复核。全部低于阈值
+仍只表示“未检出 AI 信号”，不会反推为相机照片。完整相机 EXIF 仅在 AI 检测已成功完成
+且未命中时支持“可能为实拍（有限）”，因为 EXIF 可以复制或编辑。P0 几何和 P1 相机
+一致性仍作为可审阅解释，不参与当前来源判定。
+
+审计记录位于 `models/ai_likelihood_dda_v1.json`、`models/ai_likelihood_safe_v1.json` 和
+`models/ai_likelihood_forensic_clip_v1.json`。P3 运行时不联网、不自动下载权重；三个模型
+逐个在短生命周期 CPU 子进程中运行，结束即释放模型内存，避免在网页服务中常驻叠加。
+可选依赖固定在 `requirements-p3-pixel.lock`。
+
 ## P1 audit commands
 
 `camera-calibration-summary` accepts only result files made with the same P1

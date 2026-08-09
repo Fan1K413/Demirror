@@ -163,6 +163,7 @@ class CameraEstimate(BaseModel):
     uncertainty: CameraUncertainty = Field(default_factory=CameraUncertainty)
     applicability: float = Field(ge=0.0, le=1.0)
     coverage: float = Field(ge=0.0, le=1.0)
+    backend_diagnostics: dict[str, float] = Field(default_factory=dict)
     limitations: list[str] = Field(default_factory=list)
     provenance: CameraBackendProvenance
     coordinate_space: CoordinateSpace = CoordinateSpace.INPUT
