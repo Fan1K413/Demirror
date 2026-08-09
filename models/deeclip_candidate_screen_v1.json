@@ -1,0 +1,23 @@
+{
+  "schema_version": "external-detector-candidate-screen-v1",
+  "candidate": "DeeCLIP",
+  "status": "rejected_before_inference",
+  "upstream": {
+    "repository": "https://github.com/Mamadou-Keita/DeeCLIP",
+    "revision": "7ad13c436b807aead918c8a6d4761c1c1f4e9135",
+    "paper": "arXiv 2025: DeeCLIP: A Robust and Generalizable Transformer-Based Framework for Detecting AI-Generated Images",
+    "license_status": "no_license_file_or_explicit_reuse_license_found_in_checked_repository"
+  },
+  "implementation_audit": {
+    "reported_model_size": "306M parameters in the upstream README comparison table",
+    "runtime_path": "The upstream scripts choose CPU when CUDA is absent, but instantiate the full CLIP ViT-L/14 backbone in the caller process and use a default evaluation batch size of 32.",
+    "weight_path": "A Dropbox checkpoint link without a published checksum, plus dynamic Hugging Face retrieval of openai/clip-vit-large-patch14.",
+    "host_risk": "This repository has no isolated worker, memory cap, timeout boundary, or offline-first dependency guard; it is unsuitable for a host that previously crashed during heavy Python inference."
+  },
+  "decision": {
+    "integration": "not_allowed",
+    "reason": "License clarity, checkpoint integrity, and bounded CPU execution all fail the candidate gate.",
+    "next_action": "Do not download or execute this candidate unless a future release supplies a clear reuse license, hash-pinned weights, and an independently bounded CPU inference route."
+  },
+  "scope": "This rejection is about deployment feasibility and auditability, not a statement about the paper's reported benchmark results."
+}

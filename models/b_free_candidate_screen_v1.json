@@ -1,0 +1,50 @@
+{
+  "schema_version": "external-detector-candidate-screen-v1",
+  "candidate": "B-Free / BFREE_dino2reg4",
+  "status": "deferred_before_inference",
+  "upstream": {
+    "repository": "https://github.com/grip-unina/B-Free",
+    "revision": "c6a9f898782fb466b29af01f21960b67415afb0e",
+    "paper": "CVPR 2025: A Bias-Free Training Paradigm for More General AI-generated Image Detection",
+    "license": "informational_and_nonprofit_only"
+  },
+  "architecture": {
+    "backbone": "DINOv2 ViT with four registers",
+    "inference": "five 504-pixel crops averaged by the released wrapper",
+    "training_augmentations_reported_by_authors": [
+      "jpeg_compression",
+      "scaling",
+      "blur",
+      "noise",
+      "cutout",
+      "jittering"
+    ]
+  },
+  "official_weight": {
+    "url": "https://www.grip.unina.it/download/prog/B-Free/weights/BFREE_dino2reg4.zip",
+    "expected_md5": "f3f53fa647848b16cf81c913f148a198",
+    "http_content_length_bytes": 321653488,
+    "local_state": "partial_download_not_usable"
+  },
+  "local_environment_screen": {
+    "torch": "available_cpu",
+    "torchvision": "available",
+    "timm": "available",
+    "additional_python_dependency_installation": "not_required_before_weight_test"
+  },
+  "motivation": {
+    "observed_gap": "A single local, metadata-stripped complex AI-image smoke test remained AI-positive after JPEG85 but was indeterminate after a 125-percent display-scale plus WebP80 transform.",
+    "interpretation": "This is one regression-style smoke observation, not an accuracy estimate or threshold-selection dataset."
+  },
+  "decision": {
+    "integration": "not_allowed",
+    "reason": "No complete, hash-verified weight file or local inference result exists. The detector has not passed a frozen cross-generator and transformed-real evaluation.",
+    "next_gate": [
+      "verify the complete official weight against the published MD5",
+      "run one bounded CPU subprocess to measure peak memory and single-image latency",
+      "freeze a calibration protocol without target-generator leakage",
+      "require an independently held-out cross-generator and WebP/screenshot-style evaluation before any product contribution"
+    ]
+  },
+  "scope": "B-Free is a candidate pixel-forensic complement. It is not P0 projective geometry, not provenance evidence, and must not change the origin decision until it clears the recorded gates."
+}

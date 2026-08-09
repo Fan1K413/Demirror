@@ -1,0 +1,40 @@
+{
+  "schema_version": "external-detector-candidate-screen-v1",
+  "candidate": "SPAI / Spectral AI-Generated Image Detector",
+  "status": "deferred_for_current_runtime",
+  "upstream": {
+    "repository": "https://github.com/mever-team/spai",
+    "revision": "8ff7b3b6779b4fcb43cf313471d9cb1c62d129a4",
+    "paper": "CVPR 2025: Any-Resolution AI-Generated Image Detection by Spectral Learning",
+    "license": "Apache-2.0"
+  },
+  "why_screened": {
+    "independent_signal": "self-supervised spectral reconstruction similarity rather than P0 line geometry or provenance metadata",
+    "documented_robustness_target": [
+      "JPEG compression",
+      "WebP compression",
+      "resize",
+      "blur",
+      "noise"
+    ],
+    "current_product_gap": "A metadata-stripped complex normal AI-image smoke case was indeterminate after 125-percent scaling plus WebP Q80."
+  },
+  "implementation_audit": {
+    "official_hardware_statement": "inference is documented for CUDA-capable GPUs with less than 8 GB GPU RAM",
+    "official_inference_path": "python -m spai infer",
+    "code_observation": "the published inference command exposes a CPU device option, but the normal evaluation/training paths call cuda directly and retain feature-extraction batches intended for GPU execution",
+    "checkpoint_distribution": "Google Drive link in the official README; no published cryptographic checkpoint hash was found in the checked source",
+    "current_host_constraint": "CPU-only inference must be isolated and memory-bounded because this host previously experienced an application crash during heavy Python work"
+  },
+  "decision": {
+    "integration": "not_allowed",
+    "reason": "The published weight is not hash-pinned locally and the official runtime is not yet demonstrated to fit this CPU host within an isolated memory/time envelope.",
+    "next_gate": [
+      "obtain a complete checkpoint from the official source and record its cryptographic hash",
+      "run exactly one isolated CPU single-image resource probe with a strict timeout",
+      "only if the probe is safe, run a frozen cross-generator paired screen plus JPEG/WebP/screenshot-style transformed controls",
+      "keep its score outside product decisions until an independent threshold-calibration split is completed"
+    ]
+  },
+  "scope": "SPAI is a pixel/spectral candidate and does not validate P0 geometric candidates or provenance claims."
+}

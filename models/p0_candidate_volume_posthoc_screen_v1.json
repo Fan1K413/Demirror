@@ -1,0 +1,72 @@
+{
+  "schema_version": "p0-posthoc-descriptive-screen-v1",
+  "status": "rejected_as_source_signal",
+  "input": {
+    "review_queue": "p0_cross_generator_family_review_v3 development split",
+    "sample_count": 80,
+    "p0_config_version": "p0-2026-08-10.1",
+    "review_protocol": "P0 was run before source labels were used; labels were joined only for this post-hoc descriptive screen."
+  },
+  "posthoc_by_declared_source_label": {
+    "ai_generated": {
+      "registry_count": 40,
+      "p0_ok_count": 39,
+      "candidate_count": {
+        "minimum": 0,
+        "mean": 7.333333333333333,
+        "maximum": 24
+      },
+      "maximum_candidate_score": {
+        "minimum": 0.0,
+        "mean": 0.833753949602955,
+        "maximum": 0.9869839131112277
+      },
+      "maximum_score_ge_0_9": {
+        "count": 24,
+        "rate": 0.6153846153846154
+      }
+    },
+    "camera_photo": {
+      "registry_count": 40,
+      "p0_ok_count": 34,
+      "candidate_count": {
+        "minimum": 0,
+        "mean": 9.647058823529411,
+        "maximum": 31
+      },
+      "maximum_candidate_score": {
+        "minimum": 0.0,
+        "mean": 0.8732156701774355,
+        "maximum": 0.9901537671200734
+      },
+      "maximum_score_ge_0_9": {
+        "count": 22,
+        "rate": 0.6470588235294118
+      }
+    }
+  },
+  "supporting_current_config_real_control": {
+    "cohort": "p0_f6_real_v2",
+    "sample_count": 10,
+    "p0_ok_count": 9,
+    "candidate_count": {
+      "minimum": 0,
+      "mean": 16.77777777777778,
+      "maximum": 47
+    },
+    "mean_maximum_candidate_score": 0.5686509855213913
+  },
+  "interpretation": {
+    "candidate_volume": "The candidate-count ranges overlap between generated and camera-photo examples.",
+    "high_candidate_score": "A 0.9 maximum-candidate-score rule fires on 64.7% of the camera-photo P0 runs and 61.5% of generated P0 runs in this queue. It has the wrong observed ordering for an AI-positive signal.",
+    "scope": "This is a descriptive post-hoc screen, not a new performance claim. It is sufficient to reject these two scalar summaries as candidates for origin assessment."
+  },
+  "decision": {
+    "integration": "forbidden",
+    "forbidden_features": [
+      "anomalous_line_candidate_count",
+      "maximum_anomalous_line_candidate_score"
+    ],
+    "reason": "Neither feature showed useful AI-positive separation on the source-blind P0 review queue after post-hoc label joining."
+  }
+}

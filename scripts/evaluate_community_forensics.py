@@ -109,10 +109,12 @@ def _load_model(source_dir: Path, weights_path: Path, config: dict[str, Any]) ->
     return model.eval()
 
 
-def _summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
+def _metrics_at_threshold(rows: list[dict[str, Any]], threshold: float) -> dict[str, float | int]:
+    """Report a fixed decision rule; never select a threshold from these rows."""
+
     labels = [int(row["label"]) for row in rows]
     scores = [float(row["ai_probability"]) for row in rows]
-    predicted_fake = [score >= 0.5 for score in scores]
+    predicted_fake = [score >= threshold for score in scores]
     true_positive = sum(flag and label == 1 for flag, label in zip(predicted_fake, labels))
     false_positive = sum(flag and label == 0 for flag, label in zip(predicted_fake, labels))
     true_negative = sum(not flag and label == 0 for flag, label in zip(predicted_fake, labels))
@@ -120,7 +122,7 @@ def _summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "count": len(rows),
         "roc_auc_ai_probability": float(roc_auc_score(labels, scores)),
-        "decision_threshold": 0.5,
+        "decision_threshold": threshold,
         "accuracy": (true_positive + true_negative) / len(rows),
         "true_positive": true_positive,
         "false_positive": false_positive,
@@ -129,6 +131,10 @@ def _summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "true_positive_rate": true_positive / (true_positive + false_negative),
         "false_positive_rate": false_positive / (false_positive + true_negative),
     }
+
+
+def _summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    return _metrics_at_threshold(rows, 0.5)
 
 
 def _iter_samples(
@@ -144,16 +150,45 @@ def _iter_samples(
                     yield generator, scene.lower(), image_id, path, label
 
 
-def _model_input(path: Path, transform: transforms.Compose, jpeg_quality: int | None) -> torch.Tensor:
+def _model_input(
+    path: Path,
+    transform: transforms.Compose,
+    jpeg_quality: int | None,
+    webp_quality: int | None,
+    resize_scale: float,
+) -> torch.Tensor:
     with Image.open(path) as opened:
         image = opened.convert("RGB")
+    if resize_scale != 1.0:
+        resized = (
+            max(1, round(image.width * resize_scale)),
+            max(1, round(image.height * resize_scale)),
+        )
+        image = image.resize(resized, Image.Resampling.LANCZOS)
     if jpeg_quality is not None:
         buffer = io.BytesIO()
         image.save(buffer, format="JPEG", quality=jpeg_quality)
         buffer.seek(0)
         with Image.open(buffer) as recompressed:
             return transform(recompressed.convert("RGB")).unsqueeze(0)
+    if webp_quality is not None:
+        buffer = io.BytesIO()
+        image.save(buffer, format="WEBP", quality=webp_quality, method=6)
+        buffer.seek(0)
+        with Image.open(buffer) as recompressed:
+            return transform(recompressed.convert("RGB")).unsqueeze(0)
     return transform(image).unsqueeze(0)
+
+
+def _input_transform_label(jpeg_quality: int | None, webp_quality: int | None, resize_scale: float) -> str:
+    parts = []
+    if resize_scale != 1.0:
+        parts.append(f"lanczos_scale={resize_scale:g}")
+    if jpeg_quality is not None:
+        parts.append(f"jpeg_reencode_quality={jpeg_quality}")
+    elif webp_quality is not None:
+        parts.append(f"webp_reencode_quality={webp_quality}")
+    return "+".join(parts) if parts else "original_decode"
 
 
 def evaluate(args: argparse.Namespace) -> dict[str, Any]:
@@ -161,6 +196,13 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         raise FileNotFoundError(f"Community Forensics source directory does not exist: {args.source_dir}")
     if not args.weights_path.is_file():
         raise FileNotFoundError(f"Community Forensics weights do not exist: {args.weights_path}")
+    audit = json.loads(args.audit_path.read_text(encoding="utf-8"))
+    high_threshold = float(audit["high_confidence_threshold"])
+    limited_threshold = float(audit["limited_review_threshold"])
+    if not 0.0 <= limited_threshold < high_threshold <= 1.0:
+        raise ValueError("Community Forensics audit thresholds are invalid")
+    torch.set_num_threads(args.cpu_threads)
+    torch.set_num_interop_threads(1)
     config = json.loads(args.config_path.read_text(encoding="utf-8"))
     model = _load_model(args.source_dir, args.weights_path, config)
     transform = _test_transform(int(config["input_size"]))
@@ -174,7 +216,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         for index, (generator, scene, image_id, path, label) in enumerate(samples, start=1):
             if not path.is_file():
                 raise FileNotFoundError(f"Required held-out image is missing: {path}")
-            inputs = _model_input(path, transform, args.jpeg_quality)
+            inputs = _model_input(path, transform, args.jpeg_quality, args.webp_quality, args.resize_scale)
             probability = float(torch.sigmoid(model(inputs)).item())
             rows.append(
                 {
@@ -204,9 +246,15 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         "generators": generators,
         "sample_ids": image_ids,
         "input_transform": (
-            "original_decode" if args.jpeg_quality is None else f"jpeg_reencode_quality={args.jpeg_quality}"
+            _input_transform_label(args.jpeg_quality, args.webp_quality, args.resize_scale)
         ),
         "evaluation": _summary(rows),
+        "registered_thresholds": {
+            "high_confidence": high_threshold,
+            "limited_review": limited_threshold,
+            "at_high_confidence": _metrics_at_threshold(rows, high_threshold),
+            "at_limited_review": _metrics_at_threshold(rows, limited_threshold),
+        },
         "by_generator": {
             generator: _summary([row for row in rows if row["generator"] == generator])
             for generator in generators
@@ -232,13 +280,25 @@ def main() -> int:
     parser.add_argument("--source-dir", type=Path, default=Path("data/vendor/community-forensics"))
     parser.add_argument("--weights-path", type=Path, default=Path("weights/community-forensics-224/model.safetensors"))
     parser.add_argument("--config-path", type=Path, default=Path("weights/community-forensics-224/config.json"))
+    parser.add_argument("--audit-path", type=Path, default=Path("models/ai_likelihood_community_forensics_v1.json"))
     parser.add_argument("--output-dir", type=Path, default=Path("outputs/community_forensics_sdxl_v1"))
     parser.add_argument("--ids", default="426:500", help="Inclusive range, e.g. 426:500, or comma-separated IDs.")
     parser.add_argument("--generators", default="SDXL", help="Comma-separated dataset generator names, e.g. SDXL,Pixart.")
     parser.add_argument("--jpeg-quality", type=int, default=None, help="Re-encode every input to this JPEG quality before scoring.")
+    parser.add_argument("--webp-quality", type=int, default=None, help="Re-encode every input to this WebP quality before scoring.")
+    parser.add_argument("--resize-scale", type=float, default=1.0, help="Resize before codec re-encoding; e.g. 1.25.")
+    parser.add_argument("--cpu-threads", type=int, default=2)
     args = parser.parse_args()
     if args.jpeg_quality is not None and not 1 <= args.jpeg_quality <= 100:
         raise ValueError("jpeg-quality must be within [1, 100]")
+    if args.webp_quality is not None and not 1 <= args.webp_quality <= 100:
+        raise ValueError("webp-quality must be within [1, 100]")
+    if args.jpeg_quality is not None and args.webp_quality is not None:
+        raise ValueError("Only one output codec may be selected")
+    if not 0.1 <= args.resize_scale <= 4.0:
+        raise ValueError("resize-scale must be within [0.1, 4.0]")
+    if args.cpu_threads < 1:
+        raise ValueError("cpu-threads must be at least 1")
     report = evaluate(args)
     print(json.dumps(report["evaluation"], sort_keys=True))
     return 0
