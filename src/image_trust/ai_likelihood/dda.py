@@ -106,9 +106,14 @@ def assess_high_confidence_ai(
     signals = [provenance]
     limitations: list[str] = []
     evaluation: dict[str, object] = {}
-    available_scores: list[tuple[str, float, float]] = []
+    static_webp_limited_review = _is_static_webp(input_path)
+    available_scores: list[tuple[str, float, float, bool]] = []
     primary_threshold: float | None = None
     limited_ai_signal = False
+    if static_webp_limited_review:
+        limitations.append(
+            "static_webp_pixel_high_scores_are_limited_review_only_without_format_calibration"
+        )
 
     try:
         dda_audit = _load_audit(audit_path, DDA_HIGH_CONFIDENCE_THRESHOLD)
@@ -117,19 +122,30 @@ def assess_high_confidence_ai(
         limitations.extend(dda_audit.get("limitations", []))
         evaluation["dda"] = dict(dda_audit.get("evaluation", {}))
         scored = score_dda_isolated(input_path, checkpoint_path=checkpoint_path)
-        available_scores.append(("dda", scored.score, dda_threshold))
+        available_scores.append(
+            ("dda", scored.score, dda_threshold, not static_webp_limited_review)
+        )
+        limited_ai_signal = limited_ai_signal or (
+            static_webp_limited_review and scored.score >= dda_threshold
+        )
         signals.append(
             AiSignal(
                 name="dda_pixel_detector",
                 status="available",
                 value=scored.score,
                 interpretation=(
-                    "The raw DDA score crosses its registered high-confidence threshold."
-                    if scored.score >= dda_threshold
-                    else "The raw DDA score is below its registered threshold; this is indeterminate, not camera evidence."
+                    "The raw DDA score crosses its registered high-confidence threshold, "
+                    "but static WebP is limited to review strength."
+                    if scored.score >= dda_threshold and static_webp_limited_review
+                    else (
+                        "The raw DDA score crosses its registered high-confidence threshold."
+                        if scored.score >= dda_threshold
+                        else "The raw DDA score is below its registered threshold; this is indeterminate, not camera evidence."
+                    )
                 ),
                 details={
                     "high_confidence_threshold": dda_threshold,
+                    "high_confidence_eligible": not static_webp_limited_review,
                     "preprocessing": scored.preprocessing,
                     "checkpoint_sha256": dda_audit.get("checkpoint_sha256"),
                 },
@@ -156,7 +172,12 @@ def assess_high_confidence_ai(
         limitations.extend(safe_audit.get("limitations", []))
         evaluation["safe"] = dict(safe_audit.get("evaluation", {}))
         safe_scored = score_safe_isolated(input_path, checkpoint_path=safe_checkpoint_path)
-        available_scores.append(("safe", safe_scored.score, safe_threshold))
+        available_scores.append(
+            ("safe", safe_scored.score, safe_threshold, not static_webp_limited_review)
+        )
+        limited_ai_signal = limited_ai_signal or (
+            static_webp_limited_review and safe_scored.score >= safe_threshold
+        )
         if primary_threshold is None:
             primary_threshold = safe_threshold
         signals.append(
@@ -165,12 +186,18 @@ def assess_high_confidence_ai(
                 status="available",
                 value=safe_scored.score,
                 interpretation=(
-                    "The SAFE wavelet score crosses its scoped high-confidence threshold."
-                    if safe_scored.score >= safe_threshold
-                    else "The SAFE wavelet score is below its scoped threshold; this is indeterminate, not camera evidence."
+                    "The SAFE wavelet score crosses its scoped high-confidence threshold, "
+                    "but static WebP is limited to review strength."
+                    if safe_scored.score >= safe_threshold and static_webp_limited_review
+                    else (
+                        "The SAFE wavelet score crosses its scoped high-confidence threshold."
+                        if safe_scored.score >= safe_threshold
+                        else "The SAFE wavelet score is below its scoped threshold; this is indeterminate, not camera evidence."
+                    )
                 ),
                 details={
                     "high_confidence_threshold": safe_threshold,
+                    "high_confidence_eligible": not static_webp_limited_review,
                     "preprocessing": safe_scored.preprocessing,
                     "checkpoint_sha256": safe_audit.get("checkpoint_sha256"),
                     "scope": "lossless_or_unmodified_uploads",
@@ -205,7 +232,14 @@ def assess_high_confidence_ai(
             input_path,
             model_root=forensic_clip_model_root,
         )
-        available_scores.append(("forensic_clip", forensic_scored.score, forensic_threshold))
+        available_scores.append(
+            (
+                "forensic_clip",
+                forensic_scored.score,
+                forensic_threshold,
+                not static_webp_limited_review,
+            )
+        )
         limited_ai_signal = forensic_scored.score >= forensic_limited_threshold
         if primary_threshold is None:
             primary_threshold = forensic_threshold
@@ -215,17 +249,23 @@ def assess_high_confidence_ai(
                 status="available",
                 value=forensic_scored.score,
                 interpretation=(
-                    "The compression-stable forensic score crosses its registered high-confidence threshold."
-                    if forensic_scored.score >= forensic_threshold
+                    "The forensic score crosses its registered high-confidence threshold, "
+                    "but static WebP is limited to review strength."
+                    if forensic_scored.score >= forensic_threshold and static_webp_limited_review
                     else (
-                        "The compression-stable forensic score crosses its recall-oriented limited-review threshold."
-                        if forensic_scored.score >= forensic_limited_threshold
-                        else "The compression-stable forensic score is below its thresholds; this is indeterminate, not camera evidence."
+                        "The compression-stable forensic score crosses its registered high-confidence threshold."
+                        if forensic_scored.score >= forensic_threshold
+                        else (
+                            "The compression-stable forensic score crosses its recall-oriented limited-review threshold."
+                            if forensic_scored.score >= forensic_limited_threshold
+                            else "The compression-stable forensic score is below its thresholds; this is indeterminate, not camera evidence."
+                        )
                     )
                 ),
                 details={
                     "high_confidence_threshold": forensic_threshold,
                     "limited_review_threshold": forensic_limited_threshold,
+                    "high_confidence_eligible": not static_webp_limited_review,
                     "preprocessing": forensic_scored.preprocessing,
                     "checkpoint_sha256": forensic_audit.get("checkpoint_sha256"),
                     "config_sha256": forensic_audit.get("config_sha256"),
@@ -265,7 +305,14 @@ def assess_high_confidence_ai(
             input_path,
             model_root=community_forensics_model_root,
         )
-        available_scores.append(("community_forensics", community_scored.score, community_threshold))
+        available_scores.append(
+            (
+                "community_forensics",
+                community_scored.score,
+                community_threshold,
+                not static_webp_limited_review,
+            )
+        )
         limited_ai_signal = limited_ai_signal or community_scored.score >= community_limited_threshold
         if primary_threshold is None:
             primary_threshold = community_threshold
@@ -275,17 +322,23 @@ def assess_high_confidence_ai(
                 status="available",
                 value=community_scored.score,
                 interpretation=(
-                    "The Community Forensics score crosses its registered high-confidence threshold."
-                    if community_scored.score >= community_threshold
+                    "The Community Forensics score crosses its registered high-confidence threshold, "
+                    "but static WebP is limited to review strength."
+                    if community_scored.score >= community_threshold and static_webp_limited_review
                     else (
-                        "The Community Forensics score crosses its recall-oriented limited-review threshold."
-                        if community_scored.score >= community_limited_threshold
-                        else "The Community Forensics score is below its thresholds; this is indeterminate, not camera evidence."
+                        "The Community Forensics score crosses its registered high-confidence threshold."
+                        if community_scored.score >= community_threshold
+                        else (
+                            "The Community Forensics score crosses its recall-oriented limited-review threshold."
+                            if community_scored.score >= community_limited_threshold
+                            else "The Community Forensics score is below its thresholds; this is indeterminate, not camera evidence."
+                        )
                     )
                 ),
                 details={
                     "high_confidence_threshold": community_threshold,
                     "limited_review_threshold": community_limited_threshold,
+                    "high_confidence_eligible": not static_webp_limited_review,
                     "preprocessing": community_scored.preprocessing,
                     "checkpoint_sha256": community_audit.get("checkpoint_sha256"),
                     "config_sha256": community_audit.get("config_sha256"),
@@ -317,7 +370,10 @@ def assess_high_confidence_ai(
             signals=signals,
             limitations=sorted(set(limitations)),
         )
-    high_confidence = any(score >= threshold for _, score, threshold in available_scores)
+    high_confidence = any(
+        score >= threshold and eligible_for_high
+        for _, score, threshold, eligible_for_high in available_scores
+    )
     if not high_confidence:
         limitations.append("no_high_confidence_pixel_signal_is_not_camera_evidence")
     return AiLikelihoodResult(
@@ -335,6 +391,16 @@ def assess_high_confidence_ai(
         evaluation=evaluation,
         limitations=sorted(set(limitations)),
     )
+
+
+def _is_static_webp(input_path: Path) -> bool:
+    """Identify WebP from container magic, rather than trusting the extension."""
+    try:
+        with input_path.open("rb") as source:
+            header = source.read(12)
+    except OSError:
+        return False
+    return len(header) == 12 and header[:4] == b"RIFF" and header[8:12] == b"WEBP"
 
 
 def score_dda_isolated(

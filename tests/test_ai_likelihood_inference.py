@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from PIL import Image
+
 from image_trust.ai_likelihood.dda import DdaScore, assess_high_confidence_ai
 from image_trust.ai_likelihood.community_forensics import CommunityForensicsScore
 from image_trust.ai_likelihood.forensic_clip import ForensicClipScore
@@ -147,6 +149,30 @@ def test_community_forensics_high_signal_is_auditable(monkeypatch, tmp_path) -> 
     detector = next(signal for signal in result.signals if signal.name == "community_forensics_detector")
     assert detector.value == 0.9
     assert detector.details["high_confidence_threshold"] == 0.8866265416145325
+
+
+def test_static_webp_pixel_high_signal_is_limited_review_only(monkeypatch, tmp_path) -> None:
+    monkeypatch.setattr(
+        "image_trust.ai_likelihood.dda.score_dda_isolated",
+        lambda *_args, **_kwargs: DdaScore(0.97, "center_crop_336_clip_normalization"),
+    )
+    monkeypatch.setattr(
+        "image_trust.ai_likelihood.dda.score_community_forensics_isolated",
+        lambda *_args, **_kwargs: CommunityForensicsScore(
+            0.9,
+            "resize_shorter_256_center_crop_224_imagenet_normalization",
+        ),
+    )
+    input_path = tmp_path / "renamed-input.bin"
+    Image.new("RGB", (8, 8), "white").save(input_path, format="WEBP", quality=80)
+
+    result = assess_high_confidence_ai(input_path, _record())
+
+    assert result.risk_band == "medium"
+    assert result.reliability_label == "limited"
+    assert "static_webp_pixel_high_scores_are_limited_review_only_without_format_calibration" in result.limitations
+    detector = next(signal for signal in result.signals if signal.name == "community_forensics_detector")
+    assert detector.details["high_confidence_eligible"] is False
 
 
 def test_community_forensics_limited_signal_is_not_camera_evidence(monkeypatch, tmp_path) -> None:

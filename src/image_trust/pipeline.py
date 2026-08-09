@@ -147,7 +147,9 @@ def analyze_image(
                 line_id
                 for family in stable_global_families
                 for line_id in family.member_line_ids
-            },
+            }
+            if not config.vanishing_points.local_direction_include_global_members
+            else None,
         )
         global_anomalies = identify_anomaly_candidates(
             lines,
@@ -347,7 +349,12 @@ def analyze_image(
                         "grid_size": config.vanishing_points.local_family_grid_size,
                         "families_per_cell": config.vanishing_points.local_direction_families_per_cell,
                         "inlier_angle_deg": config.vanishing_points.local_direction_inlier_angle_deg,
-                        "excluded_stable_global_members": True,
+                        "includes_stable_global_members": config.vanishing_points.local_direction_include_global_members,
+                        "finite_segment_component_gap_px": min(
+                            math.hypot(*ingested.summary.analysis_size)
+                            * config.vanishing_points.local_direction_component_gap_ratio,
+                            config.vanishing_points.local_direction_component_max_gap_px,
+                        ),
                         "limitation": "local direction families are review aids and do not replace global VP measurement or scene semantics",
                     },
                     "anomalous_lines": [

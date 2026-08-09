@@ -320,6 +320,47 @@ def test_local_direction_families_preserve_a_novel_parallel_roof_group() -> None
     assert set(families[0].member_line_ids) == {line.line_id for line in roof_lines}
 
 
+def test_local_direction_families_split_disconnected_same_angle_groups_within_cell() -> None:
+    near_left = _parallel_lines(
+        "left",
+        0,
+        [(20, 20), (20, 40), (20, 60), (20, 80)],
+    )
+    far_right = _parallel_lines(
+        "right",
+        0,
+        [(260, 20), (260, 40), (260, 60), (260, 80)],
+    )
+    transform = CoordinateTransform(
+        encoded_size=(400, 400),
+        canonical_size=(400, 400),
+        analysis_size=(400, 400),
+        exif_orientation=1,
+        orientation_applied=False,
+    )
+    config = VanishingPointConfig(
+        min_family_lines=4,
+        min_family_weight=1.0,
+        local_min_family_weight=1.0,
+        local_family_grid_size=1,
+        local_direction_families_per_cell=1,
+        local_direction_inlier_angle_deg=3.0,
+        local_direction_component_max_gap_px=36.0,
+        max_local_families=2,
+        bootstrap_rounds=4,
+    )
+
+    families = fit_local_parallel_families(
+        [*near_left, *far_right], (400, 400), transform, config, seed=123
+    )
+
+    assert len(families) == 2
+    assert {frozenset(family.member_line_ids) for family in families} == {
+        frozenset(line.line_id for line in near_left),
+        frozenset(line.line_id for line in far_right),
+    }
+
+
 def test_local_direction_family_joins_only_continuous_direction_across_cell_boundary() -> None:
     left = _parallel_lines("left", 45, [(20, 30), (45, 55), (70, 80), (95, 105)])
     right = _parallel_lines("right", 45, [(160, 160), (165, 165), (170, 170), (175, 175)])

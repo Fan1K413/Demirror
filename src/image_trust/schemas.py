@@ -239,6 +239,7 @@ class VanishingPointConfig(BaseModel):
     local_direction_inlier_angle_deg: float = Field(default=5.0, gt=0.0, lt=90.0)
     local_direction_component_gap_ratio: float = Field(default=0.08, gt=0.0, le=1.0)
     local_direction_component_max_gap_px: float = Field(default=36.0, gt=0.0)
+    local_direction_include_global_members: bool = False
 
 
 class OverlayConfig(BaseModel):

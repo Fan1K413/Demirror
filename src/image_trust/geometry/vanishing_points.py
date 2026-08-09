@@ -284,6 +284,10 @@ def fit_local_parallel_families(
         }
     )
     line_by_id = {line.line_id: line for line in lines}
+    component_gap = min(
+        math.hypot(width, height) * config.local_direction_component_gap_ratio,
+        config.local_direction_component_max_gap_px,
+    )
     candidates: list[tuple[VPFamily, float]] = []
     for row in range(grid_size):
         for col in range(grid_size):
@@ -316,24 +320,29 @@ def fit_local_parallel_families(
                         "spatial_window_analysis": window,
                     }
                 )
-                support_weight = sum(
-                    line_by_id[line_id].length_analysis
-                    * max(line_by_id[line_id].quality, 0.05)
-                    for line_id in scoped.member_line_ids
-                    if line_id in line_by_id
-                )
-                candidates.append((scoped, support_weight))
+                for component in _split_local_direction_family_by_continuity(
+                    scoped,
+                    line_by_id,
+                    component_gap,
+                ):
+                    support_weight = sum(
+                        line_by_id[line_id].length_analysis
+                        * max(line_by_id[line_id].quality, 0.05)
+                        for line_id in component.member_line_ids
+                        if line_id in line_by_id
+                    )
+                    if (
+                        len(component.member_line_ids) >= local_config.min_family_lines
+                        and support_weight >= local_config.min_family_weight
+                    ):
+                        candidates.append((component, support_weight))
     candidates.sort(key=lambda item: (-item[1], item[0].family_id))
     merged: list[tuple[VPFamily, float]] = []
-    merge_gap = min(
-        math.hypot(width, height) * config.local_direction_component_gap_ratio,
-        config.local_direction_component_max_gap_px,
-    )
     for component in _merge_adjacent_local_direction_components(
         [family for family, _ in candidates],
         config.local_direction_inlier_angle_deg,
         line_by_id,
-        merge_gap,
+        component_gap,
     ):
         member_ids = {
             line_id for family in component for line_id in family.member_line_ids
@@ -381,6 +390,55 @@ def fit_local_parallel_families(
     return [
         family.model_copy(update={"family_id": f"localdirection{index:03d}"})
         for index, (family, _) in enumerate(selected, start=1)
+    ]
+
+
+def _split_local_direction_family_by_continuity(
+    family: VPFamily,
+    line_by_id: dict[str, LineRecord],
+    maximum_segment_gap: float,
+) -> list[VPFamily]:
+    """Split one same-angle cell family into finite-segment components.
+
+    Angle agreement alone is not enough for an overlay group: a roof edge,
+    an overhead wire, and a window frame may be almost parallel while being
+    separate structures in the same grid cell.  A component therefore needs
+    a chain of nearby detected finite segments.  This is intentionally only a
+    reviewer-facing grouping rule; it does not alter the global VP model or
+    anomaly/source assessment.
+    """
+    member_lines = [
+        line_by_id[line_id]
+        for line_id in family.member_line_ids
+        if line_id in line_by_id
+    ]
+    if len(member_lines) < 2:
+        return [family]
+
+    remaining = {line.line_id for line in member_lines}
+    components: list[list[str]] = []
+    while remaining:
+        root_id = min(remaining)
+        remaining.remove(root_id)
+        component_ids = {root_id}
+        frontier = [root_id]
+        while frontier:
+            current_id = frontier.pop()
+            current_line = line_by_id[current_id]
+            nearby_ids = [
+                other_id
+                for other_id in sorted(remaining)
+                if _segment_distance(current_line, line_by_id[other_id])
+                <= maximum_segment_gap
+            ]
+            for other_id in nearby_ids:
+                remaining.remove(other_id)
+                component_ids.add(other_id)
+                frontier.append(other_id)
+        components.append(sorted(component_ids))
+    return [
+        family.model_copy(update={"member_line_ids": component_ids})
+        for component_ids in components
     ]
 
 

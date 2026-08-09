@@ -44,6 +44,16 @@
       "roc_auc": 0.9656888888888889,
       "at_high_confidence_threshold": {"recall": 0.8076190476190476, "false_positive_rate": 0.0419047619047619, "accuracy": 0.8828571428571429},
       "at_limited_review_threshold": {"recall": 0.9276190476190476, "false_positive_rate": 0.13523809523809524, "accuracy": 0.8961904761904762}
+    },
+    "held_out_cross_generator_webp80_scale125": {
+      "input_transform": "lanczos_scale=1.25+webp_reencode_quality=80",
+      "generators": ["Deepfloyd", "Kandinsky", "Pixart", "SDXL"],
+      "generated_count": 350,
+      "real_count": 350,
+      "roc_auc": 0.9236489795918368,
+      "at_high_confidence_threshold": {"recall": 0.76, "false_positive_rate": 0.11714285714285715, "accuracy": 0.8214285714285714},
+      "at_limited_review_threshold": {"recall": 0.9171428571428571, "false_positive_rate": 0.2742857142857143, "accuracy": 0.8214285714285714},
+      "protocol": "Thresholds were frozen from the separate PixArt original/JPEG-85 calibration. IDs 451--500 were not used for threshold selection. Results are a transform-specific external-detector audit, not a new calibration."
     }
   },
   "limitations": [
@@ -51,6 +61,8 @@
     "community_forensics_limited_threshold_has_13_5_percent_cross_generator_real_false_positive_rate",
     "community_forensics_no_signal_is_not_evidence_of_camera_origin",
     "community_forensics_high_signal_is_not_provenance_or_authenticity_proof",
-    "community_forensics_scope_is_limited_to_the_registered_projective_geometry_holdouts_and_jpeg85_protocol"
+    "community_forensics_webp80_scale125_limited_review_has_27_4_percent_cross_generator_real_false_positive_rate",
+    "community_forensics_static_webp_high_scores_are_limited_review_only_without_broader_format_calibration",
+    "community_forensics_scope_is_limited_to_registered_projective_geometry_holdouts_and_explicit_original_jpeg85_or_webp80_scale125_protocols"
   ]
 }

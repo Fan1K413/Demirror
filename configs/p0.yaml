@@ -1,4 +1,4 @@
-config_version: p0-2026-08-10.1
+config_version: p0-2026-08-10.2
 
 ingest:
   max_file_bytes: 52428800
@@ -66,6 +66,7 @@ vanishing_points:
   local_min_family_weight: 40.0
   local_direction_families_per_cell: 5
   local_direction_inlier_angle_deg: 5.0
+  local_direction_include_global_members: true
 
 overlays:
   line_width: 2

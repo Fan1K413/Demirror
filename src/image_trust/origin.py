@@ -156,7 +156,7 @@ def assess_origin(
             explanation=(
                 "发现了高置信 AI 像素信号或已验证的 AI 来源声明。"
                 if ai_result.risk_band == "high"
-                else "耐压缩像素检测达到偏向 AI 召回的有限强度复核阈值；该档允许更高误报，因此需要人工复核。"
+                else "一个或多个像素检测达到有限强度复核阈值；该档可能为提高 AI 召回而允许更高误报，或受文件格式/传输变换限制，因此需要人工复核。"
             ),
             supporting_evidence=_ai_evidence_labels(ai_result),
             camera_metadata=metadata,
