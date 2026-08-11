@@ -11,6 +11,22 @@
     rejected: ["文件未被接受", "图片未通过输入验证，因此没有继续分析。"],
     failed: ["分析未完成", "保留了可用的错误信息；请检查限制说明后重试。"],
   };
+  const stageLabels = {
+    queued: "等待本地分析线程。",
+    validating: "正在验证图片格式、大小与解码边界。",
+    starting: "正在准备本地检测环境。",
+    geometry: "正在提取线段并检查画面几何结构。",
+    provenance: "正在读取元数据与离线来源记录。",
+    ai_provenance: "已从可验证来源记录取得 AI 声明。",
+    ai_dda: "正在运行 DDA 像素检测。",
+    ai_safe: "正在运行 SAFE 频域检测。",
+    ai_forensic_clip: "正在运行耐压缩像素检测。",
+    ai_community_forensics: "正在运行跨生成器像素检测。",
+    ai_nonescape_mini: "正在运行 Nonescape Mini 补充检测。",
+    camera: "正在检查相机参数与画面一致性。",
+    synthesis: "正在汇总各项证据并形成结论。",
+    complete: "全部已配置的分析链路已结束。",
+  };
   const observationLabels = {
     positive: "存在待复核候选",
     negative: "未发现候选",
@@ -100,6 +116,9 @@
   const statusDot = document.querySelector("#status-dot");
   const statusLabel = document.querySelector("#status-label");
   const statusDetail = document.querySelector("#status-detail");
+  const progressTrack = document.querySelector("#progress-track");
+  const progressBar = document.querySelector("#progress-bar");
+  const progressMeta = document.querySelector("#progress-meta");
   const jobFilename = document.querySelector("#job-filename");
   const resultPanel = document.querySelector("#result-panel");
   let selected = null;
@@ -109,6 +128,12 @@
   const asText = (value, fallback = "—") => value === null || value === undefined || value === "" ? fallback : String(value);
   const percentage = (value) => Number.isFinite(value) ? `${(value * 100).toFixed(1)}%` : "—";
   const degrees = (value) => Number.isFinite(value) ? `${(value * 180 / Math.PI).toFixed(2)}°` : "—";
+
+  function formatDuration(totalSeconds) {
+    const seconds = Math.max(0, Math.floor(totalSeconds));
+    if (seconds < 60) return `${seconds} 秒`;
+    return `${Math.floor(seconds / 60)} 分 ${seconds % 60} 秒`;
+  }
 
   function detectorMetric(signal, thresholdKey = "high_confidence_threshold", thresholdLabel = "阈值") {
     if (!signal) return "未配置";
@@ -133,16 +158,27 @@
     activeJobId = null;
     analysisPanel.hidden = true;
     resultPanel.hidden = true;
+    progressBar.style.width = "0%";
+    progressTrack.setAttribute("aria-valuenow", "0");
+    progressMeta.textContent = "0% · 已用 0 秒";
     document.querySelector("#visual-grid").replaceChildren();
     document.querySelector("#limitations-list").replaceChildren();
   }
 
   function renderStatus(job) {
     const [label, detail] = stateLabels[job.status] || ["状态未知", "服务返回了未知状态。"];
+    const progress = Number.isFinite(job.progress_percent)
+      ? Math.max(0, Math.min(100, Math.round(job.progress_percent)))
+      : (terminalStates.has(job.status) ? 100 : 0);
+    const createdAt = Date.parse(job.created_at_utc);
+    const elapsedSeconds = Number.isFinite(createdAt) ? (Date.now() - createdAt) / 1000 : 0;
     analysisPanel.hidden = false;
     statusDot.dataset.status = job.status;
     statusLabel.textContent = label;
-    statusDetail.textContent = detail;
+    statusDetail.textContent = stageLabels[job.stage] || detail;
+    progressBar.style.width = `${progress}%`;
+    progressTrack.setAttribute("aria-valuenow", String(progress));
+    progressMeta.textContent = `${progress}% · 已用 ${formatDuration(elapsedSeconds)}`;
     jobFilename.textContent = job.original_filename;
     if (job.errors && job.errors.length) {
       statusDetail.textContent = job.errors.map((error) => error.message || error.code).filter(Boolean).join(" ");

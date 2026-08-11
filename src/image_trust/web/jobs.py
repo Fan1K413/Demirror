@@ -55,6 +55,7 @@ class WebJob(BaseModel):
     updated_at_utc: str
     status: WebJobStatus
     stage: str
+    progress_percent: int = Field(default=0, ge=0, le=100)
     limitations: list[str] = Field(default_factory=list)
     errors: list[dict[str, str]] = Field(default_factory=list)
     result_artifact: str | None = None
@@ -77,7 +78,8 @@ class WebJobSnapshot:
     result: dict[str, Any] | None
 
 
-JobRunner = Callable[[Path, Path], WebJobOutcome]
+ProgressReporter = Callable[[str, int], None]
+JobRunner = Callable[[Path, Path, ProgressReporter], WebJobOutcome]
 
 
 class LocalJobStore:
@@ -115,6 +117,7 @@ class LocalJobStore:
                 updated_at_utc=now,
                 status=WebJobStatus.REJECTED,
                 stage="validation",
+                progress_percent=100,
                 limitations=["unsupported_file_extension"],
                 errors=[
                     {
@@ -134,6 +137,7 @@ class LocalJobStore:
                 updated_at_utc=now,
                 status=WebJobStatus.REJECTED,
                 stage="validation",
+                progress_percent=100,
                 limitations=["upload_too_large"],
                 errors=[
                     {
@@ -215,11 +219,30 @@ class LocalJobStore:
         current = self.get_snapshot(job_id)
         if current is None:
             return
-        self._replace_job(current.job, status=WebJobStatus.VALIDATING, stage="validating")
+        self._update_progress(
+            job_id,
+            status=WebJobStatus.VALIDATING,
+            stage="validating",
+            progress_percent=5,
+        )
         try:
             upload_path = job_dir / current.job.upload_filename
-            self._replace_job(current.job, status=WebJobStatus.RUNNING, stage="running")
-            outcome = self._runner(upload_path, job_dir)
+            self._update_progress(
+                job_id,
+                status=WebJobStatus.RUNNING,
+                stage="starting",
+                progress_percent=8,
+            )
+
+            def report_progress(stage: str, progress_percent: int) -> None:
+                self._update_progress(
+                    job_id,
+                    status=WebJobStatus.RUNNING,
+                    stage=stage,
+                    progress_percent=progress_percent,
+                )
+
+            outcome = self._runner(upload_path, job_dir, report_progress)
             result_path = job_dir / "web_result.json"
             _write_json(result_path, outcome.result)
             latest = self.get_snapshot(job_id)
@@ -229,6 +252,7 @@ class LocalJobStore:
                 latest.job,
                 status=outcome.status,
                 stage="complete",
+                progress_percent=100,
                 limitations=outcome.limitations,
                 errors=outcome.errors,
                 result_artifact=result_path.name,
@@ -241,6 +265,7 @@ class LocalJobStore:
                 latest.job,
                 status=WebJobStatus.FAILED,
                 stage="failed",
+                progress_percent=100,
                 limitations=["web_analysis_failed"],
                 errors=[{"code": type(error).__name__, "message": str(error)}],
             )
@@ -251,6 +276,28 @@ class LocalJobStore:
         )
         self._write_job(self.root / updated.job_id, updated)
         return updated
+
+    def _update_progress(
+        self,
+        job_id: str,
+        *,
+        status: WebJobStatus,
+        stage: str,
+        progress_percent: int,
+    ) -> WebJob | None:
+        """Persist a monotonic progress update for a running local job."""
+
+        with self._lock:
+            snapshot = self.get_snapshot(job_id)
+            if snapshot is None:
+                return None
+            progress = max(snapshot.job.progress_percent, min(100, progress_percent))
+            return self._replace_job(
+                snapshot.job,
+                status=status,
+                stage=stage,
+                progress_percent=progress,
+            )
 
     def _write_job(self, job_dir: Path, job: WebJob) -> None:
         job_dir.mkdir(parents=True, exist_ok=True)
@@ -283,6 +330,7 @@ class LocalJobStore:
                     "updated_at_utc": _now(),
                     "status": WebJobStatus.FAILED,
                     "stage": "failed",
+                    "progress_percent": 100,
                     "limitations": sorted({*job.limitations, "web_job_interrupted"}),
                     "errors": errors,
                 }
@@ -303,7 +351,12 @@ def build_local_runner(project_root: Path) -> JobRunner:
     c2pa_config = load_c2pa_config(root / "configs" / "p1_c2pa.yaml")
     camera_config = load_camera_config(root / "configs" / "p1_geocalib.yaml")
 
-    def runner(upload_path: Path, job_dir: Path) -> WebJobOutcome:
+    def runner(
+        upload_path: Path,
+        job_dir: Path,
+        report_progress: ProgressReporter,
+    ) -> WebJobOutcome:
+        report_progress("geometry", 10)
         p0_result = analyze_image(upload_path, p0_config, job_dir / "p0")
         p0_dump = p0_result.model_dump(mode="json")
         if p0_result.evidence.run_status is RunStatus.REJECTED:
@@ -320,10 +373,15 @@ def build_local_runner(project_root: Path) -> JobRunner:
                 limitations=["p0_analysis_not_available"],
                 errors=p0_result.diagnostics.errors,
             )
+        report_progress("provenance", 25)
         c2pa_record = inspect_c2pa_asset(upload_path, c2pa_config)
         write_c2pa_record(job_dir / "c2pa" / "c2pa_result.json", c2pa_record)
         limitations = list(p0_result.evidence.limitations)
-        p3_result = assess_high_confidence_ai(upload_path, c2pa_record)
+        p3_result = assess_high_confidence_ai(
+            upload_path,
+            c2pa_record,
+            progress_callback=report_progress,
+        )
         limitations.extend(p3_result.limitations)
         result: dict[str, Any] = {
             "schema_version": "demirror-web-result-v1",
@@ -338,6 +396,7 @@ def build_local_runner(project_root: Path) -> JobRunner:
                 "c2pa_result": "c2pa/c2pa_result.json",
             },
         }
+        report_progress("camera", 88)
         try:
             camera_result = analyze_camera_image(upload_path, camera_config, job_dir / "camera")
             result["camera"] = camera_result.model_dump(mode="json")
@@ -356,6 +415,7 @@ def build_local_runner(project_root: Path) -> JobRunner:
             limitations.append("p1_camera_analysis_failed")
             status = WebJobStatus.PARTIAL
             camera_result = None
+        report_progress("synthesis", 96)
         origin = assess_origin(upload_path, p3_result, c2pa_record, camera_result)
         result["origin"] = origin.model_dump(mode="json")
         limitations.extend(origin.limitations)

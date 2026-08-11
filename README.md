@@ -13,9 +13,13 @@
 如果本地 Python 进程意外停止，下一次启动服务会把未完成的网页作业标成失败，
 避免浏览器无限等待。
 
+分析过程中，页面会显示当前检测阶段、阶段完成度和已用时间。进度按几何、来源记录、
+各像素模型、相机检查与综合推断的实际边界更新；它表示流水线已走到的位置，不是对剩余
+时间的估算。修改后端代码后需要重启本地服务，浏览器再强制刷新一次。
+
 ## P3 多路 AI 像素信号
 
-P3 不是把几个原始分数平均成“AI 概率”，而是并行执行三条已登记、作用范围不同的
+P3 不是把几个原始分数平均成“AI 概率”，而是顺序执行五条已登记、作用范围不同的
 正向检测通道：
 
 - DDA 是跨生成器主模型；在固定阈值 0.94 的原始 SDXL 留出集上召回 85%、误报 0%。
@@ -24,14 +28,19 @@ P3 不是把几个原始分数平均成“AI 概率”，而是并行执行三�
 - forensic CLIP 是低召回、耐 JPEG 的补充通道。高阈值 0.9925177 在未见 SDXL JPEG 75
   上召回 17.3%、误报 6.7%；偏向 AI 检出的有限阈值 0.9919478 召回 28.0%、误报 14.0%，
   只能触发“可能为 AI（有限）”。
+- Community Forensics 是跨生成器补充通道；固定高阈值在四生成器原图留出集上召回
+  80.8%、误报 4.2%。
+- Nonescape Mini 是严格补充通道；它与 Community Forensics 的冻结高阈值取并集后，
+  同一留出集召回为 86.9%、误报仍为 4.2%。
 
 任一高阈值命中可触发“可能为 AI（高）”；有限阈值只触发有限强度复核。全部低于阈值
 仍只表示“未检出 AI 信号”，不会反推为相机照片。完整相机 EXIF 仅在 AI 检测已成功完成
 且未命中时支持“可能为实拍（有限）”，因为 EXIF 可以复制或编辑。P0 几何和 P1 相机
 一致性仍作为可审阅解释，不参与当前来源判定。
 
-审计记录位于 `models/ai_likelihood_dda_v1.json`、`models/ai_likelihood_safe_v1.json` 和
-`models/ai_likelihood_forensic_clip_v1.json`。P3 运行时不联网、不自动下载权重；三个模型
+审计记录位于 `models/ai_likelihood_dda_v1.json`、`models/ai_likelihood_safe_v1.json`、
+`models/ai_likelihood_forensic_clip_v1.json`、`models/ai_likelihood_community_forensics_v1.json`
+和 `models/ai_likelihood_nonescape_mini_v1.json`。P3 运行时不联网、不自动下载权重；五个模型
 逐个在短生命周期 CPU 子进程中运行，结束即释放模型内存，避免在网页服务中常驻叠加。
 可选依赖固定在 `requirements-p3-pixel.lock`。
 

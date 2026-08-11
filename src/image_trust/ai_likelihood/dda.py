@@ -23,7 +23,7 @@ import sys
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from image_trust.ai_likelihood.contracts import AiLikelihoodResult, AiSignal
 from image_trust.ai_likelihood.community_forensics import (
@@ -95,11 +95,14 @@ def assess_high_confidence_ai(
     community_forensics_audit_path: Path = DEFAULT_COMMUNITY_FORENSICS_AUDIT_PATH,
     nonescape_mini_checkpoint_path: Path = DEFAULT_NONESCAPE_MINI_CHECKPOINT_PATH,
     nonescape_mini_audit_path: Path = DEFAULT_NONESCAPE_MINI_AUDIT_PATH,
+    progress_callback: Callable[[str, int], None] | None = None,
 ) -> AiLikelihoodResult:
     """Return verified provenance or complementary high-confidence pixel signals."""
 
     provenance = _provenance_signal(c2pa_record)
     if provenance.status == "available":
+        if progress_callback is not None:
+            progress_callback("ai_provenance", 82)
         return AiLikelihoodResult(
             status="available",
             probability=0.995,
@@ -124,6 +127,8 @@ def assess_high_confidence_ai(
             "static_webp_pixel_high_scores_are_limited_review_only_without_format_calibration"
         )
 
+    if progress_callback is not None:
+        progress_callback("ai_dda", 30)
     try:
         dda_audit = _load_audit(audit_path, DDA_HIGH_CONFIDENCE_THRESHOLD)
         dda_threshold = float(dda_audit["high_confidence_threshold"])
@@ -175,6 +180,8 @@ def assess_high_confidence_ai(
             )
         )
 
+    if progress_callback is not None:
+        progress_callback("ai_safe", 42)
     try:
         safe_audit = _load_audit(safe_audit_path, SAFE_HIGH_CONFIDENCE_THRESHOLD)
         safe_threshold = float(safe_audit["high_confidence_threshold"])
@@ -226,6 +233,8 @@ def assess_high_confidence_ai(
             )
         )
 
+    if progress_callback is not None:
+        progress_callback("ai_forensic_clip", 54)
     try:
         forensic_audit = _load_audit(
             forensic_clip_audit_path,
@@ -299,6 +308,8 @@ def assess_high_confidence_ai(
             )
         )
 
+    if progress_callback is not None:
+        progress_callback("ai_community_forensics", 66)
     try:
         community_audit = _load_audit(
             community_forensics_audit_path,
@@ -372,6 +383,8 @@ def assess_high_confidence_ai(
             )
         )
 
+    if progress_callback is not None:
+        progress_callback("ai_nonescape_mini", 78)
     try:
         nonescape_audit = _load_audit(
             nonescape_mini_audit_path,

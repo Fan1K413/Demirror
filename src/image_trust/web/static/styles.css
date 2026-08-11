@@ -15,6 +15,8 @@
 
 * { box-sizing: border-box; }
 
+[hidden] { display: none !important; }
+
 body {
   margin: 0;
   min-width: 320px;
@@ -75,13 +77,17 @@ h2 { margin-bottom: 0; font-size: 1.62rem; letter-spacing: -.045em; }
 .method-card li span { color: var(--mint); font-size: .7rem; font-weight: 800; }
 
 .analysis-panel { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-top: 22px; padding: 18px 22px; }
-.analysis-status { display: flex; align-items: center; gap: 13px; }
+.analysis-status { display: flex; min-width: 0; flex: 1; align-items: flex-start; gap: 13px; }
+.status-copy { width: min(620px, 100%); }
 .status-dot { width: 12px; height: 12px; border-radius: 50%; background: #e2b04f; box-shadow: 0 0 0 5px rgba(226, 176, 79, .16); }
 .status-dot[data-status="running"], .status-dot[data-status="completed"] { background: #4bb995; box-shadow: 0 0 0 5px rgba(75, 185, 149, .16); }
 .status-dot[data-status="partial"] { background: var(--orange); box-shadow: 0 0 0 5px rgba(242, 147, 82, .16); }
 .status-dot[data-status="rejected"], .status-dot[data-status="failed"] { background: var(--coral); box-shadow: 0 0 0 5px rgba(216, 90, 72, .16); }
 .status-label { margin: 0 0 3px; font-weight: 800; }
 .status-detail, .job-filename { margin: 0; color: var(--muted); font-size: .84rem; }
+.progress-track { height: 7px; margin-top: 12px; overflow: hidden; border-radius: 999px; background: #e2e5de; }
+.progress-bar { display: block; width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--mint-strong), #4bb995); transition: width .45s ease; }
+.progress-meta { margin: 6px 0 0; color: var(--muted); font-size: .72rem; font-variant-numeric: tabular-nums; }
 .job-filename { max-width: 45%; overflow: hidden; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
 
 .result-panel { padding: 72px 0 22px; }

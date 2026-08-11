@@ -55,9 +55,21 @@
         <section id="analysis-panel" class="analysis-panel" hidden aria-live="polite">
           <div class="analysis-status">
             <span id="status-dot" class="status-dot" data-status="queued"></span>
-            <div>
+            <div class="status-copy">
               <p id="status-label" class="status-label">正在排队</p>
               <p id="status-detail" class="status-detail">已创建本地作业。</p>
+              <div
+                id="progress-track"
+                class="progress-track"
+                role="progressbar"
+                aria-label="分析进度"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow="0"
+              >
+                <span id="progress-bar" class="progress-bar"></span>
+              </div>
+              <p id="progress-meta" class="progress-meta">0% · 已用 0 秒</p>
             </div>
           </div>
           <p id="job-filename" class="job-filename"></p>

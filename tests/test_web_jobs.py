@@ -6,8 +6,13 @@ from image_trust.web.jobs import LocalJobStore, WebJob, WebJobOutcome, WebJobSta
 
 
 def test_local_job_store_persists_completed_job_and_artifact(tmp_path) -> None:
-    def runner(upload_path: Path, job_dir: Path) -> WebJobOutcome:
+    observed_progress: list[tuple[str, int]] = []
+
+    def runner(upload_path: Path, job_dir: Path, report_progress) -> WebJobOutcome:
         assert upload_path.read_bytes() == b"image-bytes"
+        report_progress("test_detector", 47)
+        progress_job = WebJob.model_validate_json((job_dir / "job.json").read_text(encoding="utf-8"))
+        observed_progress.append((progress_job.stage, progress_job.progress_percent))
         artifact = job_dir / "p0" / "lines_overlay.png"
         artifact.parent.mkdir(parents=True, exist_ok=True)
         artifact.write_bytes(b"png")
@@ -22,6 +27,8 @@ def test_local_job_store_persists_completed_job_and_artifact(tmp_path) -> None:
         snapshot = store.wait(created.job_id)
         assert snapshot is not None
         assert snapshot.job.status is WebJobStatus.COMPLETED
+        assert snapshot.job.progress_percent == 100
+        assert observed_progress == [("test_detector", 47)]
         assert snapshot.result == {"schema_version": "test", "artifacts": {"overlay": "p0/lines_overlay.png"}}
         assert store.artifact_path(created.job_id, "p0/lines_overlay.png") is not None
         assert store.artifact_path(created.job_id, "job.json") is None
@@ -65,6 +72,7 @@ def test_local_job_store_marks_jobs_left_by_a_stopped_server_as_failed(tmp_path)
         assert snapshot is not None
         assert snapshot.job.status is WebJobStatus.FAILED
         assert snapshot.job.stage == "failed"
+        assert snapshot.job.progress_percent == 100
         assert "web_job_interrupted" in snapshot.job.limitations
         assert snapshot.job.errors[-1]["code"] == "server_interrupted"
     finally:

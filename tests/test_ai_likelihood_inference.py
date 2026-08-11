@@ -53,7 +53,12 @@ def test_dda_high_signal_is_conservative_and_auditable(monkeypatch, tmp_path) ->
         lambda *_args, **_kwargs: DdaScore(0.945, "center_crop_336_clip_normalization"),
     )
 
-    result = assess_high_confidence_ai(tmp_path / "asset.png", _record())
+    progress: list[tuple[str, int]] = []
+    result = assess_high_confidence_ai(
+        tmp_path / "asset.png",
+        _record(),
+        progress_callback=lambda stage, percent: progress.append((stage, percent)),
+    )
 
     assert result.status == "available"
     assert result.probability is None
@@ -62,6 +67,13 @@ def test_dda_high_signal_is_conservative_and_auditable(monkeypatch, tmp_path) ->
     detector = next(signal for signal in result.signals if signal.name == "dda_pixel_detector")
     assert detector.value == 0.945
     assert detector.details["high_confidence_threshold"] == 0.94
+    assert progress == [
+        ("ai_dda", 30),
+        ("ai_safe", 42),
+        ("ai_forensic_clip", 54),
+        ("ai_community_forensics", 66),
+        ("ai_nonescape_mini", 78),
+    ]
 
 
 def test_dda_score_below_high_threshold_is_not_camera_evidence(monkeypatch, tmp_path) -> None:

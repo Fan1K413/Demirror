@@ -28,7 +28,8 @@ def _request(app, method: str, path: str, body: bytes = b"", content_type: str =
 
 
 def test_wsgi_server_uploads_polls_and_serves_evidence(tmp_path) -> None:
-    def runner(upload_path: Path, job_dir: Path) -> WebJobOutcome:
+    def runner(upload_path: Path, job_dir: Path, report_progress) -> WebJobOutcome:
+        report_progress("test_detector", 50)
         artifact = job_dir / "p0" / "lines_overlay.png"
         artifact.parent.mkdir(parents=True, exist_ok=True)
         artifact.write_bytes(upload_path.read_bytes())
@@ -64,6 +65,7 @@ def test_wsgi_server_uploads_polls_and_serves_evidence(tmp_path) -> None:
         polled = _request(app, "GET", f"/api/jobs/{created['job_id']}")
         assert polled["status"] == "200 OK"
         assert json.loads(polled["body"])["job"]["status"] == "completed"
+        assert json.loads(polled["body"])["job"]["progress_percent"] == 100
 
         artifact = _request(
             app,
