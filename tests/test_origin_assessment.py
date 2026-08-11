@@ -1,17 +1,29 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from PIL import Image
 
 from image_trust.ai_likelihood.contracts import AiLikelihoodResult, AiSignal
 from image_trust.geometry_ai.contracts import GeometryRelationshipResult
-from image_trust.origin import _score_summary, assess_origin, inspect_camera_metadata
+from image_trust.origin import (
+    ORIGIN_SCORE_POLICY,
+    SCORE_POLICY_VERSION,
+    _score_summary,
+    assess_origin,
+    inspect_camera_metadata,
+)
 from image_trust.provenance.contracts import (
     C2paRecord,
     C2paRecordStatus,
     C2paSignatureValidationStatus,
     C2paTrustStatus,
+)
+from image_trust.watermark.contracts import (
+    ImplicitWatermarkAssessment,
+    WatermarkAdapterResult,
+    WatermarkCoverage,
 )
 
 
@@ -284,6 +296,89 @@ def test_community_forensics_limited_signal_yields_limited_possible_ai() -> None
     assert assessment.supporting_evidence == ["跨生成器像素检测（有限强度）"]
 
 
+def test_correlated_pixel_detectors_share_a_twenty_point_corroboration_budget(
+    tmp_path: Path,
+) -> None:
+    asset = tmp_path / "metadata_free.png"
+    Image.new("RGB", (32, 32)).save(asset)
+    ai_result = AiLikelihoodResult(
+        status="available",
+        risk_band="high",
+        reliability=0.9,
+        reliability_label="high",
+        target_definition="test",
+        signals=[
+            AiSignal(
+                name="safe_pixel_detector",
+                status="available",
+                value=0.95,
+                interpretation="test",
+                details={"high_confidence_threshold": 0.90},
+            ),
+            AiSignal(
+                name="community_forensics_detector",
+                status="available",
+                value=0.90,
+                interpretation="test",
+                details={"high_confidence_threshold": 0.88},
+            ),
+            AiSignal(
+                name="nonescape_mini_detector",
+                status="available",
+                value=0.90,
+                interpretation="test",
+                details={"high_confidence_threshold": 0.88},
+            ),
+        ],
+    )
+
+
+def _limited_open_watermark() -> ImplicitWatermarkAssessment:
+    return ImplicitWatermarkAssessment(
+        status="completed",
+        adapters=[
+            WatermarkAdapterResult(
+                adapter_id="test-open-watermark",
+                scheme="test",
+                detector_version="test",
+                run_status="ok",
+                observation="positive",
+                evidence_class="known_open_ai_watermark",
+                direction="supports_ai",
+                strength="limited",
+                decision_eligible=True,
+                coverage=WatermarkCoverage(),
+            )
+        ],
+        direction="supports_ai",
+        strength="limited",
+        decision_eligible=True,
+    )
+    geometry = GeometryRelationshipResult(
+        status="available",
+        probability=0.74,
+        risk_band="high",
+        applicability=1.0,
+        line_count=24,
+        decision_threshold=0.61,
+        strong_threshold=0.70,
+        model_version="test",
+        summary="test",
+    )
+
+    assessment = assess_origin(asset, ai_result, _c2pa(), geometry_result=geometry)
+
+    assert assessment.ai_score == 100
+    assert assessment.score_components["community"].points == 60
+    assert assessment.score_components["safe"].points == 10
+    assert assessment.score_components["nonescape"].points == 10
+    assert assessment.score_components["p0"].points == 20
+    assert sum(component.points for component in assessment.score_components.values()) == 100
+    assert assessment.summary == "大概率为 AI"
+    assert assessment.schema_version == "origin-assessment-v3"
+    assert assessment.score_policy_version == SCORE_POLICY_VERSION
+
+
 def test_verified_c2pa_declaration_splits_ai_score_across_declaration_and_signature(tmp_path: Path) -> None:
     asset = tmp_path / "metadata_free.png"
     Image.new("RGB", (32, 32)).save(asset)
@@ -311,6 +406,159 @@ def test_verified_c2pa_declaration_splits_ai_score_across_declaration_and_signat
     assert assessment.score_components["c2pa_declaration"].points == 70
     assert assessment.score_components["c2pa_signature"].points == 30
     assert all(assessment.score_components[key].points == 0 for key in ("dda", "safe", "forensic", "community", "nonescape"))
+    assert assessment.supporting_evidence == ["已验证的 AI 来源声明"]
+
+
+def test_global_bound_does_not_reduce_semantic_evidence_strength(tmp_path: Path) -> None:
+    asset = tmp_path / "metadata_free.png"
+    Image.new("RGB", (32, 32)).save(asset)
+    result = AiLikelihoodResult(
+        status="available",
+        risk_band="high",
+        reliability=1.0,
+        reliability_label="high",
+        target_definition="test",
+        signals=[
+            AiSignal(
+                name="community_forensics_detector",
+                status="available",
+                value=0.90,
+                interpretation="test",
+                details={"high_confidence_threshold": 0.88},
+            )
+        ],
+    )
+
+    assessment = assess_origin(
+        asset,
+        result,
+        _c2pa(),
+        watermark_result=_limited_open_watermark(),
+    )
+
+    assert assessment.ai_score == 100
+    assert assessment.score_components["community"].points == 50
+    assert assessment.score_components["watermark"].points == 50
+    assert assessment.evidence_strength == "high"
+    assert assessment.supporting_evidence == [
+        "高置信跨生成器像素检测",
+        "已知开放 AI 生态水印（有限强度）",
+    ]
+
+
+def test_zeroed_pixel_component_is_not_listed_as_supporting_evidence(
+    tmp_path: Path,
+) -> None:
+    asset = tmp_path / "metadata_free.png"
+    Image.new("RGB", (32, 32)).save(asset)
+    result = AiLikelihoodResult(
+        status="available",
+        risk_band="high",
+        reliability=1.0,
+        reliability_label="high",
+        target_definition="test",
+        signals=[
+            AiSignal(
+                name="safe_pixel_detector",
+                status="available",
+                value=0.95,
+                interpretation="test",
+                details={"high_confidence_threshold": 0.90},
+            ),
+            AiSignal(
+                name="community_forensics_detector",
+                status="available",
+                value=0.90,
+                interpretation="test",
+                details={"high_confidence_threshold": 0.88},
+            ),
+        ],
+    )
+
+    assessment = assess_origin(
+        asset,
+        result,
+        _c2pa(),
+        watermark_result=_limited_open_watermark(),
+    )
+
+    assert assessment.ai_score == 100
+    assert assessment.score_components["safe"].points == 0
+    assert assessment.score_components["community"].points == 50
+    assert assessment.score_components["watermark"].points == 50
+    assert assessment.supporting_evidence == [
+        "高置信跨生成器像素检测",
+        "已知开放 AI 生态水印（有限强度）",
+    ]
+
+
+def test_verified_source_prevents_weaker_visual_cards_from_exceeding_the_ring(tmp_path: Path) -> None:
+    asset = tmp_path / "metadata_free.png"
+    Image.new("RGB", (32, 32)).save(asset)
+    result = AiLikelihoodResult(
+        status="available",
+        risk_band="high",
+        reliability=1.0,
+        reliability_label="high",
+        target_definition="test",
+        signals=[
+            AiSignal(
+                name="verified_c2pa",
+                status="available",
+                value=1.0,
+                interpretation="test",
+            ),
+            AiSignal(
+                name="safe_pixel_detector",
+                status="available",
+                value=0.95,
+                interpretation="test",
+                details={"high_confidence_threshold": 0.90},
+            ),
+            AiSignal(
+                name="community_forensics_detector",
+                status="available",
+                value=0.90,
+                interpretation="test",
+                details={"high_confidence_threshold": 0.88},
+            ),
+            AiSignal(
+                name="nonescape_mini_detector",
+                status="available",
+                value=0.90,
+                interpretation="test",
+                details={"high_confidence_threshold": 0.88},
+            ),
+        ],
+    )
+
+    assessment = assess_origin(asset, result, _c2pa())
+
+    assert assessment.ai_score == 100
+    assert assessment.score_components["c2pa_declaration"].points == 70
+    assert assessment.score_components["c2pa_signature"].points == 30
+    assert all(
+        assessment.score_components[key].points == 0
+        for key in ("dda", "safe", "forensic", "community", "nonescape", "p0")
+    )
+    assert sum(component.points for component in assessment.score_components.values()) == 100
+
+
+def test_origin_score_policy_audit_matches_runtime() -> None:
+    models_dir = Path(__file__).resolve().parents[1] / "models"
+    audit_path = models_dir / "origin_assessment_policy_v3.json"
+    audit = json.loads(audit_path.read_text(encoding="utf-8"))
+    prior_audit = json.loads(
+        (models_dir / "origin_assessment_policy_v2.json").read_text(encoding="utf-8")
+    )
+
+    assert audit["policy_version"] == SCORE_POLICY_VERSION
+    assert audit["supersedes"] == prior_audit["policy_version"]
+    assert prior_audit["status"] == "superseded"
+    assert prior_audit["superseded_by"] == SCORE_POLICY_VERSION
+    assert audit["origin_result_schema"] == "origin-assessment-v3"
+    assert audit["runtime_parameters"] == ORIGIN_SCORE_POLICY.audit_parameters()
+    assert "always equals ai_score" in audit["validation"]["required_invariant"]
 
 
 def test_subthreshold_positive_score_uses_small_ai_probability_label(tmp_path: Path) -> None:
@@ -355,9 +603,9 @@ def test_registered_strong_geometry_tier_is_bounded_but_visible_in_ai_score(tmp_
     assessment = assess_origin(asset, _ai(), _c2pa(), geometry_result=geometry)
 
     assert assessment.decision == "no_ai_signal"
-    assert assessment.ai_score == 25
-    assert assessment.summary == "小概率为 AI"
-    assert assessment.score_components["p0"].points == 25
+    assert assessment.ai_score == 20
+    assert assessment.summary == "未检出 AI 信号"
+    assert assessment.score_components["p0"].points == 20
 
 
 def test_registered_limited_geometry_tier_only_supports_other_evidence(tmp_path: Path) -> None:

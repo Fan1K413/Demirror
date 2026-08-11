@@ -54,8 +54,9 @@ P3 不是把几个原始分数平均成“AI 概率”，而是顺序执行五�
 
 任一高阈值命中可触发“可能为 AI（高）”；有限阈值只触发有限强度复核。全部低于阈值
 仍只表示“未检出 AI 信号”，不会反推为相机照片。完整相机 EXIF 仅在 AI 检测已成功完成
-且未命中时支持“可能为实拍（有限）”，因为 EXIF 可以复制或编辑。P0 几何和 P1 相机
-一致性仍作为可审阅解释，不参与当前来源判定。
+且未命中时支持“可能为实拍（有限）”，因为 EXIF 可以复制或编辑。已登记的旧 P0 全图
+几何来源模型按冻结档位提供 `+10/+20` 的受限辅助分；新的局部几何 v2 与 P1 相机一致性
+仍只作为可审阅解释，不参与当前来源判定。
 
 审计记录位于 `models/ai_likelihood_dda_v1.json`、`models/ai_likelihood_safe_v1.json`、
 `models/ai_likelihood_forensic_clip_v1.json`、`models/ai_likelihood_community_forensics_v1.json`

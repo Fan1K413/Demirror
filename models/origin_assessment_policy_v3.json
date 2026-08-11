@@ -1,0 +1,85 @@
+{
+  "schema_version": "origin-assessment-policy-audit-v3",
+  "policy_version": "origin-assessment-policy-v3",
+  "origin_result_schema": "origin-assessment-v3",
+  "status": "active",
+  "supersedes": "origin-assessment-policy-v2",
+  "purpose": "Prevent correlated pixel detectors from being counted as independent evidence while keeping every displayed card contribution auditable.",
+  "runtime_parameters": {
+    "version": "origin-assessment-policy-v3",
+    "score_min": -100,
+    "score_max": 100,
+    "likely_ai_threshold": 65,
+    "possible_ai_threshold": 35,
+    "small_ai_threshold": 21,
+    "high_evidence_component_threshold": 60,
+    "pixel_corroboration_budget": 20,
+    "geometry_strong_points": 20,
+    "geometry_limited_points": 10,
+    "c2pa_declaration_points": 70,
+    "c2pa_signature_points": 30,
+    "trusted_capture_points": -20,
+    "metadata_coherent_points": -15,
+    "metadata_partial_points": -5,
+    "watermark_strong_points": 80,
+    "watermark_limited_points": 50
+  },
+  "pixel_family_fusion": {
+    "members": [
+      "dda",
+      "safe",
+      "forensic",
+      "community",
+      "nonescape"
+    ],
+    "strongest_positive_component": "Keeps its registered high or limited contribution.",
+    "additional_positive_components": "Share a combined corroboration budget allocated in proportion to their registered contributions.",
+    "combined_corroboration_budget_points": 20,
+    "allocation_rounding": "Integer largest-remainder allocation with stable detector ordering."
+  },
+  "global_displayed_score_bound": {
+    "range": [-100, 100],
+    "invariant": "Displayed card contributions sum to the signed score shown in the ring.",
+    "positive_reduction_order": [
+      "registered_geometry_relationship",
+      "discounted_pixel_corroboration_then_primary",
+      "decision_eligible_watermark",
+      "verified_ai_c2pa_signature",
+      "verified_ai_c2pa_declaration"
+    ],
+    "rationale": "When the positive range is exhausted, weaker visual evidence is reduced before stronger independent provenance so card totals cannot exceed the ring."
+  },
+  "independent_components": {
+    "verified_ai_c2pa": "Unchanged: declaration +70 and qualifying signature +30.",
+    "decision_eligible_watermark": "Unchanged: strong +80 or limited +50.",
+    "trusted_capture_c2pa": "Unchanged: -20.",
+    "camera_metadata": "Unchanged: coherent -15 or partial -5.",
+    "registered_geometry_relationship": "Changed: strong +20 or limited +10."
+  },
+  "regression_example": {
+    "nominal_components_before_dependency_discount": {
+      "community": 60,
+      "safe": 50,
+      "nonescape": 50,
+      "registered_geometry_relationship": 20,
+      "raw_sum": 180
+    },
+    "displayed_components_after_dependency_discount": {
+      "community": 60,
+      "safe": 10,
+      "nonescape": 10,
+      "registered_geometry_relationship": 20,
+      "final_sum": 100
+    }
+  },
+  "validation": {
+    "unit_test": "tests/test_origin_assessment.py::test_correlated_pixel_detectors_share_a_twenty_point_corroboration_budget",
+    "required_invariant": "The sum of displayed score_components always equals ai_score, including when verified evidence reaches the global signed bound."
+  },
+  "limitations": [
+    "This policy is a conservative dependency correction, not a calibrated probability model.",
+    "The 20-point corroboration budget is an engineering bound and must be replaced or revalidated if a joint fusion model passes an independent held-out evaluation.",
+    "Pixel detectors can still share unknown training or preprocessing biases even after the dependency discount.",
+    "A negative or absent pixel signal is not evidence of camera origin."
+  ]
+}
