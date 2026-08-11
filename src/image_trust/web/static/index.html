@@ -3,45 +3,45 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Demirror 本地图片几何测量与证据审阅工具。">
-    <title>Demirror · 几何证据审阅</title>
+    <meta name="description" content="Demirror 本地图像来源分析工具。">
+    <title>Demirror · 图像来源分析</title>
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
     <div class="page-shell">
       <header class="topbar">
         <a class="brand" href="/" aria-label="Demirror 首页">
-          <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
-          <span>Demirror</span>
+          Demirror
         </a>
-        <div class="local-pill"><span></span>默认仅在本机处理</div>
+        <p class="local-pill"><i aria-hidden="true"></i>仅在本机处理</p>
       </header>
 
       <main>
         <section class="intro" aria-labelledby="page-title">
-          <div>
-            <p class="eyebrow">Projection geometry evidence</p>
-            <h1 id="page-title">让透视线索<br>回到可审阅的证据。</h1>
-          </div>
-          <p class="intro-copy">上传一张静态图片，生成三档 AI 内容判断，并展开 AI 像素信号、相机元数据、几何线索、拍摄参数与离线来源记录。</p>
+          <p class="intro-kicker">本地图片审阅工具</p>
+          <h1 id="page-title">图像来源分析</h1>
+          <p class="intro-copy">检查图片中的 AI 像素信号、来源记录、相机信息和画面结构。结果只用于辅助审阅，不等同于来源证明。</p>
         </section>
 
         <section class="workspace" aria-label="上传与分析">
           <form id="upload-form" class="upload-card" novalidate>
             <input id="file-input" name="file" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" hidden>
             <label id="dropzone" class="dropzone" for="file-input">
-              <span class="upload-symbol" aria-hidden="true">↑</span>
-              <span class="upload-title">拖放图片到这里</span>
-              <span class="upload-subtitle">或选择本机文件 · JPEG、PNG、静态 WebP · 最大 25 MB</span>
-              <span id="selected-file" class="selected-file" aria-live="polite">尚未选择文件</span>
+              <span id="upload-placeholder" class="upload-placeholder">
+                <span class="upload-action">选择图片</span>
+                <span class="upload-title">也可以将图片拖到这里</span>
+                <span class="upload-subtitle">支持 JPEG、PNG 和静态 WebP，文件不超过 25 MB</span>
+              </span>
+              <img id="image-preview" class="image-preview" alt="" hidden>
+              <span id="selected-file" class="selected-file" aria-live="polite">未选择文件</span>
             </label>
             <fieldset id="external-checks" class="external-checks" hidden>
-              <legend>可选官方在线验证</legend>
+              <legend>在线来源验证</legend>
               <label id="openai-option" class="external-option" for="openai-provenance" hidden>
                 <input id="openai-provenance" name="openai_provenance" type="checkbox" disabled>
                 <span>
                   <strong>OpenAI 来源验证</strong>
-                  <small>仅勾选时把本次图片发送给 OpenAI，检查其支持的 C2PA 与 SynthID 信号。</small>
+                  <small>勾选后，本次图片将发送至 OpenAI 的来源验证接口。</small>
                 </span>
                 <em id="openai-capability">正在检查本机配置</em>
               </label>
@@ -49,25 +49,28 @@
                 <span class="manual-marker" aria-hidden="true">↗</span>
                 <span>
                   <strong>Google SynthID</strong>
-                  <small>Google 尚未开放图片检测 API；可登录 Gemini 后手动上传验证。</small>
+                  <small>Google 暂未提供图片检测 API，可在 Gemini 中手动检查。</small>
                 </span>
                 <a href="https://gemini.google.com/" target="_blank" rel="noopener noreferrer">前往官方验证</a>
               </div>
             </fieldset>
             <div class="upload-footer">
-              <p id="privacy-summary">默认不调用外部 API；文件与分析证据保存在本机的临时作业目录。</p>
-              <button id="submit-button" class="primary-button" type="submit" disabled>开始分析</button>
+              <p id="privacy-summary">未启用在线验证。图片和分析结果保存在本机临时目录。</p>
+              <div class="upload-actions">
+                <button id="cancel-button" class="secondary-button" type="button" disabled>取消</button>
+                <button id="submit-button" class="primary-button" type="submit" disabled>分析图片</button>
+              </div>
             </div>
           </form>
 
-          <aside class="method-card" aria-label="分析边界">
-            <p class="eyebrow">怎么看结果</p>
-            <h2>先看判断，再看依据</h2>
+          <aside id="analysis-notes" class="method-card" aria-label="分析内容">
+            <h2>本次会检查什么</h2>
             <ul>
-              <li><span>01</span>先呈现本次分析能支持的判断</li>
-              <li><span>02</span>再展开图片结构和拍摄参数等依据</li>
-              <li><span>03</span>有可验证的来源记录时，才作为额外依据</li>
+              <li><strong>AI 内容信号</strong><span>五路像素检测及已登记阈值</span></li>
+              <li><strong>来源信息</strong><span>C2PA、EXIF 与隐式水印</span></li>
+              <li><strong>画面结构</strong><span>线段方向、消失关系与相机参数</span></li>
             </ul>
+            <p class="method-note">未检出 AI 信号不代表图片一定为实拍。几何和相机参数目前只用于复核。</p>
           </aside>
         </section>
 
@@ -97,85 +100,91 @@
         <section id="result-panel" class="result-panel" hidden aria-labelledby="result-title">
           <div class="section-heading">
             <div>
-              <p class="eyebrow">Evidence review</p>
-              <h2 id="result-title">AI 内容可能性评估</h2>
+              <h2 id="result-title">分析结果</h2>
             </div>
-            <button id="new-analysis" class="quiet-button" type="button">分析另一张图片</button>
           </div>
 
           <article class="summary-card overall-summary">
-            <p class="card-kicker">总判断</p>
+            <p class="card-kicker">综合判断</p>
             <p id="overall-observation" class="result-value">等待结果</p>
             <p id="overall-description" class="card-description"></p>
-            <div id="overall-metrics" class="metric-grid"></div>
+            <dl id="overall-metrics" class="metric-grid"></dl>
           </article>
 
           <div class="section-heading compact-heading evidence-heading">
             <div>
-              <p class="eyebrow">Supporting evidence</p>
-              <h2>判断依据</h2>
+              <h2>检测明细</h2>
             </div>
-            <p class="section-note">AI 像素与来源记录主导判断；相机 EXIF 只支持有限实拍可能性，几何与拍摄参数用于一致性复核。</p>
+            <p class="section-note">先看各项结论；分数、阈值和模型信息收在“查看数据”中。</p>
           </div>
           <div class="summary-grid">
+            <div class="evidence-table-head" aria-hidden="true">
+              <span>检查项目</span>
+              <span>本次结果</span>
+              <span>说明</span>
+            </div>
             <article class="summary-card">
-              <p class="card-kicker">AI 像素检测</p>
-              <p id="p3-observation" class="result-value">等待结果</p>
-              <p id="p3-description" class="card-description"></p>
-              <div id="p3-metrics" class="metric-grid"></div>
+              <div class="evidence-summary">
+                <div class="evidence-label"><p class="card-kicker">AI 像素信号</p><details class="metric-details"><summary>数据</summary><dl id="p3-metrics" class="metric-grid"></dl></details></div>
+                <div class="evidence-result"><p id="p3-observation" class="result-value">等待结果</p></div>
+                <p id="p3-description" class="card-description"></p>
+              </div>
             </article>
             <article class="summary-card">
-              <p class="card-kicker">来源记录</p>
-              <p id="c2pa-observation" class="result-value">等待结果</p>
-              <p id="c2pa-description" class="card-description"></p>
-              <div id="c2pa-metrics" class="metric-grid"></div>
+              <div class="evidence-summary">
+                <div class="evidence-label"><p class="card-kicker">来源记录</p><details class="metric-details"><summary>数据</summary><dl id="c2pa-metrics" class="metric-grid"></dl></details></div>
+                <div class="evidence-result"><p id="c2pa-observation" class="result-value">等待结果</p></div>
+                <p id="c2pa-description" class="card-description"></p>
+              </div>
             </article>
             <article class="summary-card">
-              <p class="card-kicker">相机元数据</p>
-              <p id="metadata-observation" class="result-value">等待结果</p>
-              <p id="metadata-description" class="card-description"></p>
-              <div id="metadata-metrics" class="metric-grid"></div>
+              <div class="evidence-summary">
+                <div class="evidence-label"><p class="card-kicker">相机信息</p><details class="metric-details"><summary>数据</summary><dl id="metadata-metrics" class="metric-grid"></dl></details></div>
+                <div class="evidence-result"><p id="metadata-observation" class="result-value">等待结果</p></div>
+                <p id="metadata-description" class="card-description"></p>
+              </div>
             </article>
             <article class="summary-card">
-              <p class="card-kicker">画面几何检查</p>
-              <p id="p0-observation" class="result-value">等待结果</p>
-              <p id="p0-description" class="card-description"></p>
-              <div id="p0-metrics" class="metric-grid"></div>
+              <div class="evidence-summary">
+                <div class="evidence-label"><p class="card-kicker">几何结构</p><details class="metric-details"><summary>数据</summary><dl id="p0-metrics" class="metric-grid"></dl></details></div>
+                <div class="evidence-result"><p id="p0-observation" class="result-value">等待结果</p></div>
+                <p id="p0-description" class="card-description"></p>
+              </div>
             </article>
             <article class="summary-card">
-              <p class="card-kicker">拍摄参数检查</p>
-              <p id="camera-observation" class="result-value">等待结果</p>
-              <p id="camera-description" class="card-description"></p>
-              <div id="camera-metrics" class="metric-grid"></div>
+              <div class="evidence-summary">
+                <div class="evidence-label"><p class="card-kicker">相机参数一致性</p><details class="metric-details"><summary>数据</summary><dl id="camera-metrics" class="metric-grid"></dl></details></div>
+                <div class="evidence-result"><p id="camera-observation" class="result-value">等待结果</p></div>
+                <p id="camera-description" class="card-description"></p>
+              </div>
             </article>
             <article class="summary-card">
-              <p class="card-kicker">隐式水印</p>
-              <p id="watermark-observation" class="result-value">等待结果</p>
-              <p id="watermark-description" class="card-description"></p>
-              <div id="watermark-metrics" class="metric-grid"></div>
+              <div class="evidence-summary">
+                <div class="evidence-label"><p class="card-kicker">隐式水印</p><details class="metric-details"><summary>数据</summary><dl id="watermark-metrics" class="metric-grid"></dl></details></div>
+                <div class="evidence-result"><p id="watermark-observation" class="result-value">等待结果</p></div>
+                <p id="watermark-description" class="card-description"></p>
+              </div>
             </article>
           </div>
 
           <section id="evidence-visuals" class="evidence-visuals" aria-labelledby="visuals-title">
             <div class="section-heading compact-heading">
               <div>
-                <p class="eyebrow">Inspectable artifacts</p>
-                <h2 id="visuals-title">可审阅叠图</h2>
+                <h2 id="visuals-title">图像标注</h2>
               </div>
-              <p>颜色只标记检测与候选关系；请结合原图逐项复核。</p>
+              <p>标注颜色表示线段分组或待复核位置，不代表 AI 概率。</p>
             </div>
             <div id="visual-grid" class="visual-grid"></div>
           </section>
 
-          <section id="limitations-section" class="limitations" hidden aria-labelledby="limitations-title">
-            <p class="eyebrow">Limitations &amp; audit notes</p>
-            <h2 id="limitations-title">限制与审阅提示</h2>
+          <details id="limitations-section" class="limitations" hidden aria-labelledby="limitations-title">
+            <summary><span id="limitations-title" class="limitations-title" role="heading" aria-level="2">需要注意</span><span class="limitations-toggle" aria-hidden="true">展开</span></summary>
             <ul id="limitations-list"></ul>
-          </section>
+          </details>
         </section>
       </main>
 
-      <footer>Demirror 本地演示 · 结果是审阅辅助，不构成内容来源、真实性或 AI 生成判定。</footer>
+      <footer>Demirror 仅提供分析线索。结论不能替代来源核验或人工审阅。</footer>
     </div>
     <script src="/app.js" defer></script>
   </body>

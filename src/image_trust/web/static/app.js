@@ -3,43 +3,43 @@
 
   const terminalStates = new Set(["completed", "partial", "rejected", "failed"]);
   const stateLabels = {
-    queued: ["正在排队", "已创建本地作业，等待开始。"],
-    validating: ["正在验证文件", "正在检查图片格式、大小与解码边界。"],
-    running: ["正在分析", "正在生成 AI 像素信号、相机元数据、几何证据、相机一致性记录和已选择的来源验证。"],
-    completed: ["分析完成", "全部已配置的分析链路已完成。"],
-    partial: ["分析部分完成", "基础几何结果已保留；部分附加分析未形成可用观测。"],
-    rejected: ["文件未被接受", "图片未通过输入验证，因此没有继续分析。"],
-    failed: ["分析未完成", "保留了可用的错误信息；请检查限制说明后重试。"],
+    queued: ["等待开始", "文件已接收，正在等待本地分析。"],
+    validating: ["检查文件", "正在确认图片格式、大小和可读取性。"],
+    running: ["正在分析", "正在依次运行已启用的检测项目。"],
+    completed: ["分析完成", "可用的检测项目均已完成。"],
+    partial: ["部分完成", "已保留可用结果；部分检测没有取得结果。"],
+    rejected: ["文件无法分析", "图片未通过输入检查。"],
+    failed: ["分析未完成", "请查看下方说明后重新尝试。"],
   };
   const stageLabels = {
-    queued: "等待本地分析线程。",
-    validating: "正在验证图片格式、大小与解码边界。",
-    starting: "正在准备本地检测环境。",
-    geometry: "正在提取线段并检查画面几何结构。",
-    provenance: "正在读取元数据与离线来源记录。",
-    watermark: "正在检查已配置的本地隐式水印方案。",
-    openai_provenance: "正在把本次图片发送给 OpenAI 官方来源验证 API。",
-    ai_provenance: "已从可验证来源记录取得 AI 声明。",
+    queued: "等待本地分析开始。",
+    validating: "正在读取图片文件。",
+    starting: "正在准备检测环境。",
+    geometry: "正在检查线段和方向关系。",
+    provenance: "正在读取元数据和来源记录。",
+    watermark: "正在检查本地水印方案。",
+    openai_provenance: "正在请求 OpenAI 来源验证。",
+    ai_provenance: "已读取可验证的 AI 来源声明。",
     ai_dda: "正在运行 DDA 像素检测。",
-    ai_safe: "正在运行 SAFE 频域检测。",
+    ai_safe: "正在运行 SAFE 检测。",
     ai_forensic_clip: "正在运行耐压缩像素检测。",
     ai_community_forensics: "正在运行跨生成器像素检测。",
-    ai_nonescape_mini: "正在运行 Nonescape Mini 补充检测。",
-    camera: "正在检查相机参数与画面一致性。",
-    synthesis: "正在汇总各项证据并形成结论。",
-    complete: "全部已配置的分析链路已结束。",
+    ai_nonescape_mini: "正在运行补充像素检测。",
+    camera: "正在测量相机参数一致性。",
+    synthesis: "正在整理检测结果。",
+    complete: "检测结束。",
   };
   const observationLabels = {
-    positive: "存在待复核候选",
-    negative: "未发现候选",
-    not_observed: "未形成观测",
-    neutral: "中性测量结果",
+    positive: "发现候选",
+    negative: "未检出",
+    not_observed: "未取得结果",
+    neutral: "不作为判断依据",
   };
   const directionLabels = {
-    neutral: "中性测量结果",
-    supports_ai: "支持 AI 的几何线索",
-    supports_camera: "支持相机的几何线索",
-    conflicting: "几何线索相互冲突",
+    neutral: "不作为判断依据",
+    supports_ai: "存在 AI 相关线索",
+    supports_camera: "存在相机相关线索",
+    conflicting: "线索不一致",
   };
   const limitationLabels = {
     no_embedded_c2pa_manifest_found: "未在图片中发现嵌入式 C2PA 清单。",
@@ -152,7 +152,10 @@
   const form = document.querySelector("#upload-form");
   const input = document.querySelector("#file-input");
   const dropzone = document.querySelector("#dropzone");
+  const uploadPlaceholder = document.querySelector("#upload-placeholder");
+  const imagePreview = document.querySelector("#image-preview");
   const selectedFile = document.querySelector("#selected-file");
+  const cancelButton = document.querySelector("#cancel-button");
   const submitButton = document.querySelector("#submit-button");
   const externalChecks = document.querySelector("#external-checks");
   const openaiOption = document.querySelector("#openai-option");
@@ -172,6 +175,7 @@
   let selected = null;
   let activeJobId = null;
   let pollTimer = null;
+  let previewUrl = null;
 
   const asText = (value, fallback = "—") => value === null || value === undefined || value === "" ? fallback : String(value);
   const percentage = (value) => Number.isFinite(value) ? `${(value * 100).toFixed(1)}%` : "—";
@@ -197,14 +201,39 @@
 
   function setSelected(file) {
     selected = file || null;
-    selectedFile.textContent = selected ? `${selected.name} · ${(selected.size / 1024 / 1024).toFixed(2)} MB` : "尚未选择文件";
+    selectedFile.textContent = selected ? `${selected.name} · ${(selected.size / 1024 / 1024).toFixed(2)} MB` : "未选择文件";
     submitButton.disabled = !selected;
+    cancelButton.disabled = !selected;
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      previewUrl = null;
+    }
+    if (!selected) {
+      imagePreview.removeAttribute("src");
+      imagePreview.alt = "";
+      imagePreview.hidden = true;
+      uploadPlaceholder.hidden = false;
+      dropzone.classList.remove("has-preview");
+      return;
+    }
+    previewUrl = URL.createObjectURL(selected);
+    imagePreview.src = previewUrl;
+    imagePreview.alt = `已选择图片：${selected.name}`;
+    imagePreview.hidden = false;
+    uploadPlaceholder.hidden = true;
+    dropzone.classList.add("has-preview");
+  }
+
+  function clearSelected() {
+    input.value = "";
+    setSelected(null);
+    resetPanels();
   }
 
   function updatePrivacySummary() {
     privacySummary.textContent = openaiProvenance.checked
-      ? "本次会把所选图片发送给 OpenAI 做来源验证；其他分析与证据仍保存在本机。"
-      : "默认不调用外部 API；文件与分析证据保存在本机的临时作业目录。";
+      ? "本次图片会发送至 OpenAI 进行来源验证；其他分析仍在本机完成。"
+      : "未启用在线验证。图片和分析结果保存在本机临时目录。";
   }
 
   async function loadCapabilities() {
@@ -220,7 +249,7 @@
       openaiProvenance.disabled = !openaiConfigured;
       if (!openaiConfigured) openaiProvenance.checked = false;
       openaiCapability.dataset.configured = String(openaiConfigured);
-      openaiCapability.textContent = openaiConfigured ? "已配置，可选" : "";
+      openaiCapability.textContent = openaiConfigured ? "可用" : "";
       updatePrivacySummary();
     } catch (_) {
       externalChecks.hidden = true;
@@ -287,6 +316,17 @@
     const metricGrid = document.querySelector(`#${prefix}-metrics`);
     metricGrid.replaceChildren();
     metrics.forEach(([label, metricValue]) => addMetric(metricGrid, label, metricValue));
+    const metricDetails = metricGrid.closest("details");
+    if (metricDetails) {
+      metricDetails.hidden = metrics.length === 0;
+      metricDetails.open = false;
+    }
+  }
+
+  function closeMetricDetails(except = null) {
+    document.querySelectorAll(".metric-details[open]").forEach((details) => {
+      if (details !== except) details.open = false;
+    });
   }
 
   function renderOverall(result) {
@@ -299,20 +339,20 @@
         ["主要依据", evidence.join("、") || "未形成可用依据"],
       ];
       if (origin.decision === "possible_ai") {
-        setCard("overall", "可能为 AI", `原因：${asText(origin.explanation)}`, [
+        setCard("overall", "可能为 AI", asText(origin.explanation), [
           ...sharedMetrics,
-          ["相机元数据", metadata.status === "coherent" ? "存在，但不能推翻 AI 信号" : "未形成强相机证据"],
+          ["相机信息", metadata.status === "coherent" ? "存在，但不改变该结论" : "未提供正向依据"],
         ]);
         return;
       }
       if (origin.decision === "possible_camera") {
-        setCard("overall", "可能为实拍", `原因：${asText(origin.explanation)}`, [
+        setCard("overall", "可能为实拍", asText(origin.explanation), [
           ...sharedMetrics,
           ["AI 像素检测", "未检出高置信 AI 信号"],
         ]);
         return;
       }
-      setCard("overall", "未检出 AI 信号", `原因：${asText(origin.explanation)}`, [
+      setCard("overall", "未检出 AI 信号", asText(origin.explanation), [
         ...sharedMetrics,
         ["相机元数据", metadata.status === "partial" ? "信息不完整" : "未形成正向相机证据"],
       ]);
@@ -331,7 +371,7 @@
     const high = p3.status === "available" && p3.risk_band === "high";
 
     if (verified) {
-      setCard("overall", "已确认包含 AI 生成内容", "原因：已验证的图片来源记录明确声明其由 AI 生成。这个结论优先于像素检测；画面几何和拍摄参数不参与这一判断。", [
+      setCard("overall", "可能为 AI", "图片中的已验证来源记录声明其由 AI 生成。该记录优先于像素检测；几何和相机参数只供复核。", [
         ["判断强度", "已确认"],
         ["主要依据", "已验证的来源记录"],
         ["像素检测", dda?.status === "available" ? "已完成" : "未参与"],
@@ -339,14 +379,14 @@
       return;
     }
     if (high) {
-      setCard("overall", "高度疑似 AI 生成", "原因：AI 像素检测命中严格的高置信标准。画面几何、拍摄参数和一般元数据只用于解释或复核，不会被换算成 AI 概率。", [
+      setCard("overall", "可能为 AI", "AI 像素信号达到预先登记的高阈值。几何、拍摄参数和一般元数据只用于解释，不会换算为 AI 概率。", [
         ["判断强度", "高"],
         ["主要依据", "AI 像素检测"],
         ["检测分数", percentage(dda?.value ?? safe?.value ?? forensic?.value ?? community?.value ?? nonescape?.value)],
       ]);
       return;
     }
-    setCard("overall", "目前无法可靠判断", "原因：没有出现足以支持高置信 AI 判断的直接证据。这不表示图片一定由相机拍摄；几何或拍摄参数也不会被当作反向证明。", [
+    setCard("overall", "未检出 AI 信号", "没有出现足以支持 AI 判断的直接信号。这不表示图片一定由相机拍摄；几何和拍摄参数也不是反向证明。", [
       ["判断状态", "不确定"],
       ["AI 像素检测", p3.status === "available" ? "未达到高置信标准" : "未形成可用结果"],
       ["来源记录", "未发现已验证的 AI 声明"],
@@ -357,10 +397,10 @@
     const p0 = result.p0 || {};
     const evidence = p0.evidence || {};
     const features = evidence.features || {};
-    const value = evidence.run_status === "ok" ? "结构线索已提取" : "未形成结构线索";
+    const value = evidence.run_status === "ok" ? "已完成结构检查" : "未取得结构结果";
     const description = evidence.run_status === "not_applicable"
-      ? "当前图片不满足稳定的几何测量条件；不会强行把缺失测量换算成来源结论。"
-      : "已检查线条、平行族和消失方向。三种几何判别实验在未见 SDXL 上均未通过门槛，因此当前作为可审阅的一致性证据，不会伪装成可靠 AI 概率。";
+      ? "图片不满足稳定的几何测量条件，因此不显示推断。"
+      : "已检查线条、平行族和消失方向。几何模型尚未通过来源分类验证，结果只用于人工复核。";
     setCard("p0", value, description, [
       ["运行状态", asText(evidence.run_status)],
       ["适用性", percentage(evidence.applicability)],
@@ -374,11 +414,11 @@
   function renderP3(result) {
     const p3 = result.p3 || {};
     if (!Object.keys(p3).length) {
-      setCard("p3", "未运行", "本次没有得到 AI 内容判断。", []);
+      setCard("p3", "未运行", "本次没有得到可用的像素检测结果。", []);
       return;
     }
     if (p3.status !== "available") {
-      setCard("p3", "目前无法可靠判断", "原因：本次检测未能完成，因此不会用不可靠的替代分数下结论。", [
+      setCard("p3", "未取得结果", "本次像素检测没有完成，因此不使用替代分数。", [
         ["检测状态", asText(p3.status)],
       ]);
       return;
@@ -392,7 +432,7 @@
     const nonescape = signals.find((signal) => signal.name === "nonescape_mini_detector");
     const evaluation = p3.evaluation?.dda?.at_high_confidence_threshold || p3.evaluation?.at_high_confidence_threshold || {};
     if (verified) {
-      setCard("p3", "已确认包含 AI 生成内容", "原因：图片自带且已验证的来源记录，明确说明它由 AI 生成。这是来源记录，不是对像素的猜测。", [
+      setCard("p3", "来源记录确认 AI", "图片自带且已验证的来源记录说明其由 AI 生成。这是来源信息，不是像素推断。", [
         ["判断依据", "已验证的来源记录"],
         ["可靠程度", percentage(p3.reliability)],
         ["技术记录", "C2PA · trained algorithmic media"],
@@ -430,12 +470,12 @@
     const nonescapeCompressedEvaluation = p3.evaluation?.nonescape_mini?.held_out_cross_generator_jpeg85?.combined_or_of_frozen_high_thresholds || {};
     setCard(
       "p3",
-      high ? "检测信号达到高标准" : (limited ? "检测到有限 AI 信号" : "未达到高标准"),
+      high ? "检出明显 AI 信号" : (limited ? "检出有限 AI 信号" : "未检出明显 AI 信号"),
       high
-        ? "该检测是总判断的主要依据：图片的像素特征与已知生成图模式高度相符。它支持进一步复核，但不能证明来源或真实性。"
+        ? "图片像素特征达到已登记的高阈值，是本次综合判断的主要依据。它不能单独证明来源或真实性。"
         : (limited
-          ? "耐压缩模型达到偏向 AI 检出率的复核阈值，因此总判断为“可能为 AI（有限）”。该档在 JPEG 75 留出集的实拍误报率为 14%，必须结合原图和人工复核。"
-          : "该检测没有提供高置信 AI 依据。这不表示它一定是相机照片；压缩、缩放等处理也可能减弱检测信号。"),
+          ? "至少一个补充模型达到有限复核阈值。该档的误报较高，建议结合原始文件和人工检查。"
+          : "未达到高阈值。压缩、缩放和生成器差异都可能降低检测灵敏度。"),
       high
         ? [
             ["判断强度", "高"],
@@ -485,15 +525,15 @@
     const fullImage = camera.full_image || {};
     const eCam = camera.e_cam || {};
     if (!Object.keys(camera).length) {
-      setCard("camera", "未运行", "该作业没有相机一致性结果。", []);
+      setCard("camera", "未运行", "本次没有相机参数一致性结果。", []);
       return;
     }
     if (camera.status === "failed") {
-      setCard("camera", "未完成", "相机一致性分析失败，不能据此作任何推断。", []);
+      setCard("camera", "未完成", "相机参数检查没有完成，不作为判断依据。", []);
       return;
     }
-    const value = fullImage.status === "ok" ? "拍摄参数已测量" : "未形成可用测量";
-    setCard("camera", value, "用于检查全图和局部裁剪之间的参数关系。本地真实/AI 对照未形成稳定区分，因此不独立改变来源结论。", [
+    const value = fullImage.status === "ok" ? "已完成参数检查" : "未取得参数结果";
+    setCard("camera", value, "用于比较整图和局部区域的相机参数。当前没有可靠的来源区分阈值，因此不单独改变结论。", [
       ["后端状态", asText(fullImage.status)],
       ["E_cam", asText(eCam.observation)],
       ["Roll", degrees(fullImage.roll)],
@@ -506,11 +546,11 @@
   function renderC2pa(result) {
     const c2pa = result.c2pa || {};
     if (!Object.keys(c2pa).length) {
-      setCard("c2pa", "未运行", "该作业没有 C2PA 读取记录。", []);
+      setCard("c2pa", "未运行", "本次没有读取到 C2PA 记录。", []);
       return;
     }
     const value = c2pa.manifest_present ? "发现嵌入式清单" : "未发现嵌入式清单";
-    setCard("c2pa", value, "只读取图像中已有的嵌入信息；只有已验证且受信任的数字拍摄来源链才可支持“可能为实拍”。离线模式不会检索远程清单。", [
+    setCard("c2pa", value, "只读取图片中已有的嵌入记录。可信的数字拍摄来源链可作为实拍线索；离线模式不检索远程清单。", [
       ["读取状态", asText(c2pa.status)],
       ["签名状态", asText(c2pa.signature_validation_status)],
       ["信任状态", asText(c2pa.trust_status)],
@@ -524,11 +564,11 @@
   function renderMetadata(result) {
     const metadata = result.origin?.camera_metadata || {};
     if (!Object.keys(metadata).length) {
-      setCard("metadata", "未运行", "该作业没有相机元数据审阅结果。", []);
+      setCard("metadata", "未运行", "本次没有相机信息审阅结果。", []);
       return;
     }
     if (metadata.status === "coherent") {
-      setCard("metadata", "发现完整相机元数据", "相机品牌、型号、拍摄时间以及至少三项拍摄参数彼此完整。在 AI 像素检测已完成且未命中时，它支持有限强度的“可能为实拍”；EXIF 可被复制或编辑，不能作为真实性证明。", [
+      setCard("metadata", "相机信息较完整", "相机品牌、型号、拍摄时间和多项拍摄参数均存在。只有在未检出 AI 信号时，它才可提供有限的实拍线索；EXIF 可以被复制或编辑。", [
         ["相机", `${asText(metadata.camera_make)} · ${asText(metadata.camera_model)}`],
         ["拍摄时间", asText(metadata.captured_at_local)],
         ["物理参数", (metadata.physical_capture_fields || []).join("、") || "—"],
@@ -537,20 +577,20 @@
       return;
     }
     if (metadata.status === "partial") {
-      setCard("metadata", "相机元数据不完整", "发现了部分相机信息，但不足以作为“可能为实拍”的正向依据。", [
+      setCard("metadata", "相机信息不完整", "发现了部分相机信息，但不足以支持实拍判断。", [
         ["相机", `${asText(metadata.camera_make)} · ${asText(metadata.camera_model)}`],
         ["拍摄时间", asText(metadata.captured_at_local)],
         ["物理参数", (metadata.physical_capture_fields || []).join("、") || "—"],
       ]);
       return;
     }
-    setCard("metadata", "未发现相机元数据", "没有可用的相机 EXIF 信息；这很常见，也不表示图片一定是 AI 生成。", []);
+    setCard("metadata", "未发现相机信息", "没有可用的 EXIF 信息。这很常见，也不表示图片由 AI 生成。", []);
   }
 
   function renderWatermark(result) {
     const assessment = result.watermark || result.origin?.implicit_watermark;
     if (!assessment || assessment === "not_configured" || assessment.status === "not_configured") {
-      setCard("watermark", "尚未接入检测", "当前没有兼容的本地隐式水印检测器，因此它不参与本次 AI 或实拍判断。", [
+      setCard("watermark", "未配置检测", "当前没有可用的本地水印检测器，因此不作为判断依据。", [
         ["检测状态", "未配置"],
       ]);
       return;
@@ -584,30 +624,30 @@
       });
     });
     if (positives.some((item) => item.evidence_class === "verified_provider_ai")) {
-      setCard("watermark", "检测到可信 AI 来源信号", "官方供应商验证检出了受支持的来源信号，并已作为强 AI 证据进入综合判断；它只覆盖该供应商支持的内容。", metrics);
+      setCard("watermark", "检出可信 AI 来源信号", "官方验证检出了受支持的来源信号，已作为强 AI 线索进入综合判断；它只覆盖该供应商支持的内容。", metrics);
       return;
     }
     if (positives.some((item) => item.evidence_class === "known_open_ai_watermark")) {
-      setCard("watermark", "检测到开放 AI 水印", "像素标记与已知开放 AI 生态水印匹配；该标记可被复制，不能验证创建者。", metrics);
+      setCard("watermark", "检出开放 AI 水印", "像素标记与已知开放水印匹配；该标记可以被复制，不能验证创建者。", metrics);
       return;
     }
     if (positives.length) {
-      setCard("watermark", "发现未验证的隐式标识", "检测到水印或标识，但尚未验证其归属和当前图像绑定，因此不改变综合判断。", metrics);
+      setCard("watermark", "发现未验证标识", "检测到水印或标识，但尚未验证归属和图片绑定，因此不改变综合判断。", metrics);
       return;
     }
     if (completed.length) {
       const usedOpenAI = adapters.some((item) => item.provider === "openai");
       setCard(
         "watermark",
-        usedOpenAI ? "已完成来源信号检查" : "已完成本地检查",
+        usedOpenAI ? "已完成来源信号检查" : "已完成本地水印检查",
         usedOpenAI
-          ? "本地方案与已选择的 OpenAI 官方检查均未检出匹配；这不排除其他 AI、旧模型或已受损的水印。"
-          : "已启用的本地方案未检出匹配；其他工具可能不加水印，水印也可能已被移除。",
+          ? "本地方案和已选择的 OpenAI 检查均未检出匹配；这不排除其他 AI、旧模型或已受损的水印。"
+          : "已启用的本地方案未检出匹配；其他工具可能没有水印，水印也可能已被移除。",
         metrics,
       );
       return;
     }
-    setCard("watermark", "来源信号检测不可用", "已配置或已选择的方案本次未形成观测；这不支持 AI 或实拍来源。", metrics);
+    setCard("watermark", "未取得水印结果", "已配置或已选择的方案本次没有取得结果，不支持 AI 或实拍判断。", metrics);
   }
 
   function addVisual(container, title, caption, src) {
@@ -630,8 +670,8 @@
     visualGrid.replaceChildren();
     const visuals = [
       ["原始输入", "上传后的本地原图。", artifacts.input_image],
-      ["线段与方向族", "同色线段表示同一稳定方向族；请与原图的真实结构对照。", artifacts.lines_overlay],
-      ["候选异常线", "只用于复核排序，不能单独解释为 AI 证据。", artifacts.anomalous_lines_overlay],
+      ["线段与方向组", "同色线段表示同一稳定方向组，请与原图结构对照。", artifacts.lines_overlay],
+      ["待复核线段", "用于定位需要复核的位置，不单独代表 AI 信号。", artifacts.anomalous_lines_overlay],
     ];
     visuals.filter(([, , path]) => typeof path === "string").forEach(([title, caption, path]) => {
       addVisual(visualGrid, title, caption, artifactUrl(job.job_id, path));
@@ -640,7 +680,20 @@
   }
 
   function humanizeLimitation(value) {
-    return limitationLabels[value] || value.replaceAll("_", " ");
+    if (limitationLabels[value]) return limitationLabels[value];
+    if (typeof value !== "string") return "有一项检测未满足运行条件，未作为判断依据。";
+    if (value.startsWith("camera_metadata_unavailable:")) return "无法读取图片中的相机信息。";
+    if (value.startsWith("dependency_not_installed:")) return "相机参数检测所需组件未安装，本次未运行。";
+    if (value.startsWith("perspective_fields_inference_failed:") || value.startsWith("geocalib_inference_failed:")) {
+      return "相机参数检测没有完成，本次不作为判断依据。";
+    }
+    if (value.startsWith("dda_audit_record_unavailable:") || value.startsWith("safe_audit_record_unavailable:")) {
+      return "部分像素检测配置无法读取，本次未使用替代分数。";
+    }
+    if (value.startsWith("forensic_clip_audit_record_unavailable:") || value.startsWith("community_forensics_audit_record_unavailable:") || value.startsWith("nonescape_mini_audit_record_unavailable:")) {
+      return "部分补充像素检测无法运行，本次不作为判断依据。";
+    }
+    return "有一项检测未满足运行条件，未作为判断依据。";
   }
 
   function renderLimitations(job, result) {
@@ -690,8 +743,8 @@
       pollTimer = window.setTimeout(() => poll(jobId), 900);
     } catch (error) {
       statusDot.dataset.status = "failed";
-      statusLabel.textContent = "无法读取作业状态";
-      statusDetail.textContent = error instanceof Error ? error.message : "请重新上传图片。";
+      statusLabel.textContent = "无法读取分析状态";
+      statusDetail.textContent = error instanceof Error ? error.message : "请重新选择图片。";
     }
   }
 
@@ -700,7 +753,8 @@
     if (!selected) return;
     resetPanels();
     submitButton.disabled = true;
-    submitButton.textContent = "正在上传…";
+    cancelButton.disabled = true;
+    submitButton.textContent = "正在提交…";
     const formData = new FormData();
     formData.append("file", selected, selected.name);
     if (openaiProvenance.checked && !openaiProvenance.disabled) {
@@ -709,22 +763,24 @@
     try {
       const response = await fetch("/api/jobs", { method: "POST", body: formData });
       const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error || "上传失败");
+      if (!response.ok) throw new Error(payload.error || "提交失败");
       activeJobId = payload.job.job_id;
       renderStatus(payload.job);
       await poll(activeJobId);
     } catch (error) {
       analysisPanel.hidden = false;
       statusDot.dataset.status = "failed";
-      statusLabel.textContent = "上传未完成";
+      statusLabel.textContent = "提交未完成";
       statusDetail.textContent = error instanceof Error ? error.message : "请重新选择图片后再试。";
     } finally {
       submitButton.disabled = !selected;
-      submitButton.textContent = "开始分析";
+      cancelButton.disabled = !selected;
+      submitButton.textContent = "分析图片";
     }
   }
 
   input.addEventListener("change", () => setSelected(input.files?.[0]));
+  cancelButton.addEventListener("click", clearSelected);
   openaiProvenance.addEventListener("change", updatePrivacySummary);
   form.addEventListener("submit", submit);
   ["dragenter", "dragover"].forEach((eventName) => dropzone.addEventListener(eventName, (event) => {
@@ -739,12 +795,15 @@
     const file = event.dataTransfer?.files?.[0];
     if (file) setSelected(file);
   });
-  document.querySelector("#new-analysis").addEventListener("click", () => {
-    resetPanels();
-    input.value = "";
-    setSelected(null);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  document.querySelectorAll(".metric-details").forEach((details) => {
+    details.addEventListener("toggle", () => {
+      if (details.open) closeMetricDetails(details);
+    });
   });
+  document.addEventListener("click", (event) => {
+    if (!(event.target instanceof Element) || !event.target.closest(".metric-details")) closeMetricDetails();
+  });
+  window.addEventListener("wheel", () => closeMetricDetails(), { passive: true });
   updatePrivacySummary();
   loadCapabilities();
 })();
