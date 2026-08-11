@@ -1,0 +1,4 @@
+# Audit-only optional dependency, generated on 2026-08-11.
+# Install requirements-p4-watermark.lock first, then install this file with
+# --no-deps to retain opencv-python-headless. It is not needed by the server.
+invisible-watermark==0.2.0

@@ -21,6 +21,11 @@ def test_web_ui_has_a_separate_ai_pixel_signal_card() -> None:
     assert "function renderOverall" in javascript
     assert "function renderMetadata" in javascript
     assert "function renderWatermark" in javascript
+    assert "assessment.status === \"not_configured\"" in javascript
+    assert "发现未验证的隐式标识" in javascript
+    assert "因此不改变综合判断" in javascript
+    assert 'watermark: "正在检查已配置的本地隐式水印方案。"' in javascript
+    assert '"watermark": watermark_result.model_dump' in jobs
     assert "const stageLabels" in javascript
     assert "job.progress_percent" in javascript
     assert 'result["origin"] = origin.model_dump' in jobs

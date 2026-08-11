@@ -17,6 +17,7 @@
     starting: "正在准备本地检测环境。",
     geometry: "正在提取线段并检查画面几何结构。",
     provenance: "正在读取元数据与离线来源记录。",
+    watermark: "正在检查已配置的本地隐式水印方案。",
     ai_provenance: "已从可验证来源记录取得 AI 声明。",
     ai_dda: "正在运行 DDA 像素检测。",
     ai_safe: "正在运行 SAFE 频域检测。",
@@ -94,6 +95,31 @@
     nonescape_mini_scope_is_limited_to_registered_Projective_Geometry_cross_generator_and_jpeg85_protocols: "该通道只在登记的跨生成器与 JPEG-85 协议中审计，不能外推为通用保证。",
     exif_metadata_can_be_copied_or_edited: "相机 EXIF 可以被复制或编辑，因此只能在 AI 检测已完成且未命中时支持有限强度的“可能为实拍”。",
     implicit_watermark_detector_not_configured: "尚未配置兼容的本地隐式水印检测器。",
+    sdxl_watermark_pywavelets_not_available: "未安装 SD/SDXL 固定水印所需的本地小波变换依赖。",
+    sdxl_watermark_pywavelets_version_not_pinned: "小波变换依赖版本与登记版本不一致，已拒绝运行。",
+    sdxl_watermark_worker_timed_out: "SD/SDXL 水印隔离进程超时。",
+    sdxl_watermark_worker_failed: "SD/SDXL 水印隔离进程未完成。",
+    sdxl_watermark_short_side_below_256: "图片短边小于 256 像素，不适用该固定水印检测。",
+    sdxl_watermark_input_pixel_limit_exceeded: "图片像素数超过水印检测的本地资源上限。",
+    sdxl_watermark_is_open_and_can_be_copied_to_non_ai_images: "该固定水印和编码器是公开的，标记可以被复制到非 AI 图片。",
+    sdxl_watermark_negative_is_not_camera_evidence: "未检出该固定水印不支持相机来源。",
+    sdxl_watermark_coverage_depends_on_generator_export_path: "该水印只覆盖保留了固定标记的部分 SD/SDXL 导出路径。",
+    sdxl_watermark_resizing_cropping_or_reencoding_can_destroy_signal: "缩放、裁剪或重新编码可能破坏该固定水印。",
+    trustmark_q_model_not_available: "尚未安装经过校验的 TrustMark Q 本地模型。",
+    trustmark_q_model_not_readable: "无法读取 TrustMark Q 本地模型。",
+    trustmark_q_model_sha256_mismatch: "TrustMark Q 模型校验失败，已拒绝运行。",
+    trustmark_q_worker_timed_out: "TrustMark Q 隔离进程超时。",
+    trustmark_q_worker_failed: "TrustMark Q 隔离进程未完成。",
+    trustmark_q_short_side_below_150: "图片短边小于 150 像素，不适用 TrustMark Q 检测。",
+    trustmark_q_input_pixel_limit_exceeded: "图片像素数超过 TrustMark Q 的本地资源上限。",
+    trustmark_q_variant_only: "当前只检测 TrustMark Q 变体。",
+    trustmark_q_bch5_schema_only: "为控制误报，当前只接受 TrustMark 默认的 BCH_5 载荷格式。",
+    trustmark_q_correction_budget_reduced_to_3: "为控制误报，只接受最多纠正 3 位错误的 BCH_5 结果；受损更重的水印会保持未检出。",
+    trustmark_identifier_is_not_ai_evidence_without_trusted_provenance: "TrustMark 标识本身不证明图片由 AI 生成；需要可信来源记录绑定后才能改变综合判断。",
+    trustmark_identifier_can_be_reencoded_or_removed: "TrustMark 标识可能被重新编码、复制或移除。",
+    trustmark_payload_withheld_from_result: "为减少标识泄露，结果中仅显示载荷摘要，不返回原始内容。",
+    trustmark_remote_resolver_disabled: "离线模式不会连接远程服务解析标识归属。",
+    trustmark_negative_is_not_camera_evidence: "未检出 TrustMark 不支持相机来源。",
     camera_consistency_not_calibrated_for_origin_decision: "拍摄参数一致性尚未按来源类别校准，因此不参与三档判断。",
     c2pa_capture_declaration_not_trusted_for_camera_decision: "C2PA 捕获声明虽可读取，但未通过受信任来源链验证，因此不作为“可能为实拍”的依据。",
     opencv_lsd_quality_is_backend_relative_not_probability: "线段质量是 OpenCV LSD 内部相对量，不是来源概率。",
@@ -467,14 +493,49 @@
   }
 
   function renderWatermark(result) {
-    const status = result.origin?.implicit_watermark;
-    if (status === "not_configured") {
+    const assessment = result.watermark || result.origin?.implicit_watermark;
+    if (!assessment || assessment === "not_configured" || assessment.status === "not_configured") {
       setCard("watermark", "尚未接入检测", "当前没有兼容的本地隐式水印检测器，因此它不参与本次 AI 或实拍判断。", [
         ["检测状态", "未配置"],
       ]);
       return;
     }
-    setCard("watermark", "未运行", "该作业没有隐式水印检测结果。", []);
+    const adapters = Array.isArray(assessment.adapters) ? assessment.adapters : [];
+    const positives = adapters.filter((item) => item.observation === "positive");
+    const completed = adapters.filter((item) => item.run_status === "ok");
+    const metrics = [
+      ["整体状态", assessment.status === "completed" ? "已完成" : assessment.status === "partial" ? "部分完成" : "不可用"],
+      ["已完成方案", `${completed.length} / ${adapters.length}`],
+    ];
+    adapters.forEach((item) => {
+      const label = item.observation === "positive"
+        ? "检出匹配"
+        : item.observation === "negative"
+          ? "未检出"
+          : item.run_status === "not_applicable"
+            ? "不适用"
+            : item.run_status === "failed"
+              ? "运行失败"
+              : "不可用";
+      metrics.push([item.adapter_id || item.scheme || "未命名方案", label]);
+    });
+    if (positives.some((item) => item.evidence_class === "verified_provider_ai")) {
+      setCard("watermark", "检测到可信 AI 水印", "本地适配器形成了可进入综合判断的供应商来源证据。", metrics);
+      return;
+    }
+    if (positives.some((item) => item.evidence_class === "known_open_ai_watermark")) {
+      setCard("watermark", "检测到开放 AI 水印", "像素标记与已知开放 AI 生态水印匹配；该标记可被复制，不能验证创建者。", metrics);
+      return;
+    }
+    if (positives.length) {
+      setCard("watermark", "发现未验证的隐式标识", "检测到水印或标识，但尚未验证其归属和当前图像绑定，因此不改变综合判断。", metrics);
+      return;
+    }
+    if (completed.length) {
+      setCard("watermark", "已完成本地检查", "已启用的方案未检出匹配；其他工具可能不加水印，水印也可能已被移除。", metrics);
+      return;
+    }
+    setCard("watermark", "本地检测不可用", "已配置的水印方案本次未形成观测；这不支持 AI 或实拍来源。", metrics);
   }
 
   function addVisual(container, title, caption, src) {

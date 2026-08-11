@@ -25,6 +25,10 @@ from image_trust.provenance.c2pa import inspect_c2pa_asset, write_c2pa_record
 from image_trust.provenance.config import load_c2pa_config
 from image_trust.schemas import RunStatus
 from image_trust.utils.config import load_config
+from image_trust.watermark.suite import (
+    assess_implicit_watermarks,
+    build_offline_watermark_adapters,
+)
 
 
 MAX_UPLOAD_BYTES = 25 * 1024 * 1024
@@ -350,6 +354,7 @@ def build_local_runner(project_root: Path) -> JobRunner:
     p0_config = load_config(root / "configs" / "p0.yaml")
     c2pa_config = load_c2pa_config(root / "configs" / "p1_c2pa.yaml")
     camera_config = load_camera_config(root / "configs" / "p1_geocalib.yaml")
+    watermark_adapters = build_offline_watermark_adapters()
 
     def runner(
         upload_path: Path,
@@ -376,6 +381,8 @@ def build_local_runner(project_root: Path) -> JobRunner:
         report_progress("provenance", 25)
         c2pa_record = inspect_c2pa_asset(upload_path, c2pa_config)
         write_c2pa_record(job_dir / "c2pa" / "c2pa_result.json", c2pa_record)
+        report_progress("watermark", 27)
+        watermark_result = assess_implicit_watermarks(upload_path, watermark_adapters)
         limitations = list(p0_result.evidence.limitations)
         p3_result = assess_high_confidence_ai(
             upload_path,
@@ -388,6 +395,7 @@ def build_local_runner(project_root: Path) -> JobRunner:
             "p0": p0_dump,
             "p3": p3_result.model_dump(mode="json"),
             "c2pa": c2pa_record.model_dump(mode="json"),
+            "watermark": watermark_result.model_dump(mode="json"),
             "artifacts": {
                 "input_image": upload_path.name,
                 "lines_overlay": "p0/lines_overlay.png",
@@ -416,7 +424,13 @@ def build_local_runner(project_root: Path) -> JobRunner:
             status = WebJobStatus.PARTIAL
             camera_result = None
         report_progress("synthesis", 96)
-        origin = assess_origin(upload_path, p3_result, c2pa_record, camera_result)
+        origin = assess_origin(
+            upload_path,
+            p3_result,
+            c2pa_record,
+            camera_result,
+            watermark_result,
+        )
         result["origin"] = origin.model_dump(mode="json")
         limitations.extend(origin.limitations)
         result["limitations"] = sorted(set(limitations))

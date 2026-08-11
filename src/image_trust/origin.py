@@ -22,6 +22,7 @@ from image_trust.provenance.contracts import (
     C2paSignatureValidationStatus,
     C2paTrustStatus,
 )
+from image_trust.watermark.contracts import ImplicitWatermarkAssessment
 
 
 _CAPTURE_SOURCE_TYPES = {"digitalcapture", "computationalcapture"}
@@ -63,7 +64,9 @@ class OriginAssessment(BaseModel):
     trusted_c2pa_capture_declaration: bool = False
     declared_c2pa_source_types: list[str] = Field(default_factory=list)
     camera_consistency: Literal["measured_not_calibrated", "not_observed", "not_run"]
-    implicit_watermark: Literal["not_configured"] = "not_configured"
+    implicit_watermark: ImplicitWatermarkAssessment = Field(
+        default_factory=ImplicitWatermarkAssessment.not_configured
+    )
     limitations: list[str] = Field(default_factory=list)
 
 
@@ -113,6 +116,7 @@ def assess_origin(
     ai_result: AiLikelihoodResult,
     c2pa_record: C2paRecord,
     camera_result: CameraExperimentResult | None = None,
+    watermark_result: ImplicitWatermarkAssessment | None = None,
 ) -> OriginAssessment:
     """Combine direct AI and direct capture signals without negative inference.
 
@@ -124,6 +128,7 @@ def assess_origin(
     """
 
     metadata = inspect_camera_metadata(input_path)
+    watermark = watermark_result or ImplicitWatermarkAssessment.not_configured()
     source_types = sorted(set(c2pa_record.declared_digital_source_types))
     verified_capture = (
         c2pa_record.signature_validation_status is C2paSignatureValidationStatus.VALID
@@ -137,33 +142,35 @@ def assess_origin(
     camera_consistency = _camera_consistency_status(camera_result)
     limitations = [
         *metadata.limitations,
-        "implicit_watermark_detector_not_configured",
+        *watermark.limitations,
     ]
     if camera_consistency != "not_run":
         limitations.append("camera_consistency_not_calibrated_for_origin_decision")
     if verified_capture and not trusted_capture:
         limitations.append("c2pa_capture_declaration_not_trusted_for_camera_decision")
 
-    if ai_result.risk_band in {"high", "medium"}:
+    if ai_result.risk_band in {"high", "medium"} or watermark.decision_eligible:
+        ai_labels = _ai_evidence_labels(ai_result) if ai_result.risk_band in {"high", "medium"} else []
+        watermark_labels = _watermark_evidence_labels(watermark)
+        high_strength = (
+            ai_result.risk_band == "high" and ai_result.reliability_label == "high"
+        ) or watermark.strength == "strong"
         return OriginAssessment(
             decision="possible_ai",
-            evidence_strength=(
-                "high"
-                if ai_result.risk_band == "high" and ai_result.reliability_label == "high"
-                else "limited"
-            ),
+            evidence_strength="high" if high_strength else "limited",
             summary="可能为 AI",
             explanation=(
                 "发现了高置信 AI 像素信号或已验证的 AI 来源声明。"
-                if ai_result.risk_band == "high"
-                else "一个或多个像素检测达到有限强度复核阈值；该档可能为提高 AI 召回而允许更高误报，或受文件格式/传输变换限制，因此需要人工复核。"
+                if high_strength
+                else "一个或多个已校准检测达到有限强度复核阈值；开放水印可能被复制，像素检测也受文件格式和传输变换限制，因此需要人工复核。"
             ),
-            supporting_evidence=_ai_evidence_labels(ai_result),
+            supporting_evidence=ai_labels + watermark_labels,
             camera_metadata=metadata,
             verified_c2pa_capture_declaration=verified_capture,
             trusted_c2pa_capture_declaration=trusted_capture,
             declared_c2pa_source_types=source_types,
             camera_consistency=camera_consistency,
+            implicit_watermark=watermark,
             limitations=sorted(set(limitations)),
         )
     if trusted_capture:
@@ -178,6 +185,7 @@ def assess_origin(
             trusted_c2pa_capture_declaration=trusted_capture,
             declared_c2pa_source_types=source_types,
             camera_consistency=camera_consistency,
+            implicit_watermark=watermark,
             limitations=sorted(set(limitations)),
         )
     if ai_result.status == "available" and metadata.status == "coherent":
@@ -198,6 +206,7 @@ def assess_origin(
             trusted_c2pa_capture_declaration=trusted_capture,
             declared_c2pa_source_types=source_types,
             camera_consistency=camera_consistency,
+            implicit_watermark=watermark,
             limitations=sorted(set(limitations)),
         )
     return OriginAssessment(
@@ -211,8 +220,21 @@ def assess_origin(
         trusted_c2pa_capture_declaration=trusted_capture,
         declared_c2pa_source_types=source_types,
         camera_consistency=camera_consistency,
+        implicit_watermark=watermark,
         limitations=sorted(set(limitations)),
     )
+
+
+def _watermark_evidence_labels(result: ImplicitWatermarkAssessment) -> list[str]:
+    labels: list[str] = []
+    for adapter in result.adapters:
+        if not adapter.decision_eligible:
+            continue
+        if adapter.evidence_class == "verified_provider_ai":
+            labels.append("已验证的供应商 AI 隐式水印")
+        elif adapter.evidence_class == "known_open_ai_watermark":
+            labels.append("已知开放 AI 生态水印（有限强度）")
+    return labels
 
 
 def _camera_consistency_status(

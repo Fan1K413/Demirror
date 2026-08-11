@@ -1,0 +1,20 @@
+{
+  "schema_version": "demirror-test-fixture-manifest-v1",
+  "source": {
+    "project": "Adobe TrustMark",
+    "repository": "https://github.com/adobe/trustmark",
+    "license": "MIT"
+  },
+  "files": [
+    {
+      "path": "ufo_240_Q.png",
+      "role": "official TrustMark Q positive example",
+      "sha256": "f388997ad006ae755e332a0fe3bae2a6a5f77bd8222f0e71ed09301c289e6922"
+    },
+    {
+      "path": "ufo_240.jpg",
+      "role": "corresponding unwatermarked negative example",
+      "sha256": "193203acc400e688083441cb8eaf4df2d2486f33eb81ece806dba9d5c788af1b"
+    }
+  ]
+}

@@ -25,6 +25,14 @@ dev = [
 p2 = [
   "scikit-learn>=1.7,<2",
 ]
+watermark = [
+  "PyWavelets==1.8.0",
+  "onnxruntime==1.23.2",
+  "bchlib==2.1.3",
+]
+watermark-audit = [
+  "invisible-watermark==0.2.0",
+]
 
 [project.scripts]
 image-trust = "image_trust.cli:main"

@@ -1,0 +1,186 @@
+{
+  "adapter_id": "sdxl_dwt_dct_v1",
+  "audit_date": "2026-08-11",
+  "audit_encoder": "invisible-watermark==0.2.0",
+  "decision_policy": {
+    "decision_eligible_on_positive": true,
+    "evidence_strength": "limited",
+    "negative_contribution": "neutral",
+    "rationale": "A match adds a high-specificity but forgeable open-ecosystem signal. Low recall limits coverage but does not invert a positive match into camera provenance."
+  },
+  "expected_bits": "101100111110110010010000011110111011000110011110",
+  "limitations": [
+    "The encoder is public, so a positive match cannot identify the creator or prove provenance.",
+    "The self-encoded screen shows severe recall loss after JPEG, WebP, resize, crop, and screenshot-like resampling.",
+    "No-match results are always neutral.",
+    "The local screen is reproducible but is not a future-generator or deployment-prevalence guarantee."
+  ],
+  "method": "dwtDct",
+  "native_sdxl_observation": {
+    "elapsed_seconds": 4.387,
+    "eligible_images": 1000,
+    "label_warning": "The dataset does not prove that the fixed watermark was enabled or retained; this is a coverage observation, not a positive-ground-truth recall set.",
+    "matched_bit_histogram": {
+      "15": 2,
+      "16": 11,
+      "17": 6,
+      "18": 19,
+      "19": 16,
+      "20": 36,
+      "21": 229,
+      "22": 68,
+      "23": 53,
+      "24": 48,
+      "25": 60,
+      "26": 82,
+      "27": 237,
+      "28": 64,
+      "29": 31,
+      "30": 20,
+      "31": 9,
+      "32": 4,
+      "33": 2,
+      "34": 2,
+      "36": 1
+    },
+    "max_matched_bits": 36,
+    "positive_matches": 0,
+    "positive_rate": 0.0
+  },
+  "negative_screen": {
+    "camera_photos": {
+      "elapsed_seconds": 4.325,
+      "eligible_images": 998,
+      "matched_bit_histogram": {
+        "12": 1,
+        "15": 6,
+        "16": 2,
+        "17": 6,
+        "18": 11,
+        "19": 44,
+        "20": 58,
+        "21": 316,
+        "22": 91,
+        "23": 84,
+        "24": 69,
+        "25": 66,
+        "26": 61,
+        "27": 74,
+        "28": 39,
+        "29": 40,
+        "30": 17,
+        "31": 7,
+        "32": 2,
+        "33": 2,
+        "34": 1,
+        "35": 1
+      },
+      "max_matched_bits": 35,
+      "positive_matches": 0,
+      "positive_rate": 0.0
+    },
+    "definition": "unique camera-photo files plus unique non-SDXL generated files found in the local Projective Geometry corpora",
+    "eligible_images": 3995,
+    "false_positive_rate": 0.0,
+    "non_sdxl_generated": {
+      "elapsed_seconds": 13.693,
+      "eligible_images": 2997,
+      "matched_bit_histogram": {
+        "12": 1,
+        "13": 2,
+        "14": 3,
+        "15": 9,
+        "16": 14,
+        "17": 22,
+        "18": 45,
+        "19": 83,
+        "20": 179,
+        "21": 786,
+        "22": 258,
+        "23": 243,
+        "24": 222,
+        "25": 244,
+        "26": 239,
+        "27": 305,
+        "28": 142,
+        "29": 85,
+        "30": 60,
+        "31": 26,
+        "32": 19,
+        "33": 4,
+        "34": 4,
+        "35": 1,
+        "36": 1
+      },
+      "max_matched_bits": 36,
+      "positive_matches": 0,
+      "positive_rate": 0.0
+    },
+    "positive_matches": 0,
+    "zero_error_one_sided_95_upper": 0.0007495893238461671
+  },
+  "operating_point": {
+    "bit_length": 48,
+    "match_rate_threshold": 0.9375,
+    "minimum_matched_bits": 45,
+    "threshold_id": "sdxl-dwt-dct-local-screen-v1-45-of-48"
+  },
+  "runtime_decoder": "demirror-dwt-dct-decoder-v1",
+  "runtime_dependency": "PyWavelets==1.8.0",
+  "schema_version": "sdxl-watermark-audit-v1",
+  "self_encoded_positive_screen": {
+    "elapsed_seconds": 41.841,
+    "source_images": 100,
+    "transforms": {
+      "crop10": {
+        "detected": 0,
+        "eligible_images": 99,
+        "mean_matched_bits": 23.101,
+        "min_matched_bits": 19,
+        "recall": 0.0
+      },
+      "jpeg85": {
+        "detected": 0,
+        "eligible_images": 100,
+        "mean_matched_bits": 23.41,
+        "min_matched_bits": 20,
+        "recall": 0.0
+      },
+      "jpeg95": {
+        "detected": 7,
+        "eligible_images": 100,
+        "mean_matched_bits": 26.17,
+        "min_matched_bits": 21,
+        "recall": 0.07
+      },
+      "original": {
+        "detected": 56,
+        "eligible_images": 100,
+        "mean_matched_bits": 38.23,
+        "min_matched_bits": 21,
+        "recall": 0.56
+      },
+      "resize075": {
+        "detected": 0,
+        "eligible_images": 97,
+        "mean_matched_bits": 22.433,
+        "min_matched_bits": 19,
+        "recall": 0.0
+      },
+      "screenshot125": {
+        "detected": 0,
+        "eligible_images": 100,
+        "mean_matched_bits": 23.94,
+        "min_matched_bits": 19,
+        "recall": 0.0
+      },
+      "webp80": {
+        "detected": 0,
+        "eligible_images": 100,
+        "mean_matched_bits": 22.84,
+        "min_matched_bits": 21,
+        "recall": 0.0
+      }
+    }
+  }
+}

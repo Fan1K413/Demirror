@@ -1,0 +1,103 @@
+{
+  "acceptance_rule": {
+    "accepted_schema": "BCH_5",
+    "maximum_accepted_corrected_bits": 3,
+    "native_bch_correction_capacity": 5,
+    "neural_bit_threshold": "logit >= 0",
+    "permissive_schema_fallback": false,
+    "required_version_bits": "0001"
+  },
+  "adapter_id": "trustmark_q_onnx_v1",
+  "audit_date": "2026-08-11",
+  "decision_policy": {
+    "decision_eligible": false,
+    "direction": "neutral",
+    "evidence_class": "unverified_identifier",
+    "raw_payload_returned": false
+  },
+  "limitations": [
+    "Only the Q model and default BCH_5 schema are accepted.",
+    "A valid local identifier does not identify its issuer or prove AI generation.",
+    "Remote identifier resolution is disabled.",
+    "No-match results are always neutral.",
+    "The local screen is reproducible but is not a deployment-prevalence guarantee."
+  ],
+  "model": {
+    "release": "official-onnx-Q-2026-04",
+    "sha256": "ee3268f057c9dabef680e169302f5973d0589feea86189ed229a896cc3aa88df",
+    "variant": "Q"
+  },
+  "negative_screen": {
+    "camera_photos": {
+      "elapsed_seconds": 57.398,
+      "eligible_images": 998,
+      "matched_schemas": {},
+      "positive_examples": [],
+      "positive_matches": 0,
+      "positive_rate": 0.0
+    },
+    "definition": "unique camera-photo files plus unique non-SDXL generated files in the local Projective Geometry corpora",
+    "eligible_images": 3995,
+    "false_positive_rate": 0.0,
+    "non_trustmark_generated": {
+      "elapsed_seconds": 162.998,
+      "eligible_images": 2997,
+      "matched_schemas": {},
+      "positive_examples": [],
+      "positive_matches": 0,
+      "positive_rate": 0.0
+    },
+    "positive_matches": 0,
+    "zero_error_one_sided_95_upper": 0.0007495893238461671
+  },
+  "official_fixture_screen": {
+    "negative_detected": false,
+    "negative_sha256": "193203acc400e688083441cb8eaf4df2d2486f33eb81ece806dba9d5c788af1b",
+    "positive_detected": true,
+    "positive_schema": "BCH_5",
+    "positive_sha256": "f388997ad006ae755e332a0fe3bae2a6a5f77bd8222f0e71ed09301c289e6922",
+    "transforms": {
+      "crop10": {
+        "corrected_bits": 0,
+        "detected": true,
+        "schema": "BCH_5"
+      },
+      "jpeg85": {
+        "corrected_bits": 1,
+        "detected": true,
+        "schema": "BCH_5"
+      },
+      "jpeg95": {
+        "corrected_bits": 1,
+        "detected": true,
+        "schema": "BCH_5"
+      },
+      "original": {
+        "corrected_bits": 0,
+        "detected": true,
+        "schema": "BCH_5"
+      },
+      "resize075": {
+        "corrected_bits": 0,
+        "detected": true,
+        "schema": "BCH_5"
+      },
+      "screenshot125": {
+        "corrected_bits": 0,
+        "detected": true,
+        "schema": "BCH_5"
+      },
+      "webp80": {
+        "corrected_bits": 0,
+        "detected": true,
+        "schema": "BCH_5"
+      }
+    }
+  },
+  "runtime_decoder": "demirror-trustmark-q-onnx-v1",
+  "runtime_dependencies": [
+    "onnxruntime==1.23.2",
+    "bchlib==2.1.3"
+  ],
+  "schema_version": "trustmark-q-watermark-audit-v1"
+}

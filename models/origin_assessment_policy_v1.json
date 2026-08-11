@@ -2,7 +2,7 @@
   "schema_version": "origin-assessment-policy-v1",
   "policy_version": "origin-assessment-v1",
   "decisions": {
-    "possible_ai": "A verified C2PA AI declaration or any registered P3 pixel detector score at/above its pre-registered high-confidence threshold.",
+    "possible_ai": "A verified C2PA AI declaration, any registered P3 pixel detector score at/above its pre-registered threshold, or a decision-eligible positive local watermark observation.",
     "no_ai_signal": "No high-confidence AI signal and no qualifying positive camera-capture evidence.",
     "possible_camera": "No high-confidence AI signal, plus either a trusted C2PA digitalCapture/computationalCapture declaration (high strength) or coherent camera/time/physical EXIF after a completed AI check (limited strength)."
   },
@@ -15,7 +15,7 @@
   "non_contributing_methods": {
     "camera_consistency": "Displayed for review only: the local labeled-control audit did not establish stable source separation.",
     "geometry": "Displayed for review only: official line classification, learned line sets, and explicit projective-consistency features all failed the held-out SDXL gate.",
-    "implicit_watermark": "No compatible local detector is configured, so it does not affect any decision."
+    "implicit_watermark": "The local SD/SDXL fixed-mark adapter may add limited AI support only at its registered 45/48-bit operating point. Its negative, unavailable, failed, or not-applicable results are neutral; open encoders prevent identity or provenance claims. TrustMark identifiers remain neutral unless separately bound to trusted provenance."
   },
   "limitations": [
     "EXIF metadata can be copied or edited; it can support only a limited possible-camera result and never overrides positive AI evidence.",
