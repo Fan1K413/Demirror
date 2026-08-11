@@ -1,4 +1,4 @@
-"""Conservative three-band origin assessment for local image reviews.
+"""Conservative two-band origin assessment for local image reviews.
 
 The result is deliberately categorical.  It may report a possible camera
 capture only from positive capture evidence; a missing AI signal is never
@@ -15,7 +15,7 @@ from typing import Literal
 from PIL import ExifTags, Image, UnidentifiedImageError
 from pydantic import BaseModel, ConfigDict, Field
 
-from image_trust.ai_likelihood.contracts import AiLikelihoodResult
+from image_trust.ai_likelihood.contracts import AiLikelihoodResult, AiSignal
 from image_trust.camera.contracts import CameraConsistencyObservation, CameraExperimentResult
 from image_trust.provenance.contracts import (
     C2paRecord,
@@ -48,14 +48,26 @@ class CameraMetadataEvidence(BaseModel):
     limitations: list[str] = Field(default_factory=list)
 
 
-class OriginAssessment(BaseModel):
-    """Auditable, three-band review result rather than a provenance verdict."""
+class AiScoreComponent(BaseModel):
+    """One transparent contribution to the bounded AI signal score."""
 
     model_config = ConfigDict(frozen=True)
 
-    schema_version: str = "origin-assessment-v1"
-    decision: Literal["possible_ai", "no_ai_signal", "possible_camera"]
+    points: int = Field(ge=-100, le=100)
+    state: Literal["positive", "negative", "neutral", "not_detected"]
+    explanation: str
+
+
+class OriginAssessment(BaseModel):
+    """Auditable three-band review result with a signed, non-probabilistic score."""
+
+    model_config = ConfigDict(frozen=True)
+
+    schema_version: str = "origin-assessment-v2"
+    decision: Literal["possible_ai", "possible_photo", "no_ai_signal"]
     evidence_strength: Literal["high", "limited"]
+    ai_score: int = Field(ge=-100, le=100)
+    score_components: dict[str, AiScoreComponent] = Field(default_factory=dict)
     summary: str
     explanation: str
     supporting_evidence: list[str] = Field(default_factory=list)
@@ -118,13 +130,13 @@ def assess_origin(
     camera_result: CameraExperimentResult | None = None,
     watermark_result: ImplicitWatermarkAssessment | None = None,
 ) -> OriginAssessment:
-    """Combine direct AI and direct capture signals without negative inference.
+    """Combine registered AI signals and limited camera counter-evidence.
 
-    The P1 camera measurement is surfaced but excluded: it has no registered
-    source-direction calibration in this project.  Coherent EXIF may support a
-    *limited* possible-camera review result only after the AI detector has
-    completed without a high-confidence signal.  It remains explicitly
-    spoofable and is always overridden by positive AI evidence.
+    ``ai_score`` is a signed, bounded evidence score, not a probability that
+    an image is AI-generated. Positive AI evidence raises it; trusted capture
+    records and coherent camera metadata lower it. Geometry and camera-parameter
+    measurements remain visible for review but receive zero points until a source
+    calibration exists.
     """
 
     metadata = inspect_camera_metadata(input_path)
@@ -149,21 +161,31 @@ def assess_origin(
     if verified_capture and not trusted_capture:
         limitations.append("c2pa_capture_declaration_not_trusted_for_camera_decision")
 
-    if ai_result.risk_band in {"high", "medium"} or watermark.decision_eligible:
-        ai_labels = _ai_evidence_labels(ai_result) if ai_result.risk_band in {"high", "medium"} else []
-        watermark_labels = _watermark_evidence_labels(watermark)
-        high_strength = (
-            ai_result.risk_band == "high" and ai_result.reliability_label == "high"
-        ) or watermark.strength == "strong"
+    score_components = _score_components(
+        ai_result,
+        watermark,
+        metadata,
+        trusted_capture=trusted_capture,
+    )
+    ai_score = max(-100, min(100, sum(component.points for component in score_components.values())))
+    positive_components = [
+        component for component in score_components.values() if component.points > 0
+    ]
+    possible_ai = ai_score >= 35
+    high_strength = any(component.points >= 60 for component in positive_components)
+    ai_labels = _ai_evidence_labels(ai_result) if any(
+        score_components[key].points > 0
+        for key in _PIXEL_COMPONENT_KEYS
+    ) else []
+    watermark_labels = _watermark_evidence_labels(watermark) if score_components["watermark"].points else []
+    if possible_ai:
         return OriginAssessment(
             decision="possible_ai",
             evidence_strength="high" if high_strength else "limited",
-            summary="可能为 AI",
-            explanation=(
-                "发现了高置信 AI 像素信号或已验证的 AI 来源声明。"
-                if high_strength
-                else "一个或多个已校准检测达到有限强度复核阈值；开放水印可能被复制，像素检测也受文件格式和传输变换限制，因此需要人工复核。"
-            ),
+            ai_score=ai_score,
+            score_components=score_components,
+            summary=_score_summary(ai_score),
+            explanation="已检出可计分的 AI 信号。AI 分数按各项加减分汇总。",
             supporting_evidence=ai_labels + watermark_labels,
             camera_metadata=metadata,
             verified_c2pa_capture_declaration=verified_capture,
@@ -173,34 +195,18 @@ def assess_origin(
             implicit_watermark=watermark,
             limitations=sorted(set(limitations)),
         )
-    if trusted_capture:
+    if ai_score < 0:
         return OriginAssessment(
-            decision="possible_camera",
-            evidence_strength="high",
-            summary="可能为实拍",
-            explanation="可信 C2PA 来源链支持为数字拍摄，且没有高置信 AI 信号；这不证明画面内容从未编辑。",
-            supporting_evidence=["可信 C2PA 数字拍摄来源链"],
-            camera_metadata=metadata,
-            verified_c2pa_capture_declaration=verified_capture,
-            trusted_c2pa_capture_declaration=trusted_capture,
-            declared_c2pa_source_types=source_types,
-            camera_consistency=camera_consistency,
-            implicit_watermark=watermark,
-            limitations=sorted(set(limitations)),
-        )
-    if ai_result.status == "available" and metadata.status == "coherent":
-        supporting = ["完整相机 EXIF（可复制或编辑）"]
-        if (
-            camera_result is not None
-            and camera_result.full_image.status.value == "ok"
-        ):
-            supporting.append("相机参数估计已完成（仅辅助复核）")
-        return OriginAssessment(
-            decision="possible_camera",
+            decision="possible_photo",
             evidence_strength="limited",
-            summary="可能为实拍",
-            explanation="AI 像素检测未达到高置信标准，且图片包含完整的相机、拍摄时间和物理拍摄参数。EXIF 可以被复制或编辑，因此这里只给出有限强度的实拍可能性。",
-            supporting_evidence=supporting,
+            ai_score=ai_score,
+            score_components=score_components,
+            summary=_score_summary(ai_score),
+            explanation="检测到可计分的拍摄来源或相机线索，AI 分数为负。",
+            supporting_evidence=_photo_evidence_labels(
+                metadata,
+                trusted_capture=trusted_capture,
+            ),
             camera_metadata=metadata,
             verified_c2pa_capture_declaration=verified_capture,
             trusted_c2pa_capture_declaration=trusted_capture,
@@ -212,9 +218,11 @@ def assess_origin(
     return OriginAssessment(
         decision="no_ai_signal",
         evidence_strength="limited",
-        summary="未检出 AI 信号",
-        explanation="没有出现高置信 AI 信号，也没有可信的数字拍摄来源链。这不是相机来源结论。",
-        supporting_evidence=["AI 像素检测未达到高置信标准"],
+        ai_score=ai_score,
+        score_components=score_components,
+        summary=_score_summary(ai_score),
+        explanation="没有出现足以达到 AI 判断分界的可计分 AI 信号。",
+        supporting_evidence=["未达到 AI 信号分界"],
         camera_metadata=metadata,
         verified_c2pa_capture_declaration=verified_capture,
         trusted_c2pa_capture_declaration=trusted_capture,
@@ -223,6 +231,156 @@ def assess_origin(
         implicit_watermark=watermark,
         limitations=sorted(set(limitations)),
     )
+
+
+def _score_components(
+    ai_result: AiLikelihoodResult,
+    watermark: ImplicitWatermarkAssessment,
+    metadata: CameraMetadataEvidence,
+    *,
+    trusted_capture: bool,
+) -> dict[str, AiScoreComponent]:
+    """Return the registered card-level score contributions for one review."""
+
+    verified_ai_declaration = any(
+        signal.name == "verified_c2pa" and signal.status == "available"
+        for signal in ai_result.signals
+    )
+    if verified_ai_declaration:
+        c2pa_declaration = AiScoreComponent(points=70, state="positive", explanation="C2PA 明确声明生成式内容")
+        c2pa_signature = AiScoreComponent(points=30, state="positive", explanation="C2PA 签名已通过本地验证")
+    else:
+        c2pa_declaration = AiScoreComponent(points=0, state="not_detected", explanation="未检出已验证的生成式来源声明")
+        c2pa_signature = AiScoreComponent(points=0, state="neutral", explanation="签名状态本身不指向 AI")
+    if trusted_capture:
+        c2pa_capture = AiScoreComponent(points=-20, state="negative", explanation="可信数字拍摄来源链")
+    else:
+        c2pa_capture = AiScoreComponent(points=0, state="neutral", explanation="未形成可信数字拍摄来源线索")
+
+    if watermark.decision_eligible and watermark.strength == "strong":
+        watermark_component = AiScoreComponent(points=80, state="positive", explanation="强度较高的 AI 隐式水印")
+    elif watermark.decision_eligible:
+        watermark_component = AiScoreComponent(points=50, state="positive", explanation="有限强度 AI 隐式水印")
+    elif watermark.status == "completed":
+        watermark_component = AiScoreComponent(points=0, state="not_detected", explanation="未检出可计分 AI 隐式水印")
+    else:
+        watermark_component = AiScoreComponent(points=0, state="neutral", explanation="水印检测未形成可用结论")
+
+    if metadata.status == "coherent":
+        metadata_component = AiScoreComponent(points=-15, state="negative", explanation="相机信息完整但可被复制或编辑")
+    elif metadata.status == "partial":
+        metadata_component = AiScoreComponent(points=-5, state="negative", explanation="检测到部分相机信息")
+    else:
+        metadata_component = AiScoreComponent(points=0, state="neutral", explanation="未检测到可用相机信息")
+
+    return {
+        **_pixel_score_components(ai_result),
+        "c2pa_declaration": c2pa_declaration,
+        "c2pa_signature": c2pa_signature,
+        "c2pa_capture": c2pa_capture,
+        "metadata": metadata_component,
+        "p0": AiScoreComponent(points=0, state="neutral", explanation="几何检查暂不参与 AI 分数"),
+        "camera": AiScoreComponent(points=0, state="neutral", explanation="相机参数暂不参与 AI 分数"),
+        "watermark": watermark_component,
+    }
+
+
+_PIXEL_COMPONENT_KEYS = (
+    "dda",
+    "safe",
+    "forensic",
+    "community",
+    "nonescape",
+)
+_PIXEL_SCORE_POLICY: dict[str, tuple[str, int, int]] = {
+    "dda_pixel_detector": ("dda", 60, 45),
+    "safe_pixel_detector": ("safe", 50, 30),
+    "forensic_clip_detector": ("forensic", 60, 50),
+    "community_forensics_detector": ("community", 60, 50),
+    "nonescape_mini_detector": ("nonescape", 50, 35),
+}
+
+
+def _pixel_score_components(ai_result: AiLikelihoodResult) -> dict[str, AiScoreComponent]:
+    signals = {signal.name: signal for signal in ai_result.signals}
+    components: dict[str, AiScoreComponent] = {}
+    pixel_signal_count = sum(name in _PIXEL_SCORE_POLICY for name in signals)
+    for signal_name, (key, high_points, limited_points) in _PIXEL_SCORE_POLICY.items():
+        signal = signals.get(signal_name)
+        components[key] = _score_pixel_signal(
+            signal,
+            ai_result,
+            high_points=high_points,
+            limited_points=limited_points,
+            pixel_signal_count=pixel_signal_count,
+        )
+    return components
+
+
+def _score_pixel_signal(
+    signal: AiSignal | None,
+    ai_result: AiLikelihoodResult,
+    *,
+    high_points: int,
+    limited_points: int,
+    pixel_signal_count: int,
+) -> AiScoreComponent:
+    if ai_result.status != "available":
+        return AiScoreComponent(points=0, state="neutral", explanation="像素检测未形成可用结果")
+    if signal is None or signal.status in {"not_run", "unavailable", "failed"}:
+        return AiScoreComponent(points=0, state="neutral", explanation="该像素检测未形成可用结果")
+    if signal.status != "available" or signal.value is None:
+        return AiScoreComponent(points=0, state="not_detected", explanation="未检出可计分 AI 像素信号")
+    high_threshold = _number(signal.details.get("high_confidence_threshold"))
+    limited_threshold = _number(signal.details.get("limited_review_threshold"))
+    high_eligible = signal.details.get("high_confidence_eligible") is not False
+    if high_threshold is not None and signal.value >= high_threshold:
+        if high_eligible:
+            return AiScoreComponent(points=high_points, state="positive", explanation="达到高强度 AI 像素阈值")
+        return AiScoreComponent(points=limited_points, state="positive", explanation="达到阈值，但当前格式只作有限强度复核")
+    if limited_threshold is not None and signal.value >= limited_threshold:
+        return AiScoreComponent(points=limited_points, state="positive", explanation="达到有限强度 AI 像素阈值")
+    if high_threshold is None and pixel_signal_count == 1 and ai_result.risk_band == "high":
+        return AiScoreComponent(points=high_points, state="positive", explanation="达到高强度 AI 像素阈值")
+    if high_threshold is None and pixel_signal_count == 1 and ai_result.risk_band == "medium":
+        return AiScoreComponent(points=limited_points, state="positive", explanation="达到有限强度 AI 像素阈值")
+    return AiScoreComponent(points=0, state="not_detected", explanation="未检出可计分 AI 像素信号")
+
+
+def _photo_evidence_labels(
+    metadata: CameraMetadataEvidence,
+    *,
+    trusted_capture: bool,
+) -> list[str]:
+    labels: list[str] = []
+    if trusted_capture:
+        labels.append("可信数字拍摄来源链")
+    if metadata.status == "coherent":
+        labels.append("完整相机信息")
+    elif metadata.status == "partial":
+        labels.append("部分相机信息")
+    return labels or ["可计分拍摄线索"]
+
+
+def _score_summary(ai_score: int) -> str:
+    """Return an intentionally probabilistic, human-facing label for a signed score."""
+
+    if ai_score >= 65:
+        return "大概率为 AI"
+    if ai_score >= 35:
+        return "可能为 AI"
+    if ai_score > 20:
+        return "小概率为 AI"
+    if ai_score >= 0:
+        return "未检出 AI 信号"
+    return "可能为实拍"
+
+
+def _number(value: object) -> float | None:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
 
 
 def _watermark_evidence_labels(result: ImplicitWatermarkAssessment) -> list[str]:

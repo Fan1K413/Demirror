@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 import argparse
-import json
 from pathlib import Path
 
-from image_trust.web.jobs import WebJobOutcome, build_local_runner
+from image_trust.web.jobs import WebJobOutcome, _write_json, build_local_runner
 from image_trust.watermark.remote import load_remote_verification_settings
 
 
@@ -35,14 +34,5 @@ def main(argv: list[str] | None = None) -> int:
         )
     _write_json(outcome_path, outcome.model_dump(mode="json"))
     return 0
-
-
-def _write_json(path: Path, value: object) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_suffix(f"{path.suffix}.tmp")
-    temporary.write_text(json.dumps(value, ensure_ascii=False), encoding="utf-8")
-    temporary.replace(path)
-
-
 if __name__ == "__main__":
     raise SystemExit(main())

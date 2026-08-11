@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from threading import Event
 
-from image_trust.web.jobs import LocalJobStore, WebJob, WebJobOutcome, WebJobStatus
+from image_trust.web.jobs import LocalJobStore, WebJob, WebJobOutcome, WebJobStatus, _write_json
 
 
 def test_local_job_store_persists_completed_job_and_artifact(tmp_path) -> None:
@@ -37,6 +38,58 @@ def test_local_job_store_persists_completed_job_and_artifact(tmp_path) -> None:
         assert store.artifact_path(created.job_id, "../job.json") is None
     finally:
         store.close()
+
+
+def test_local_job_store_exposes_completed_cards_before_the_job_finishes(tmp_path) -> None:
+    partial_written = Event()
+    release_job = Event()
+
+    def runner(_: Path, job_dir: Path, report_progress) -> WebJobOutcome:
+        report_progress("geometry_complete", 20)
+        (job_dir / "web_partial_result.json").write_text(
+            json.dumps({"p0": {"completed": True}}), encoding="utf-8"
+        )
+        partial_written.set()
+        assert release_job.wait(timeout=5)
+        return WebJobOutcome(status=WebJobStatus.COMPLETED, result={"complete": True})
+
+    store = LocalJobStore(tmp_path / "jobs", runner)
+    try:
+        created = store.create_job("example.jpg", b"image-bytes")
+        assert partial_written.wait(timeout=5)
+        partial_snapshot = store.get_snapshot(created.job_id)
+        assert partial_snapshot is not None
+        assert partial_snapshot.job.status is WebJobStatus.RUNNING
+        assert partial_snapshot.result == {"p0": {"completed": True}}
+
+        release_job.set()
+        completed_snapshot = store.wait(created.job_id)
+        assert completed_snapshot is not None
+        assert completed_snapshot.result == {"complete": True}
+        assert not (tmp_path / "jobs" / created.job_id / "web_partial_result.json").exists()
+    finally:
+        release_job.set()
+        store.close()
+
+
+def test_atomic_json_writer_retries_a_transient_windows_replace_lock(tmp_path, monkeypatch) -> None:
+    destination = tmp_path / "web_partial_result.json"
+    original_replace = Path.replace
+    attempts = 0
+
+    def replace_once_locked(path: Path, target: Path):
+        nonlocal attempts
+        attempts += 1
+        if attempts == 1:
+            raise PermissionError("transient reader lock")
+        return original_replace(path, target)
+
+    monkeypatch.setattr(Path, "replace", replace_once_locked)
+
+    _write_json(destination, {"p0": {"completed": True}})
+
+    assert attempts == 2
+    assert json.loads(destination.read_text(encoding="utf-8")) == {"p0": {"completed": True}}
 
 
 def test_local_job_store_rejects_unsupported_or_oversized_uploads(tmp_path) -> None:

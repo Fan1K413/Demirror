@@ -20,7 +20,7 @@
         <section class="intro" aria-labelledby="page-title">
           <p class="intro-kicker">本地图片审阅工具</p>
           <h1 id="page-title">图像来源分析</h1>
-          <p class="intro-copy">检查图片中的 AI 像素信号、来源记录、相机信息和画面结构。结果只用于辅助审阅，不等同于来源证明。</p>
+          <p class="intro-copy">检查图片中的 AI 像素信号、来源记录、相机信息和画面结构。</p>
         </section>
 
         <section class="workspace" aria-label="上传与分析">
@@ -70,7 +70,7 @@
               <li><strong>来源信息</strong><span>C2PA、EXIF 与隐式水印</span></li>
               <li><strong>画面结构</strong><span>线段方向、消失关系与相机参数</span></li>
             </ul>
-            <p class="method-note">未检出 AI 信号不代表图片一定为实拍。几何和相机参数目前只用于复核。</p>
+            <p class="method-note">几何和相机参数目前用于复核。</p>
           </aside>
         </section>
 
@@ -104,10 +104,16 @@
             </div>
           </div>
 
-          <article class="summary-card overall-summary">
+          <article id="overall-summary" class="summary-card overall-summary">
             <p class="card-kicker">综合判断</p>
             <p id="overall-observation" class="result-value">等待结果</p>
             <p id="overall-description" class="card-description"></p>
+            <div id="overall-score-ring" class="overall-score-ring" role="img" aria-label="AI 分数等待结果">
+              <div class="overall-score-ring-inner">
+                <strong id="overall-score-value">—</strong>
+                <span>AI 分数</span>
+              </div>
+            </div>
             <dl id="overall-metrics" class="metric-grid"></dl>
           </article>
 
@@ -115,7 +121,7 @@
             <div>
               <h2>检测明细</h2>
             </div>
-            <p class="section-note">先看各项结论；分数、阈值和模型信息收在“查看数据”中。</p>
+            <p class="section-note">每项显示对 AI 分数的贡献；阈值和模型信息收在“数据”中。</p>
           </div>
           <div class="summary-grid">
             <div class="evidence-table-head" aria-hidden="true">
@@ -123,44 +129,86 @@
               <span>本次结果</span>
               <span>说明</span>
             </div>
-            <article class="summary-card">
+            <article id="dda-card" class="summary-card evidence-card">
               <div class="evidence-summary">
-                <div class="evidence-label"><p class="card-kicker">AI 像素信号</p><details class="metric-details"><summary>数据</summary><dl id="p3-metrics" class="metric-grid"></dl></details></div>
-                <div class="evidence-result"><p id="p3-observation" class="result-value">等待结果</p></div>
-                <p id="p3-description" class="card-description"></p>
+                <div class="evidence-label"><p class="card-kicker">DDA 像素检测</p><span id="dda-score" class="contribution-score">等待</span><details class="metric-details"><summary>数据</summary><dl id="dda-metrics" class="metric-grid"></dl></details></div>
+                <div class="evidence-result"><p id="dda-observation" class="result-value">等待结果</p></div>
+                <p id="dda-description" class="card-description"></p>
               </div>
             </article>
-            <article class="summary-card">
+            <article id="safe-card" class="summary-card evidence-card">
               <div class="evidence-summary">
-                <div class="evidence-label"><p class="card-kicker">来源记录</p><details class="metric-details"><summary>数据</summary><dl id="c2pa-metrics" class="metric-grid"></dl></details></div>
-                <div class="evidence-result"><p id="c2pa-observation" class="result-value">等待结果</p></div>
-                <p id="c2pa-description" class="card-description"></p>
+                <div class="evidence-label"><p class="card-kicker">SAFE 纹理检测</p><span id="safe-score" class="contribution-score">等待</span><details class="metric-details"><summary>数据</summary><dl id="safe-metrics" class="metric-grid"></dl></details></div>
+                <div class="evidence-result"><p id="safe-observation" class="result-value">等待结果</p></div>
+                <p id="safe-description" class="card-description"></p>
               </div>
             </article>
-            <article class="summary-card">
+            <article id="forensic-card" class="summary-card evidence-card">
               <div class="evidence-summary">
-                <div class="evidence-label"><p class="card-kicker">相机信息</p><details class="metric-details"><summary>数据</summary><dl id="metadata-metrics" class="metric-grid"></dl></details></div>
+                <div class="evidence-label"><p class="card-kicker">耐压缩像素检测</p><span id="forensic-score" class="contribution-score">等待</span><details class="metric-details"><summary>数据</summary><dl id="forensic-metrics" class="metric-grid"></dl></details></div>
+                <div class="evidence-result"><p id="forensic-observation" class="result-value">等待结果</p></div>
+                <p id="forensic-description" class="card-description"></p>
+              </div>
+            </article>
+            <article id="community-card" class="summary-card evidence-card">
+              <div class="evidence-summary">
+                <div class="evidence-label"><p class="card-kicker">跨生成器像素检测</p><span id="community-score" class="contribution-score">等待</span><details class="metric-details"><summary>数据</summary><dl id="community-metrics" class="metric-grid"></dl></details></div>
+                <div class="evidence-result"><p id="community-observation" class="result-value">等待结果</p></div>
+                <p id="community-description" class="card-description"></p>
+              </div>
+            </article>
+            <article id="nonescape-card" class="summary-card evidence-card">
+              <div class="evidence-summary">
+                <div class="evidence-label"><p class="card-kicker">Nonescape Mini</p><span id="nonescape-score" class="contribution-score">等待</span><details class="metric-details"><summary>数据</summary><dl id="nonescape-metrics" class="metric-grid"></dl></details></div>
+                <div class="evidence-result"><p id="nonescape-observation" class="result-value">等待结果</p></div>
+                <p id="nonescape-description" class="card-description"></p>
+              </div>
+            </article>
+            <article id="c2pa-declaration-card" class="summary-card evidence-card">
+              <div class="evidence-summary">
+                <div class="evidence-label"><p class="card-kicker">生成式来源声明</p><span id="c2pa-declaration-score" class="contribution-score">等待</span><details class="metric-details"><summary>数据</summary><dl id="c2pa-declaration-metrics" class="metric-grid"></dl></details></div>
+                <div class="evidence-result"><p id="c2pa-declaration-observation" class="result-value">等待结果</p></div>
+                <p id="c2pa-declaration-description" class="card-description"></p>
+              </div>
+            </article>
+            <article id="c2pa-signature-card" class="summary-card evidence-card">
+              <div class="evidence-summary">
+                <div class="evidence-label"><p class="card-kicker">来源记录签名</p><span id="c2pa-signature-score" class="contribution-score">等待</span><details class="metric-details"><summary>数据</summary><dl id="c2pa-signature-metrics" class="metric-grid"></dl></details></div>
+                <div class="evidence-result"><p id="c2pa-signature-observation" class="result-value">等待结果</p></div>
+                <p id="c2pa-signature-description" class="card-description"></p>
+              </div>
+            </article>
+            <article id="c2pa-capture-card" class="summary-card evidence-card">
+              <div class="evidence-summary">
+                <div class="evidence-label"><p class="card-kicker">数字拍摄来源</p><span id="c2pa-capture-score" class="contribution-score">等待</span><details class="metric-details"><summary>数据</summary><dl id="c2pa-capture-metrics" class="metric-grid"></dl></details></div>
+                <div class="evidence-result"><p id="c2pa-capture-observation" class="result-value">等待结果</p></div>
+                <p id="c2pa-capture-description" class="card-description"></p>
+              </div>
+            </article>
+            <article id="metadata-card" class="summary-card evidence-card">
+              <div class="evidence-summary">
+                <div class="evidence-label"><p class="card-kicker">相机信息</p><span id="metadata-score" class="contribution-score">等待</span><details class="metric-details"><summary>数据</summary><dl id="metadata-metrics" class="metric-grid"></dl></details></div>
                 <div class="evidence-result"><p id="metadata-observation" class="result-value">等待结果</p></div>
                 <p id="metadata-description" class="card-description"></p>
               </div>
             </article>
-            <article class="summary-card">
+            <article id="p0-card" class="summary-card evidence-card">
               <div class="evidence-summary">
-                <div class="evidence-label"><p class="card-kicker">几何结构</p><details class="metric-details"><summary>数据</summary><dl id="p0-metrics" class="metric-grid"></dl></details></div>
+                <div class="evidence-label"><p class="card-kicker">几何结构</p><span id="p0-score" class="contribution-score">等待</span><details class="metric-details"><summary>数据</summary><dl id="p0-metrics" class="metric-grid"></dl></details></div>
                 <div class="evidence-result"><p id="p0-observation" class="result-value">等待结果</p></div>
                 <p id="p0-description" class="card-description"></p>
               </div>
             </article>
-            <article class="summary-card">
+            <article id="camera-card" class="summary-card evidence-card">
               <div class="evidence-summary">
-                <div class="evidence-label"><p class="card-kicker">相机参数一致性</p><details class="metric-details"><summary>数据</summary><dl id="camera-metrics" class="metric-grid"></dl></details></div>
+                <div class="evidence-label"><p class="card-kicker">相机参数一致性</p><span id="camera-score" class="contribution-score">等待</span><details class="metric-details"><summary>数据</summary><dl id="camera-metrics" class="metric-grid"></dl></details></div>
                 <div class="evidence-result"><p id="camera-observation" class="result-value">等待结果</p></div>
                 <p id="camera-description" class="card-description"></p>
               </div>
             </article>
-            <article class="summary-card">
+            <article id="watermark-card" class="summary-card evidence-card">
               <div class="evidence-summary">
-                <div class="evidence-label"><p class="card-kicker">隐式水印</p><details class="metric-details"><summary>数据</summary><dl id="watermark-metrics" class="metric-grid"></dl></details></div>
+                <div class="evidence-label"><p class="card-kicker">隐式水印</p><span id="watermark-score" class="contribution-score">等待</span><details class="metric-details"><summary>数据</summary><dl id="watermark-metrics" class="metric-grid"></dl></details></div>
                 <div class="evidence-result"><p id="watermark-observation" class="result-value">等待结果</p></div>
                 <p id="watermark-description" class="card-description"></p>
               </div>
@@ -172,7 +220,7 @@
               <div>
                 <h2 id="visuals-title">图像标注</h2>
               </div>
-              <p>标注颜色表示线段分组或待复核位置，不代表 AI 概率。</p>
+              <p>标注颜色表示线段分组或待复核位置。</p>
             </div>
             <div id="visual-grid" class="visual-grid"></div>
           </section>

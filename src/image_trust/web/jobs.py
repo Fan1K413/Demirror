@@ -202,10 +202,24 @@ class LocalJobStore:
         result: dict[str, Any] | None = None
         if job.result_artifact:
             result_path = _safe_relative(job_dir, job.result_artifact)
-            if result_path.is_file():
-                raw = json.loads(result_path.read_text(encoding="utf-8"))
-                if isinstance(raw, dict):
-                    result = raw
+            try:
+                if result_path.is_file():
+                    raw = json.loads(result_path.read_text(encoding="utf-8"))
+                    if isinstance(raw, dict):
+                        result = raw
+            except (OSError, ValueError, json.JSONDecodeError):
+                pass
+        elif job.status is WebJobStatus.RUNNING:
+            partial_path = job_dir / "web_partial_result.json"
+            try:
+                if partial_path.is_file():
+                    raw = json.loads(partial_path.read_text(encoding="utf-8"))
+                    if isinstance(raw, dict):
+                        result = raw
+            except (OSError, ValueError, json.JSONDecodeError):
+                # The worker publishes atomically. If Windows momentarily holds
+                # the prior file open, keep the job running and try next poll.
+                pass
         return WebJobSnapshot(job=job, result=result)
 
     def artifact_path(self, job_id: str, relative_path: str) -> Path | None:
@@ -316,6 +330,12 @@ class LocalJobStore:
                 return
             result_path = job_dir / "web_result.json"
             _write_json(result_path, outcome.result)
+            try:
+                (job_dir / "web_partial_result.json").unlink(missing_ok=True)
+            except OSError:
+                # A reader can briefly retain the old partial file on Windows.
+                # The final result artifact takes precedence for all snapshots.
+                pass
             latest = self.get_snapshot(job_id)
             if latest is None or latest.job.status is WebJobStatus.CANCELLED:
                 return
@@ -532,9 +552,30 @@ def build_local_runner(
                 limitations=["p0_analysis_not_available"],
                 errors=p0_result.diagnostics.errors,
             )
+        result: dict[str, Any] = {
+            "schema_version": "demirror-web-result-v1",
+            "p0": p0_dump,
+            "artifacts": {
+                "input_image": upload_path.name,
+                "lines_overlay": "p0/lines_overlay.png",
+                "anomalous_lines_overlay": "p0/anomalous_lines_overlay.png",
+                "p0_result": "p0/result.json",
+            },
+        }
+
+        def write_partial_result() -> None:
+            """Atomically expose every completed card while the job is running."""
+
+            _write_json(job_dir / "web_partial_result.json", result)
+
+        limitations = list(p0_result.evidence.limitations)
+        write_partial_result()
         report_progress("provenance", 25)
         c2pa_record = inspect_c2pa_asset(upload_path, c2pa_config)
         write_c2pa_record(job_dir / "c2pa" / "c2pa_result.json", c2pa_record)
+        result["c2pa"] = c2pa_record.model_dump(mode="json")
+        result["artifacts"]["c2pa_result"] = "c2pa/c2pa_result.json"
+        write_partial_result()
         report_progress("watermark", 27)
         offline_watermark = assess_implicit_watermarks(upload_path, watermark_adapters)
         watermark_results = list(offline_watermark.adapters)
@@ -547,27 +588,25 @@ def build_local_runner(
             )
             watermark_results.extend(openai_result.adapters)
         watermark_result = aggregate_watermark_results(watermark_results)
-        limitations = list(p0_result.evidence.limitations)
+        result["watermark"] = watermark_result.model_dump(mode="json")
+        write_partial_result()
         p3_result = assess_high_confidence_ai(
             upload_path,
             c2pa_record,
             progress_callback=report_progress,
         )
         limitations.extend(p3_result.limitations)
-        result: dict[str, Any] = {
-            "schema_version": "demirror-web-result-v1",
-            "p0": p0_dump,
-            "p3": p3_result.model_dump(mode="json"),
-            "c2pa": c2pa_record.model_dump(mode="json"),
-            "watermark": watermark_result.model_dump(mode="json"),
-            "artifacts": {
-                "input_image": upload_path.name,
-                "lines_overlay": "p0/lines_overlay.png",
-                "anomalous_lines_overlay": "p0/anomalous_lines_overlay.png",
-                "p0_result": "p0/result.json",
-                "c2pa_result": "c2pa/c2pa_result.json",
-            },
-        }
+        result["p3"] = p3_result.model_dump(mode="json")
+        partial_origin = assess_origin(
+            upload_path,
+            p3_result,
+            c2pa_record,
+            watermark_result=watermark_result,
+        )
+        result["origin"] = partial_origin.model_dump(mode="json")
+        limitations.extend(partial_origin.limitations)
+        result["limitations"] = sorted(set(limitations))
+        write_partial_result()
         report_progress("camera", 88)
         try:
             camera_result = analyze_camera_image(upload_path, camera_config, job_dir / "camera")
@@ -663,10 +702,24 @@ def _now() -> str:
 
 
 def _write_json(path: Path, value: object) -> None:
+    """Write JSON atomically, tolerating transient Windows reader locks."""
+
     path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_suffix(f"{path.suffix}.tmp")
-    temporary.write_text(
-        json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True),
-        encoding="utf-8",
-    )
-    temporary.replace(path)
+    encoded = json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True)
+    last_error: OSError | None = None
+    for attempt in range(12):
+        temporary = path.with_name(f".{path.name}.{uuid.uuid4().hex}.tmp")
+        try:
+            temporary.write_text(encoded, encoding="utf-8")
+            temporary.replace(path)
+            return
+        except PermissionError as error:
+            last_error = error
+            time.sleep(0.05 * (attempt + 1))
+        finally:
+            try:
+                temporary.unlink(missing_ok=True)
+            except OSError:
+                pass
+    if last_error is not None:
+        raise last_error
