@@ -23,6 +23,7 @@ from image_trust.camera.config import load_camera_config
 from image_trust.camera.contracts import CameraEstimateStatus
 from image_trust.camera.pipeline import analyze_camera_image
 from image_trust.ai_likelihood.dda import assess_high_confidence_ai
+from image_trust.geometry_ai.inference import assess_geometry_ai
 from image_trust.origin import assess_origin
 from image_trust.pipeline import analyze_image
 from image_trust.provenance.c2pa import inspect_c2pa_asset, write_c2pa_record
@@ -527,6 +528,7 @@ def build_local_runner(
     p0_config = load_config(root / "configs" / "p0.yaml")
     c2pa_config = load_c2pa_config(root / "configs" / "p1_c2pa.yaml")
     camera_config = load_camera_config(root / "configs" / "p1_geocalib.yaml")
+    geometry_relationship_model = root / "models" / "geometry_relationship_v2.json"
     watermark_adapters = build_offline_watermark_adapters()
     configured_remote = remote_settings or RemoteVerificationSettings()
 
@@ -552,9 +554,14 @@ def build_local_runner(
                 limitations=["p0_analysis_not_available"],
                 errors=p0_result.diagnostics.errors,
             )
+        geometry_relationship = assess_geometry_ai(
+            upload_path,
+            model_path=geometry_relationship_model,
+        )
         result: dict[str, Any] = {
             "schema_version": "demirror-web-result-v1",
             "p0": p0_dump,
+            "geometry_ai": geometry_relationship.model_dump(mode="json"),
             "artifacts": {
                 "input_image": upload_path.name,
                 "lines_overlay": "p0/lines_overlay.png",
@@ -568,7 +575,7 @@ def build_local_runner(
 
             _write_json(job_dir / "web_partial_result.json", result)
 
-        limitations = list(p0_result.evidence.limitations)
+        limitations = [*p0_result.evidence.limitations, *geometry_relationship.limitations]
         write_partial_result()
         report_progress("provenance", 25)
         c2pa_record = inspect_c2pa_asset(upload_path, c2pa_config)
@@ -602,6 +609,7 @@ def build_local_runner(
             p3_result,
             c2pa_record,
             watermark_result=watermark_result,
+            geometry_result=geometry_relationship,
         )
         result["origin"] = partial_origin.model_dump(mode="json")
         limitations.extend(partial_origin.limitations)
@@ -638,6 +646,7 @@ def build_local_runner(
             c2pa_record,
             camera_result,
             watermark_result,
+            geometry_relationship,
         )
         result["origin"] = origin.model_dump(mode="json")
         limitations.extend(origin.limitations)

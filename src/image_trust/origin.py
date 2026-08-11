@@ -17,6 +17,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from image_trust.ai_likelihood.contracts import AiLikelihoodResult, AiSignal
 from image_trust.camera.contracts import CameraConsistencyObservation, CameraExperimentResult
+from image_trust.geometry_ai.contracts import GeometryRelationshipResult
 from image_trust.provenance.contracts import (
     C2paRecord,
     C2paSignatureValidationStatus,
@@ -129,6 +130,7 @@ def assess_origin(
     c2pa_record: C2paRecord,
     camera_result: CameraExperimentResult | None = None,
     watermark_result: ImplicitWatermarkAssessment | None = None,
+    geometry_result: GeometryRelationshipResult | None = None,
 ) -> OriginAssessment:
     """Combine registered AI signals and limited camera counter-evidence.
 
@@ -136,7 +138,9 @@ def assess_origin(
     an image is AI-generated. Positive AI evidence raises it; trusted capture
     records and coherent camera metadata lower it. Geometry and camera-parameter
     measurements remain visible for review but receive zero points until a source
-    calibration exists.
+    calibration exists.  The registered geometry relationship model is an
+    exception: its contribution is explicitly capped because it is a weak,
+    generator-limited auxiliary signal rather than provenance evidence.
     """
 
     metadata = inspect_camera_metadata(input_path)
@@ -158,6 +162,8 @@ def assess_origin(
     ]
     if camera_consistency != "not_run":
         limitations.append("camera_consistency_not_calibrated_for_origin_decision")
+    if geometry_result is not None:
+        limitations.extend(geometry_result.limitations)
     if verified_capture and not trusted_capture:
         limitations.append("c2pa_capture_declaration_not_trusted_for_camera_decision")
 
@@ -166,6 +172,7 @@ def assess_origin(
         watermark,
         metadata,
         trusted_capture=trusted_capture,
+        geometry_result=geometry_result,
     )
     ai_score = max(-100, min(100, sum(component.points for component in score_components.values())))
     positive_components = [
@@ -239,6 +246,7 @@ def _score_components(
     metadata: CameraMetadataEvidence,
     *,
     trusted_capture: bool,
+    geometry_result: GeometryRelationshipResult | None,
 ) -> dict[str, AiScoreComponent]:
     """Return the registered card-level score contributions for one review."""
 
@@ -279,10 +287,40 @@ def _score_components(
         "c2pa_signature": c2pa_signature,
         "c2pa_capture": c2pa_capture,
         "metadata": metadata_component,
-        "p0": AiScoreComponent(points=0, state="neutral", explanation="几何检查暂不参与 AI 分数"),
-        "camera": AiScoreComponent(points=0, state="neutral", explanation="相机参数暂不参与 AI 分数"),
+        "p0": _score_geometry_relationship(geometry_result),
+        "camera": AiScoreComponent(
+            points=0,
+            state="neutral",
+            explanation="相机参数一致性尚未形成可复现的来源区分能力，仅供复核",
+        ),
         "watermark": watermark_component,
     }
+
+
+def _score_geometry_relationship(
+    result: GeometryRelationshipResult | None,
+) -> AiScoreComponent:
+    """Map the registered, bounded geometry tiers to transparent score points."""
+
+    if result is None:
+        return AiScoreComponent(points=0, state="neutral", explanation="几何关系模型未运行")
+    if result.status == "not_applicable":
+        return AiScoreComponent(points=0, state="neutral", explanation="可用直线关系不足，未形成几何分数")
+    if result.status != "available" or result.probability is None:
+        return AiScoreComponent(points=0, state="neutral", explanation="几何关系模型未形成可用结果")
+    if result.risk_band == "high":
+        return AiScoreComponent(
+            points=25,
+            state="positive",
+            explanation="线段关系达到经独立留出集校准的较强几何 AI 线索阈值",
+        )
+    if result.risk_band == "medium":
+        return AiScoreComponent(
+            points=10,
+            state="positive",
+            explanation="线段关系达到辅助几何 AI 线索阈值；该项不单独给出 AI 结论",
+        )
+    return AiScoreComponent(points=0, state="not_detected", explanation="未检出达到计分阈值的几何 AI 线索")
 
 
 _PIXEL_COMPONENT_KEYS = (

@@ -259,7 +259,7 @@ def train(args: argparse.Namespace) -> tuple[GeometryRelationshipModel, dict[str
         calibration_raw = _raw_mlp_logit(classifier, x_calibration)
         calibrator = _calibrate(calibration_raw, y_calibration)
         calibration_probability = _probability(calibrator, calibration_raw)
-        threshold = _threshold(calibration_probability[y_calibration == 0], 0.05)
+        threshold = _threshold(calibration_probability[y_calibration == 0], args.target_fpr)
         metrics = _metrics(y_calibration, calibration_probability, threshold)
         candidates.append((f"mlp_{hidden[0]}_{hidden[1]}", classifier, calibrator, calibration_probability, metrics))
     selected = max(
@@ -271,10 +271,12 @@ def train(args: argparse.Namespace) -> tuple[GeometryRelationshipModel, dict[str
         ),
     )
     candidate_name, classifier, calibrator, calibration_probability, calibration_metrics = selected
-    ai_threshold = _threshold(calibration_probability[y_calibration == 0], 0.05)
-    strong_threshold = _threshold(calibration_probability[y_calibration == 0], 0.01)
+    ai_threshold = _threshold(calibration_probability[y_calibration == 0], args.target_fpr)
+    strong_threshold = _threshold(calibration_probability[y_calibration == 0], args.strong_fpr)
     test_probability = _probability(calibrator, _raw_mlp_logit(classifier, x_test))
     test_metrics = _metrics(y_test, test_probability, ai_threshold)
+    strong_calibration_metrics = _metrics(y_calibration, calibration_probability, strong_threshold)
+    strong_test_metrics = _metrics(y_test, test_probability, strong_threshold)
     test_metrics["true_positive_rate_bootstrap_95_interval"] = _bootstrap_tpr_interval(
         y_test, test_probability, ai_threshold
     )
@@ -302,6 +304,8 @@ def train(args: argparse.Namespace) -> tuple[GeometryRelationshipModel, dict[str
         "candidate_calibration_metrics": candidate_audit,
         "calibration_at_target_fpr": calibration_metrics,
         "held_out_test": test_metrics,
+        "calibration_at_strong_fpr": strong_calibration_metrics,
+        "held_out_test_at_strong_fpr": strong_test_metrics,
         "held_out_test_by_archive": by_archive,
     }
     layers = [
@@ -313,7 +317,7 @@ def train(args: argparse.Namespace) -> tuple[GeometryRelationshipModel, dict[str
         for index, (weights, bias) in enumerate(zip(classifier.coefs_, classifier.intercepts_))
     ]
     model = GeometryRelationshipModel(
-        model_version="geometry-relationship-2026-08-09.1",
+        model_version="geometry-relationship-2026-08-11.1",
         feature_schema_version=FEATURE_SCHEMA_VERSION,
         feature_names=names,
         standardizer_mean=scaler.mean_.astype(float).tolist(),
@@ -334,7 +338,8 @@ def train(args: argparse.Namespace) -> tuple[GeometryRelationshipModel, dict[str
             "calibration": "PixArt, ids 351-425",
             "held_out_test": "SDXL, ids 426-500",
             "real_image_duplicate_policy": "deduplicated by SHA-256 and numeric identifier split",
-            "target_false_positive_rate": 0.05,
+            "target_false_positive_rate": args.target_fpr,
+            "strong_false_positive_rate": args.strong_fpr,
         },
         evaluation=evaluation,
         limitations=[
@@ -352,9 +357,10 @@ def train(args: argparse.Namespace) -> tuple[GeometryRelationshipModel, dict[str
         "evaluation": evaluation,
         "decision": "candidate_requires_acceptance_gate",
         "acceptance_gate": {
-            "held_out_test_tpr_at_calibration_5pct_fpr": 0.70,
-            "held_out_test_fpr_max": 0.08,
-            "hard_real_control_fpr_max": 0.20,
+            "role": "bounded_supporting_score_not_standalone_origin_verdict",
+            "held_out_test_tpr_min": 0.30,
+            "held_out_test_fpr_max": 0.25,
+            "strong_tier_calibration_fpr": args.strong_fpr,
         },
     }
     return model, report, records
@@ -371,10 +377,24 @@ def main() -> int:
             Path("data/p3_aigc_v2/extracted"),
         ],
     )
-    parser.add_argument("--output-model", type=Path, default=Path("models/geometry_relationship_v1.json"))
-    parser.add_argument("--output-dir", type=Path, default=Path("outputs/geometry_relationship_v1"))
+    parser.add_argument("--output-model", type=Path, default=Path("models/geometry_relationship_v2.json"))
+    parser.add_argument("--output-dir", type=Path, default=Path("outputs/geometry_relationship_v2"))
     parser.add_argument("--workers", type=int, default=4)
+    parser.add_argument(
+        "--target-fpr",
+        type=float,
+        default=0.20,
+        help="Calibration false-positive rate for the limited (+10) geometry tier.",
+    )
+    parser.add_argument(
+        "--strong-fpr",
+        type=float,
+        default=0.05,
+        help="Calibration false-positive rate for the stronger (+25) geometry tier.",
+    )
     args = parser.parse_args()
+    if not 0.0 < args.strong_fpr <= args.target_fpr < 1.0:
+        raise ValueError("Require 0 < --strong-fpr <= --target-fpr < 1")
     model, report, records = train(args)
     args.output_model.parent.mkdir(parents=True, exist_ok=True)
     args.output_dir.mkdir(parents=True, exist_ok=True)

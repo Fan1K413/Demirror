@@ -357,7 +357,11 @@
     const metricDetails = metricGrid.closest("details");
     if (metricDetails) {
       metricDetails.hidden = metrics.length === 0;
-      metricDetails.open = false;
+      // Polling refreshes completed cards while slower checks are still
+      // running. Preserve an explicitly opened data panel across those
+      // refreshes; it should close only when the user closes it, opens another
+      // panel, clicks outside, scrolls the page, or the card loses its data.
+      if (metrics.length === 0) metricDetails.open = false;
     }
     window.requestAnimationFrame(() => syncMetricScrollbar(metricGrid));
   }
@@ -405,8 +409,8 @@
   }
 
   function fallbackContribution(key) {
-    if (key === "p0") return { points: 0, state: "neutral", explanation: "几何检查暂不参与 AI 分数" };
-    if (key === "camera") return { points: 0, state: "neutral", explanation: "相机参数暂不参与 AI 分数" };
+    if (key === "p0") return { points: 0, state: "neutral", explanation: "等待几何关系模型结果" };
+    if (key === "camera") return { points: 0, state: "neutral", explanation: "相机参数一致性仅供复核" };
     return { points: 0, state: "neutral", explanation: "等待该项检测完成" };
   }
 
@@ -557,20 +561,20 @@
       if (origin.decision === "possible_ai") {
         setCard("overall", conclusion, asText(origin.explanation), [
           ...sharedMetrics,
-          ["计分规则", "按各项分值汇总"],
+          ["综合方式", "按各项已完成线索汇总"],
         ]);
         return;
       }
       if (origin.decision === "possible_photo") {
         setCard("overall", conclusion, asText(origin.explanation), [
           ...sharedMetrics,
-          ["计分规则", "拍摄线索已计入 AI 分数"],
+          ["综合方式", "拍摄线索已纳入综合判断"],
         ]);
         return;
       }
       setCard("overall", conclusion, asText(origin.explanation), [
         ...sharedMetrics,
-        ["计分规则", "相机线索已计入 AI 分数"],
+        ["综合方式", "已完成线索纳入综合判断"],
       ]);
       return;
     }
@@ -606,11 +610,30 @@
     const p0 = result.p0 || {};
     const evidence = p0.evidence || {};
     const features = evidence.features || {};
-    const value = evidence.run_status === "ok" ? "已完成结构检查" : "未取得结构结果";
-    const description = evidence.run_status === "not_applicable"
-      ? "图片不满足稳定的几何测量条件，因此不显示推断。"
-      : "已检查线条、平行族和消失方向。";
+    const geometry = result.geometry_ai || {};
+    const probability = Number(geometry.probability);
+    const geometryAvailable = geometry.status === "available" && Number.isFinite(probability);
+    const value = geometry.risk_band === "high"
+      ? "检出较强几何 AI 线索"
+      : geometry.risk_band === "medium"
+        ? "检出辅助几何 AI 线索"
+        : evidence.run_status === "ok"
+          ? "未发现明显几何线索"
+          : "未取得结构结果";
+    const description = geometryAvailable
+      ? "仅比较画面内线段的位置和方向关系，结果作为受限的辅助线索。"
+      : evidence.run_status === "not_applicable"
+        ? "图片不满足稳定的几何测量条件。"
+        : "已检查线条、平行族和消失方向。";
+    const relationshipMetrics = geometryAvailable ? [
+      ["几何 AI 值", percentage(probability)],
+      ["辅助阈值", percentage(Number(geometry.decision_threshold))],
+      ["较强阈值", percentage(Number(geometry.strong_threshold))],
+      ["关系模型", asText(geometry.model_version)],
+      ["参与线段", asText(geometry.line_count, "0")],
+    ] : [];
     setCard("p0", value, description, [
+      ...relationshipMetrics,
       ["运行状态", asText(evidence.run_status)],
       ["适用性", percentage(evidence.applicability)],
       ["覆盖度", percentage(evidence.coverage)],
@@ -656,7 +679,7 @@
       : limited || fallbackLimited
         ? `${label}达到有限强度复核阈值，需结合原始文件和其他信号复核。`
         : signal.status === "available"
-          ? `${label}未达到可计分阈值。`
+          ? `${label}未达到已登记的提示阈值。`
           : `${label}未形成可用分数，不计入 AI 分数。`;
     setCard(prefix, observation, description, [
       ["模型分数", detectorMetric(signal)],

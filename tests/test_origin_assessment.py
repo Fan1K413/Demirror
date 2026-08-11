@@ -5,6 +5,7 @@ from pathlib import Path
 from PIL import Image
 
 from image_trust.ai_likelihood.contracts import AiLikelihoodResult, AiSignal
+from image_trust.geometry_ai.contracts import GeometryRelationshipResult
 from image_trust.origin import _score_summary, assess_origin, inspect_camera_metadata
 from image_trust.provenance.contracts import (
     C2paRecord,
@@ -334,6 +335,51 @@ def test_subthreshold_positive_score_uses_small_ai_probability_label(tmp_path: P
     assert assessment.decision == "no_ai_signal"
     assert assessment.ai_score == 30
     assert assessment.summary == "小概率为 AI"
+
+
+def test_registered_strong_geometry_tier_is_bounded_but_visible_in_ai_score(tmp_path: Path) -> None:
+    asset = tmp_path / "geometry.png"
+    Image.new("RGB", (32, 32)).save(asset)
+    geometry = GeometryRelationshipResult(
+        status="available",
+        probability=0.74,
+        risk_band="high",
+        applicability=1.0,
+        line_count=24,
+        decision_threshold=0.61,
+        strong_threshold=0.70,
+        model_version="test",
+        summary="test",
+    )
+
+    assessment = assess_origin(asset, _ai(), _c2pa(), geometry_result=geometry)
+
+    assert assessment.decision == "no_ai_signal"
+    assert assessment.ai_score == 25
+    assert assessment.summary == "小概率为 AI"
+    assert assessment.score_components["p0"].points == 25
+
+
+def test_registered_limited_geometry_tier_only_supports_other_evidence(tmp_path: Path) -> None:
+    asset = tmp_path / "geometry.png"
+    Image.new("RGB", (32, 32)).save(asset)
+    geometry = GeometryRelationshipResult(
+        status="available",
+        probability=0.65,
+        risk_band="medium",
+        applicability=1.0,
+        line_count=24,
+        decision_threshold=0.61,
+        strong_threshold=0.70,
+        model_version="test",
+        summary="test",
+    )
+
+    assessment = assess_origin(asset, _ai(), _c2pa(), geometry_result=geometry)
+
+    assert assessment.decision == "no_ai_signal"
+    assert assessment.ai_score == 10
+    assert assessment.score_components["p0"].points == 10
 
 
 def test_combined_capture_and_exif_evidence_uses_large_photo_probability_label() -> None:
