@@ -166,3 +166,33 @@ def test_controlled_parallel_outlier_is_separated_from_clean_control() -> None:
     assert anomaly_g1.anomaly_score is not None
     assert anomaly_g1.anomaly_score >= 0.50
     assert any(len(finding.family_ids) == 2 for finding in anomaly_g1.findings)
+
+
+def test_measurement_v2_publishes_completed_checks_in_order(tmp_path: Path) -> None:
+    input_path = tmp_path / "structured.png"
+    _save_structured_image(input_path)
+    snapshots: list[list[str]] = []
+    events: list[str] = []
+
+    result = assess_geometry_measurement_v2(
+        input_path,
+        check_started_callback=lambda check_id: events.append(f"start:{check_id}"),
+        check_callback=lambda checks: (
+            snapshots.append([check.check_id for check in checks]),
+            events.append(f"done:{checks[-1].check_id}"),
+        ),
+    )
+
+    assert snapshots == [
+        ["G1"],
+        ["G1", "G2"],
+        ["G1", "G2", "G3"],
+        ["G1", "G2", "G3", "G4"],
+    ]
+    assert events == [
+        "start:G1", "done:G1",
+        "start:G2", "done:G2",
+        "start:G3", "done:G3",
+        "start:G4", "done:G4",
+    ]
+    assert [check.check_id for check in result.checks] == ["G1", "G2", "G3", "G4", "G5"]

@@ -24,6 +24,15 @@ from image_trust.camera.contracts import CameraEstimateStatus
 from image_trust.camera.pipeline import analyze_camera_image
 from image_trust.ai_likelihood.dda import assess_high_confidence_ai
 from image_trust.geometry_ai.inference import assess_geometry_ai
+from image_trust.geometry_ai.measurement_types import (
+    GeometryCheckV2,
+    GeometryMeasurementV2Result,
+)
+from image_trust.geometry_ai.measurement_v2 import assess_geometry_measurement_v2
+from image_trust.geometry_ai.perspective_fields import (
+    attach_g5_measurements,
+    run_perspective_fields_isolated,
+)
 from image_trust.origin import assess_origin
 from image_trust.pipeline import analyze_image
 from image_trust.provenance.c2pa import inspect_c2pa_asset, write_c2pa_record
@@ -528,6 +537,7 @@ def build_local_runner(
     p0_config = load_config(root / "configs" / "p0.yaml")
     c2pa_config = load_c2pa_config(root / "configs" / "p1_c2pa.yaml")
     camera_config = load_camera_config(root / "configs" / "p1_geocalib.yaml")
+    perspective_fields_config = root / "configs" / "p1_perspective_fields.yaml"
     geometry_relationship_model = root / "models" / "geometry_relationship_v2.json"
     watermark_adapters = build_offline_watermark_adapters()
     configured_remote = remote_settings or RemoteVerificationSettings()
@@ -577,6 +587,37 @@ def build_local_runner(
 
         limitations = [*p0_result.evidence.limitations, *geometry_relationship.limitations]
         write_partial_result()
+        geometry_v2: GeometryMeasurementV2Result | None = None
+        report_progress("geometry_v2_extraction", 15)
+
+        def report_geometry_check_started(check_id: str) -> None:
+            progress = {"G1": 16, "G2": 18, "G3": 20, "G4": 22}[check_id]
+            report_progress(f"geometry_v2_{check_id.lower()}", progress)
+
+        def publish_geometry_checks(checks: list[GeometryCheckV2]) -> None:
+            result["geometry_v2"] = _geometry_v2_partial_summary(checks)
+            write_partial_result()
+
+        try:
+            geometry_v2 = assess_geometry_measurement_v2(
+                upload_path,
+                output_dir=job_dir / "geometry_v2",
+                check_callback=publish_geometry_checks,
+                check_started_callback=report_geometry_check_started,
+            )
+            result["geometry_v2"] = _geometry_v2_web_summary(geometry_v2)
+            _publish_geometry_v2_artifacts(result["artifacts"], geometry_v2, job_dir)
+        except Exception as error:
+            result["geometry_v2"] = {
+                "schema_version": "geometry-measurement-v2",
+                "status": "failed",
+                "summary": "几何关系检查没有完成。",
+                "checks": [],
+                "limitations": [
+                    f"geometry_measurement_v2_unhandled_failure:{type(error).__name__}"
+                ],
+            }
+        write_partial_result()
         report_progress("provenance", 25)
         c2pa_record = inspect_c2pa_asset(upload_path, c2pa_config)
         write_c2pa_record(job_dir / "c2pa" / "c2pa_result.json", c2pa_record)
@@ -616,6 +657,7 @@ def build_local_runner(
         result["limitations"] = sorted(set(limitations))
         write_partial_result()
         report_progress("camera", 88)
+        camera_failed = False
         try:
             camera_result = analyze_camera_image(upload_path, camera_config, job_dir / "camera")
             result["camera"] = camera_result.model_dump(mode="json")
@@ -634,6 +676,36 @@ def build_local_runner(
             limitations.append("p1_camera_analysis_failed")
             status = WebJobStatus.PARTIAL
             camera_result = None
+            camera_failed = True
+        if geometry_v2 is not None:
+            report_progress("geometry_v2_g5", 92)
+            perspective_fields_run = run_perspective_fields_isolated(
+                upload_path,
+                perspective_fields_config,
+                job_dir / "geometry_v2" / "perspective_fields",
+            )
+            perspective_artifact = None
+            if (
+                perspective_fields_run.status == "completed"
+                and perspective_fields_run.result_path is not None
+            ):
+                perspective_artifact = "perspective_fields/camera_result.json"
+                result["artifacts"]["geometry_v2_perspective_fields_result"] = (
+                    "geometry_v2/perspective_fields/camera_result.json"
+                )
+            geometry_v2 = attach_g5_measurements(
+                geometry_v2,
+                camera_result,
+                perspective_fields_run,
+                perspective_fields_artifact=perspective_artifact,
+                geocalib_failed=camera_failed,
+            )
+            _write_json(
+                job_dir / "geometry_v2" / "geometry_measurement_v2.json",
+                geometry_v2.model_dump(mode="json"),
+            )
+            result["geometry_v2"] = _geometry_v2_web_summary(geometry_v2)
+            write_partial_result()
         if requested_external_checks and any(
             adapter.provider in requested_external_checks and adapter.run_status != "ok"
             for adapter in watermark_result.adapters
@@ -654,6 +726,58 @@ def build_local_runner(
         return WebJobOutcome(status=status, result=result, limitations=sorted(set(limitations)))
 
     return runner
+
+
+def _geometry_v2_partial_summary(checks: list[GeometryCheckV2]) -> dict[str, Any]:
+    return {
+        "schema_version": "geometry-measurement-v2",
+        "status": "running",
+        "summary": "正在逐项检查局部几何关系。",
+        "checks": [check.model_dump(mode="json") for check in checks],
+        "limitations": [],
+    }
+
+
+def _geometry_v2_web_summary(
+    measurement: GeometryMeasurementV2Result,
+) -> dict[str, Any]:
+    global_line_count = (
+        measurement.global_scale.line_count if measurement.global_scale is not None else 0
+    )
+    return {
+        "schema_version": measurement.schema_version,
+        "status": measurement.status,
+        "summary": measurement.summary,
+        "applicability": measurement.applicability,
+        "gates": [gate.model_dump(mode="json") for gate in measurement.gates],
+        "global_line_count": global_line_count,
+        "merged_line_count": len(measurement.merged_lines),
+        "region_count": len(measurement.regions),
+        "stable_family_count": sum(family.stable for family in measurement.families),
+        "checks": [check.model_dump(mode="json") for check in measurement.checks],
+        "artifacts": measurement.artifacts.model_dump(mode="json"),
+        "limitations": measurement.limitations,
+    }
+
+
+def _publish_geometry_v2_artifacts(
+    artifacts: dict[str, Any],
+    measurement: GeometryMeasurementV2Result,
+    job_dir: Path,
+) -> None:
+    published = {
+        "geometry_v2_result": measurement.artifacts.result_json,
+        "geometry_v2_regions_overlay": measurement.artifacts.regions_overlay,
+        "geometry_v2_families_overlay": measurement.artifacts.families_overlay,
+        "geometry_v2_consistency_overlay": measurement.artifacts.consistency_overlay,
+        "geometry_v2_repeat_spacing_overlay": measurement.artifacts.repeat_spacing_overlay,
+    }
+    for key, relative_name in published.items():
+        if not relative_name:
+            continue
+        relative_path = PurePosixPath("geometry_v2") / PurePosixPath(relative_name)
+        if _safe_relative(job_dir, relative_path.as_posix()).is_file():
+            artifacts[key] = relative_path.as_posix()
 
 
 def _safe_filename(filename: str) -> str:

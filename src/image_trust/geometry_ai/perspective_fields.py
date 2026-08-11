@@ -192,6 +192,7 @@ def build_g5_check(
     geocalib_result: CameraExperimentResult | None = None,
     perspective_fields_result: CameraExperimentResult | None = None,
     *,
+    geocalib_failed: bool = False,
     perspective_fields_status: Literal[
         "disabled", "completed", "timed_out", "failed"
     ]
@@ -233,8 +234,10 @@ def build_g5_check(
             "component_means": e_cam.component_means,
         }
 
-    measurements["attempted_backend_count"] = len(backend_results)
+    measurements["attempted_backend_count"] = len(backend_results) + int(geocalib_failed)
     measurements["measured_backend_count"] = len(measured_values)
+    if geocalib_failed:
+        measurements["geocalib_process_status"] = "failed"
     if perspective_fields_status is not None:
         measurements["perspective_fields_process_status"] = perspective_fields_status
 
@@ -262,7 +265,7 @@ def build_g5_check(
                 set(["geometry_g5_no_qualified_camera_measurement", *limitations])
             ),
         )
-    if perspective_fields_status in {"failed", "timed_out"}:
+    if geocalib_failed or perspective_fields_status in {"failed", "timed_out"}:
         return GeometryCheckV2(
             check_id="G5",
             title="多裁剪相机与透视场一致性",
@@ -287,6 +290,7 @@ def attach_g5_measurements(
     perspective_fields_run: PerspectiveFieldsProcessResult | None = None,
     *,
     perspective_fields_artifact: str | None = None,
+    geocalib_failed: bool = False,
 ) -> GeometryMeasurementV2Result:
     """Return a copy with exactly one up-to-date G5 check and optional artifact."""
 
@@ -298,6 +302,7 @@ def attach_g5_measurements(
     g5 = build_g5_check(
         geocalib_result,
         perspective_result,
+        geocalib_failed=geocalib_failed,
         perspective_fields_status=process_status,
         additional_limitations=process_limitations,
     )

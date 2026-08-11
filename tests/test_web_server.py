@@ -35,9 +35,17 @@ def test_wsgi_server_uploads_polls_and_serves_evidence(tmp_path) -> None:
         artifact = job_dir / "p0" / "lines_overlay.png"
         artifact.parent.mkdir(parents=True, exist_ok=True)
         artifact.write_bytes(upload_path.read_bytes())
+        geometry_artifact = job_dir / "geometry_v2" / "consistency_overlay.png"
+        geometry_artifact.parent.mkdir(parents=True, exist_ok=True)
+        geometry_artifact.write_bytes(b"geometry-v2")
         return WebJobOutcome(
             status=WebJobStatus.COMPLETED,
-            result={"artifacts": {"lines_overlay": "p0/lines_overlay.png"}},
+            result={
+                "artifacts": {
+                    "lines_overlay": "p0/lines_overlay.png",
+                    "geometry_v2_consistency_overlay": "geometry_v2/consistency_overlay.png",
+                }
+            },
         )
 
     static_root = tmp_path / "static"
@@ -76,6 +84,14 @@ def test_wsgi_server_uploads_polls_and_serves_evidence(tmp_path) -> None:
         )
         assert artifact["status"] == "200 OK"
         assert artifact["body"] == b"image-bytes"
+
+        geometry_artifact = _request(
+            app,
+            "GET",
+            f"/api/jobs/{created['job_id']}/artifacts/geometry_v2/consistency_overlay.png",
+        )
+        assert geometry_artifact["status"] == "200 OK"
+        assert geometry_artifact["body"] == b"geometry-v2"
 
         assert _request(app, "GET", "/")["body"] == b"Demirror"
     finally:

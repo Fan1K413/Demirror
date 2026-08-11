@@ -9,6 +9,7 @@ classifier remains unchanged while this chain is validated.
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
 from pathlib import Path
 
 import cv2
@@ -26,6 +27,7 @@ from image_trust.geometry_ai.measurement_overlays import write_geometry_v2_overl
 from image_trust.geometry_ai.measurement_types import (
     CanonicalBox,
     GeometryArtifactsV2,
+    GeometryCheckV2,
     GeometryGateV2,
     GeometryLineV2,
     GeometryMeasurementV2Result,
@@ -45,6 +47,8 @@ def assess_geometry_measurement_v2(
     input_path: Path,
     *,
     output_dir: Path | None = None,
+    check_callback: Callable[[list[GeometryCheckV2]], None] | None = None,
+    check_started_callback: Callable[[str], None] | None = None,
 ) -> GeometryMeasurementV2Result:
     """Extract two-scale local line evidence without producing an AI score.
 
@@ -145,7 +149,14 @@ def assess_geometry_measurement_v2(
         if measurable
         else []
     )
-    checks = measure_consistency_checks(merged_lines, regions, families, rgb)
+    checks = measure_consistency_checks(
+        merged_lines,
+        regions,
+        families,
+        rgb,
+        check_callback=check_callback,
+        check_started_callback=check_started_callback,
+    )
     limitations = [
         "geometry_measurement_v2_has_no_source_or_ai_decision",
         "geometry_measurement_v2_special_imaging_not_assessed",

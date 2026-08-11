@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 from collections import defaultdict
+from collections.abc import Callable
 
 import cv2
 import numpy as np
@@ -236,19 +237,32 @@ def measure_consistency_checks(
     regions: list[StructureRegionV2],
     families: list[GeometryFamilyV2],
     canonical_rgb: np.ndarray,
+    *,
+    check_callback: Callable[[list[GeometryCheckV2]], None] | None = None,
+    check_started_callback: Callable[[str], None] | None = None,
 ) -> list[GeometryCheckV2]:
-    return [
-        _measure_g1(lines, regions, families),
-        _measure_g2(regions, families),
-        _measure_g3(lines, regions, families),
-        _measure_g4(lines, regions, canonical_rgb),
+    checks: list[GeometryCheckV2] = []
+    measured = [
+        ("G1", lambda: _measure_g1(lines, regions, families)),
+        ("G2", lambda: _measure_g2(regions, families)),
+        ("G3", lambda: _measure_g3(lines, regions, families)),
+        ("G4", lambda: _measure_g4(lines, regions, canonical_rgb)),
+    ]
+    for check_id, measure in measured:
+        if check_started_callback is not None:
+            check_started_callback(check_id)
+        checks.append(measure())
+        if check_callback is not None:
+            check_callback(list(checks))
+    checks.append(
         GeometryCheckV2(
             check_id="G5",
             title="多裁切相机与透视场一致性",
             status="not_run",
             limitations=["geometry_g5_camera_measurements_not_attached"],
-        ),
-    ]
+        )
+    )
+    return checks
 
 
 def _measure_g1(

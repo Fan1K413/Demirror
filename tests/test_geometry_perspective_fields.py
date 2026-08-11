@@ -225,6 +225,25 @@ def test_failed_optional_process_does_not_discard_geocalib_measurement() -> None
     assert "geometry_g5_perspective_fields_worker_timed_out" in g5.limitations
 
 
+def test_failed_geocalib_without_optional_result_marks_g5_failed() -> None:
+    measurement = GeometryMeasurementV2Result(status="measurable", summary="test")
+    process = PerspectiveFieldsProcessResult(
+        status="disabled",
+        limitations=("geometry_g5_perspective_fields_not_enabled",),
+    )
+
+    updated = attach_g5_measurements(
+        measurement,
+        perspective_fields_run=process,
+        geocalib_failed=True,
+    )
+
+    g5 = updated.checks[-1]
+    assert g5.status == "failed"
+    assert g5.measurements["geocalib_process_status"] == "failed"
+    assert g5.measurements["attempted_backend_count"] == 1
+
+
 def _write_config(root: Path) -> Path:
     config = root / "perspective-fields.yaml"
     config.write_text(

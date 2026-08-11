@@ -17,17 +17,24 @@
     queued: "等待本地分析开始。",
     validating: "正在读取图片文件。",
     starting: "正在准备检测环境。",
-    geometry: "正在检查线段和方向关系。",
-    provenance: "正在读取元数据和来源记录。",
-    watermark: "正在检查本地水印方案。",
-    openai_provenance: "正在请求 OpenAI 来源验证。",
+    geometry: "当前项目：旧几何来源模型。",
+    geometry_v2_extraction: "当前项目：几何结构预处理，为 G1–G4 建立局部区域。",
+    geometry_v2_g1: "当前项目：G1 局部平行线族。",
+    geometry_v2_g2: "当前项目：G2 局部与全局消失方向。",
+    geometry_v2_g3: "当前项目：G3 重复结构透视间距。",
+    geometry_v2_g4: "当前项目：G4 线段连接与方向突变。",
+    geometry_v2_g5: "当前项目：G5 相机与透视场一致性。",
+    geometry_perspective: "当前项目：G5 相机与透视场一致性。",
+    provenance: "当前项目：来源记录与相机信息。",
+    watermark: "当前项目：本地隐式水印。",
+    openai_provenance: "当前项目：OpenAI 来源验证。",
     ai_provenance: "已读取可验证的 AI 来源声明。",
-    ai_dda: "正在运行 DDA 像素检测。",
-    ai_safe: "正在运行 SAFE 检测。",
-    ai_forensic_clip: "正在运行耐压缩像素检测。",
-    ai_community_forensics: "正在运行跨生成器像素检测。",
-    ai_nonescape_mini: "正在运行补充像素检测。",
-    camera: "正在测量相机参数一致性。",
+    ai_dda: "当前项目：DDA 像素检测。",
+    ai_safe: "当前项目：SAFE 纹理检测。",
+    ai_forensic_clip: "当前项目：耐压缩像素检测。",
+    ai_community_forensics: "当前项目：跨生成器像素检测。",
+    ai_nonescape_mini: "当前项目：Nonescape Mini 补充检测。",
+    camera: "当前项目：相机参数测量，为 G5 提供数据。",
     synthesis: "正在整理检测结果。",
     complete: "检测结束。",
     cancelled: "已取消这张图片对应的分析任务。",
@@ -181,6 +188,7 @@
   let isSubmitting = false;
   let pollTimer = null;
   let previewUrl = null;
+  let visualSignature = "";
 
   const asText = (value, fallback = "—") => value === null || value === undefined || value === "" ? fallback : String(value);
   const percentage = (value) => Number.isFinite(value) ? `${(value * 100).toFixed(1)}%` : "—";
@@ -310,6 +318,7 @@
     progressTrack.setAttribute("aria-valuenow", "0");
     progressMeta.textContent = "0% · 已用 0 秒";
     document.querySelector("#visual-grid").replaceChildren();
+    visualSignature = "";
     document.querySelector("#limitations-list").replaceChildren();
   }
 
@@ -352,8 +361,10 @@
     document.querySelector(`#${prefix}-observation`).textContent = value;
     document.querySelector(`#${prefix}-description`).textContent = description;
     const metricGrid = document.querySelector(`#${prefix}-metrics`);
+    const previousScrollTop = metricGrid.scrollTop;
     metricGrid.replaceChildren();
     metrics.forEach(([label, metricValue]) => addMetric(metricGrid, label, metricValue));
+    metricGrid.scrollTop = previousScrollTop;
     const metricDetails = metricGrid.closest("details");
     if (metricDetails) {
       metricDetails.hidden = metrics.length === 0;
@@ -390,10 +401,13 @@
 
   const pixelCardKeys = new Set(["dda", "safe", "forensic", "community", "nonescape"]);
   const c2paCardKeys = new Set(["c2pa-declaration", "c2pa-signature", "c2pa-capture"]);
+  const geometryCheckIds = ["G1", "G2", "G3", "G4", "G5"];
+  const completedGeometryCheckStates = new Set(["available", "not_applicable", "failed"]);
   const evidenceCardKeys = [
     "dda", "safe", "forensic", "community", "nonescape",
     "c2pa-declaration", "c2pa-signature", "c2pa-capture",
-    "metadata", "p0", "camera", "watermark",
+    "metadata", "p0", "geometry-structure",
+    "camera", "watermark",
   ];
   const contributionKeys = {
     "c2pa-declaration": "c2pa_declaration",
@@ -401,26 +415,43 @@
     "c2pa-capture": "c2pa_capture",
   };
 
-  function evidenceIsAvailable(result, key) {
+  function geometryStructureIsComplete(result) {
+    const measurement = result.geometry_v2;
+    if (!measurement || typeof measurement !== "object") return false;
+    if (measurement.status === "failed") return true;
+    const checks = Array.isArray(measurement.checks) ? measurement.checks : [];
+    return geometryCheckIds.every((checkId) => {
+      const check = checks.find((candidate) => candidate.check_id === checkId);
+      return Boolean(check && completedGeometryCheckStates.has(check.status));
+    });
+  }
+
+  function evidenceIsAvailable(result, key, job = null) {
     if (pixelCardKeys.has(key)) return Boolean(result.p3);
     if (c2paCardKeys.has(key)) return Boolean(result.c2pa);
+    if (key === "geometry-structure") {
+      const progress = Number(job?.progress_percent);
+      const g5StageComplete = job === null || (Number.isFinite(progress) && progress >= 92);
+      return g5StageComplete && geometryStructureIsComplete(result);
+    }
     if (key === "metadata") return Boolean(result.origin?.camera_metadata);
     return Object.prototype.hasOwnProperty.call(result, key);
   }
 
   function fallbackContribution(key) {
     if (key === "p0") return { points: 0, state: "neutral", explanation: "等待几何关系模型结果" };
+    if (key === "geometry-structure") return { points: 0, state: "neutral", explanation: "本项仅用于几何结构复核" };
     if (key === "camera") return { points: 0, state: "neutral", explanation: "相机参数一致性仅供复核" };
     return { points: 0, state: "neutral", explanation: "等待该项检测完成" };
   }
 
-  function renderEvidenceOrder(result) {
+  function renderEvidenceOrder(result, job) {
     const grid = document.querySelector(".summary-grid");
     const components = result.origin?.score_components || {};
     const cards = evidenceCardKeys.map((key, index) => {
       const card = document.querySelector(`#${key}-card`);
       const score = document.querySelector(`#${key}-score`);
-      const available = evidenceIsAvailable(result, key);
+      const available = evidenceIsAvailable(result, key, job);
       if (!(card instanceof HTMLElement) || !(score instanceof HTMLElement)) return null;
       card.hidden = !available;
       const component = components[contributionKeys[key] || key] || fallbackContribution(key);
@@ -430,9 +461,9 @@
       score.dataset.state = component.state || "neutral";
       score.title = asText(component.explanation, "本项当前不改变 AI 分数。");
       const observation = document.querySelector(`#${key}-observation`)?.textContent?.trim() || "";
-      const notRun = ["未运行", "未取得结果", "未取得参数结果", "未完成", "未配置检测"].includes(observation);
-      const metadataWithoutData = key === "metadata" && observation === "未发现相机信息";
-      const group = points > 0 ? 0 : points < 0 ? 1 : metadataWithoutData ? 3 : notRun ? 4 : 2;
+      const notRun = ["未运行", "未取得结果", "未取得参数结果", "未完成", "结构检测未完成", "部分结构检查未完成", "未配置检测"].includes(observation);
+      const noInformation = (key === "metadata" && observation === "未发现相机信息") || observation === "可测结构不足";
+      const group = points > 0 ? 0 : points < 0 ? 1 : noInformation ? 3 : notRun ? 4 : 2;
       return { card, group, points, index };
     }).filter(Boolean);
     cards.sort((left, right) => left.group - right.group || right.points - left.points || left.index - right.index);
@@ -641,6 +672,110 @@
       ["稳定线族", asText(features.families?.length, "0")],
       ["候选异常线", asText(features.anomalous_lines?.length, "0")],
     ]);
+  }
+
+  const geometryCheckDefinitions = {
+    G1: {
+      label: "G1 局部平行线族",
+      measurements: [
+        ["comparable_regions", "可比较区域"],
+      ],
+    },
+    G2: {
+      label: "G2 消失方向",
+      measurements: [
+        ["comparison_count", "完成比较"],
+      ],
+    },
+    G3: {
+      label: "G3 重复结构间距",
+      measurements: [
+        ["sequence_count", "可测序列"],
+      ],
+    },
+    G4: {
+      label: "G4 线段连接关系",
+      measurements: [
+        ["tested_pair_count", "测试线对"],
+      ],
+    },
+    G5: {
+      label: "G5 相机与透视场",
+      measurements: [
+        ["attempted_backend_count", "尝试后端"],
+        ["measured_backend_count", "可用后端"],
+      ],
+    },
+  };
+
+  function geometryCheckSummary(check) {
+    if (check.status === "failed") return "未完成";
+    if (check.status === "not_applicable") return "不适用";
+    const score = check.anomaly_score === null || check.anomaly_score === undefined
+      ? Number.NaN
+      : Number(check.anomaly_score);
+    const findings = Array.isArray(check.findings) ? check.findings : [];
+    if (Number.isFinite(score) && score >= 0.5) {
+      return `发现 ${findings.length} 个候选 · ${percentage(score)}`;
+    }
+    return Number.isFinite(score) ? `未达复核条件 · ${percentage(score)}` : "已完成";
+  }
+
+  function renderGeometryStructure(result) {
+    const measurement = result.geometry_v2 || {};
+    const checks = Array.isArray(result.geometry_v2?.checks) ? result.geometry_v2.checks : [];
+    if (measurement.status === "failed") {
+      setCard("geometry-structure", "结构检测未完成", "本次没有形成完整的 G1–G5 结构检测结果。", [
+        ["检测状态", "未完成"],
+      ]);
+      return;
+    }
+    const completedChecks = geometryCheckIds
+      .map((checkId) => checks.find((candidate) => candidate.check_id === checkId))
+      .filter(Boolean);
+    const availableScores = completedChecks
+      .filter((check) => check.status === "available")
+      .map((check) => Number(check.anomaly_score))
+      .filter(Number.isFinite);
+    const value = completedChecks.some((check) => check.status === "failed")
+      ? "部分结构检查未完成"
+      : availableScores.some((score) => score >= 0.5)
+        ? "发现结构复核候选"
+        : completedChecks.every((check) => check.status === "not_applicable")
+          ? "可测结构不足"
+          : "未发现达到复核条件的偏差";
+    const metrics = [
+      ["结构适用性", percentage(Number(measurement.applicability))],
+      ["结构区域", asText(measurement.region_count, "0")],
+      ["稳定线族", asText(measurement.stable_family_count, "0")],
+    ];
+    completedChecks.forEach((check) => {
+      const definition = geometryCheckDefinitions[check.check_id];
+      metrics.push([definition.label, geometryCheckSummary(check)]);
+      const measurements = check.measurements && typeof check.measurements === "object"
+        ? check.measurements
+        : {};
+      definition.measurements.forEach(([key, label]) => {
+        if (measurements[key] !== null && measurements[key] !== undefined && Number.isFinite(Number(measurements[key]))) {
+          metrics.push([`${check.check_id} ${label}`, String(measurements[key])]);
+        }
+      });
+      if (check.check_id === "G5" && measurements.geocalib && typeof measurements.geocalib === "object") {
+        const eCam = measurements.geocalib.e_cam === null || measurements.geocalib.e_cam === undefined
+          ? Number.NaN
+          : Number(measurements.geocalib.e_cam);
+        if (Number.isFinite(eCam)) metrics.push(["G5 GeoCalib 一致性残差", percentage(eCam)]);
+        if (Number.isFinite(Number(measurements.geocalib.qualified_crop_count))) {
+          metrics.push(["G5 有效裁切", String(measurements.geocalib.qualified_crop_count)]);
+        }
+      }
+    });
+    setCard(
+      "geometry-structure",
+      value,
+      "汇总局部平行线族、消失方向、重复结构间距、线段连接关系，以及相机与透视场一致性。",
+      metrics,
+    );
   }
 
   function renderPixelDetectorCard(prefix, signal, p3, label, pixelSignalCount) {
@@ -1013,13 +1148,20 @@
   function renderVisuals(job, result) {
     const artifacts = result.artifacts || {};
     const visualGrid = document.querySelector("#visual-grid");
-    visualGrid.replaceChildren();
     const visuals = [
-      ["原始输入", "上传后的本地原图。", artifacts.input_image],
       ["线段与方向组", "同色线段表示同一稳定方向组，请与原图结构对照。", artifacts.lines_overlay],
       ["待复核线段", "用于定位需要复核的位置。", artifacts.anomalous_lines_overlay],
+      ["局部结构区域", "不同边框表示分别分析的连续结构区域。", artifacts.geometry_v2_regions_overlay],
+      ["局部线族", "颜色区分各结构区域内拟合出的稳定线族。", artifacts.geometry_v2_families_overlay],
+      ["几何一致性候选", "红色线段和橙色区域用于定位本次复核候选。", artifacts.geometry_v2_consistency_overlay],
+      ["重复结构间距", "标出参与重复间距检查的局部线族。", artifacts.geometry_v2_repeat_spacing_overlay],
     ];
-    visuals.filter(([, , path]) => typeof path === "string").forEach(([title, caption, path]) => {
+    const available = visuals.filter(([, , path]) => typeof path === "string");
+    const nextSignature = JSON.stringify([job.job_id, ...available.map(([, , path]) => path)]);
+    if (nextSignature === visualSignature) return;
+    visualSignature = nextSignature;
+    visualGrid.replaceChildren();
+    available.forEach(([title, caption, path]) => {
       addVisual(visualGrid, title, caption, artifactUrl(job.job_id, path));
     });
     document.querySelector("#evidence-visuals").hidden = visualGrid.childElementCount === 0;
@@ -1070,13 +1212,14 @@
     const hasCompletedAnalysis = completedAnalysisStates.has(job.status);
     if (overall instanceof HTMLElement) overall.hidden = !(hasOrigin && hasCompletedAnalysis);
     if (hasOrigin && hasCompletedAnalysis) renderOverall(result);
-    if (evidenceIsAvailable(result, "p0")) renderP0(result);
-    if (evidenceIsAvailable(result, "p3")) renderP3(result);
-    if (evidenceIsAvailable(result, "camera")) renderCamera(result);
-    if (evidenceIsAvailable(result, "c2pa")) renderC2pa(result);
-    if (evidenceIsAvailable(result, "metadata")) renderMetadata(result);
-    if (evidenceIsAvailable(result, "watermark")) renderWatermark(result);
-    renderEvidenceOrder(result);
+    if (evidenceIsAvailable(result, "p0", job)) renderP0(result);
+    if (evidenceIsAvailable(result, "geometry-structure", job)) renderGeometryStructure(result);
+    if (evidenceIsAvailable(result, "p3", job)) renderP3(result);
+    if (evidenceIsAvailable(result, "camera", job)) renderCamera(result);
+    if (evidenceIsAvailable(result, "c2pa", job)) renderC2pa(result);
+    if (evidenceIsAvailable(result, "metadata", job)) renderMetadata(result);
+    if (evidenceIsAvailable(result, "watermark", job)) renderWatermark(result);
+    renderEvidenceOrder(result, job);
     renderVisuals(job, result);
     renderLimitations(job, result);
   }

@@ -4,7 +4,21 @@ import json
 from pathlib import Path
 from threading import Event
 
-from image_trust.web.jobs import LocalJobStore, WebJob, WebJobOutcome, WebJobStatus, _write_json
+from image_trust.geometry_ai.measurement_types import (
+    GeometryArtifactsV2,
+    GeometryCheckV2,
+    GeometryMeasurementV2Result,
+)
+from image_trust.web.jobs import (
+    LocalJobStore,
+    WebJob,
+    WebJobOutcome,
+    WebJobStatus,
+    _geometry_v2_partial_summary,
+    _geometry_v2_web_summary,
+    _publish_geometry_v2_artifacts,
+    _write_json,
+)
 
 
 def test_local_job_store_persists_completed_job_and_artifact(tmp_path) -> None:
@@ -70,6 +84,43 @@ def test_local_job_store_exposes_completed_cards_before_the_job_finishes(tmp_pat
     finally:
         release_job.set()
         store.close()
+
+
+def test_geometry_v2_web_summary_is_progressive_and_keeps_raw_lines_in_artifact(
+    tmp_path,
+) -> None:
+    checks = [
+        GeometryCheckV2(check_id="G1", title="parallel", status="available", anomaly_score=0.4),
+        GeometryCheckV2(check_id="G2", title="vanishing", status="not_applicable"),
+    ]
+    partial = _geometry_v2_partial_summary(checks[:1])
+    measurement = GeometryMeasurementV2Result(
+        status="measurable",
+        summary="done",
+        checks=checks,
+        artifacts=GeometryArtifactsV2(
+            result_json="geometry_measurement_v2.json",
+            consistency_overlay="consistency_overlay.png",
+        ),
+    )
+    summary = _geometry_v2_web_summary(measurement)
+    job_dir = tmp_path / "job"
+    geometry_dir = job_dir / "geometry_v2"
+    geometry_dir.mkdir(parents=True)
+    (geometry_dir / "geometry_measurement_v2.json").write_text("{}", encoding="utf-8")
+    (geometry_dir / "consistency_overlay.png").write_bytes(b"png")
+    artifacts: dict[str, object] = {}
+
+    _publish_geometry_v2_artifacts(artifacts, measurement, job_dir)
+
+    assert partial["status"] == "running"
+    assert [check["check_id"] for check in partial["checks"]] == ["G1"]
+    assert [check["check_id"] for check in summary["checks"]] == ["G1", "G2"]
+    assert "merged_lines" not in summary
+    assert artifacts == {
+        "geometry_v2_result": "geometry_v2/geometry_measurement_v2.json",
+        "geometry_v2_consistency_overlay": "geometry_v2/consistency_overlay.png",
+    }
 
 
 def test_atomic_json_writer_retries_a_transient_windows_replace_lock(tmp_path, monkeypatch) -> None:
