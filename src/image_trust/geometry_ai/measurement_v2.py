@@ -14,12 +14,25 @@ from pathlib import Path
 import cv2
 import numpy as np
 from PIL import Image, ImageOps, UnidentifiedImageError
-from pydantic import BaseModel, ConfigDict, Field
 
+from image_trust.geometry_ai.consistency_v2 import (
+    fit_region_families,
+    measure_consistency_checks,
+    merge_multiscale_lines,
+    propose_structure_regions,
+)
 from image_trust.geometry_ai.features import detect_lines
+from image_trust.geometry_ai.measurement_overlays import write_geometry_v2_overlays
+from image_trust.geometry_ai.measurement_types import (
+    CanonicalBox,
+    GeometryArtifactsV2,
+    GeometryGateV2,
+    GeometryLineV2,
+    GeometryMeasurementV2Result,
+    GeometryScaleV2,
+)
 
 
-SCHEMA_VERSION = "geometry-measurement-v2"
 GLOBAL_LONG_SIDE = 960
 LOCAL_LONG_SIDE = 640
 GRID_SIZE = 3
@@ -28,74 +41,11 @@ MIN_LINES_PER_REGION = 4
 MIN_SUPPORTED_REGIONS = 3
 
 
-class CanonicalBox(BaseModel):
-    """A half-open rectangle in EXIF-normalized source pixel coordinates."""
-
-    model_config = ConfigDict(frozen=True)
-
-    x: int = Field(ge=0)
-    y: int = Field(ge=0)
-    width: int = Field(gt=0)
-    height: int = Field(gt=0)
-
-
-class GeometryLineV2(BaseModel):
-    """One LSD line, mapped back to canonical source coordinates."""
-
-    model_config = ConfigDict(frozen=True)
-
-    line_id: str
-    x1: float
-    y1: float
-    x2: float
-    y2: float
-    length_px: float = Field(gt=0.0)
-    length_normalized: float = Field(gt=0.0)
-
-
-class GeometryScaleV2(BaseModel):
-    """Line extraction result for either the global image or a local crop."""
-
-    model_config = ConfigDict(frozen=True)
-
-    scale_id: str
-    scope: str
-    canonical_crop: CanonicalBox
-    analysis_size: tuple[int, int]
-    line_count: int = Field(ge=0)
-    normalized_total_length: float = Field(ge=0.0)
-    lines: list[GeometryLineV2] = Field(default_factory=list)
-
-
-class GeometryGateV2(BaseModel):
-    """One transparent applicability gate, not an AI signal."""
-
-    model_config = ConfigDict(frozen=True)
-
-    gate_id: str
-    passed: bool
-    observed: float
-    threshold: float
-    description: str
-
-
-class GeometryMeasurementV2Result(BaseModel):
-    """Measurement-only output for the M0 local-geometry milestone."""
-
-    model_config = ConfigDict(frozen=True)
-
-    schema_version: str = SCHEMA_VERSION
-    status: str
-    summary: str
-    canonical_size: tuple[int, int] = (0, 0)
-    applicability: float = Field(default=0.0, ge=0.0, le=1.0)
-    gates: list[GeometryGateV2] = Field(default_factory=list)
-    global_scale: GeometryScaleV2 | None = None
-    local_scales: list[GeometryScaleV2] = Field(default_factory=list)
-    limitations: list[str] = Field(default_factory=list)
-
-
-def assess_geometry_measurement_v2(input_path: Path) -> GeometryMeasurementV2Result:
+def assess_geometry_measurement_v2(
+    input_path: Path,
+    *,
+    output_dir: Path | None = None,
+) -> GeometryMeasurementV2Result:
     """Extract two-scale local line evidence without producing an AI score.
 
     The result is ``measurable`` only when the global image has enough line
@@ -131,8 +81,11 @@ def assess_geometry_measurement_v2(input_path: Path) -> GeometryMeasurementV2Res
             limitations=[f"geometry_measurement_line_extraction_failed:{type(error).__name__}"],
         )
 
+    merged_lines = merge_multiscale_lines(global_scale, local_scales, canonical_size)
+    regions = propose_structure_regions(merged_lines, canonical_size)
     occupied_cells = _occupied_global_cells(global_scale.lines, canonical_width, canonical_height)
     supported_local_regions = sum(scale.line_count >= MIN_LINES_PER_REGION for scale in local_scales)
+    stable_line_count = sum(line.cross_scale_stability >= 0.65 for line in merged_lines)
     gates = [
         GeometryGateV2(
             gate_id="global_line_support",
@@ -155,6 +108,20 @@ def assess_geometry_measurement_v2(input_path: Path) -> GeometryMeasurementV2Res
             threshold=float(MIN_SUPPORTED_REGIONS),
             description="至少三个局部裁切须独立提供足够线段，供后续局部结构比较。",
         ),
+        GeometryGateV2(
+            gate_id="cross_scale_stability",
+            passed=stable_line_count >= 8,
+            observed=float(stable_line_count),
+            threshold=8.0,
+            description="至少八条线须在全图或多个局部尺度中稳定复现。",
+        ),
+        GeometryGateV2(
+            gate_id="structure_region_support",
+            passed=len(regions) >= 1,
+            observed=float(len(regions)),
+            threshold=1.0,
+            description="至少形成一个具有空间连续支持的局部结构区域。",
+        ),
     ]
     applicability = float(
         np.mean(
@@ -162,21 +129,44 @@ def assess_geometry_measurement_v2(input_path: Path) -> GeometryMeasurementV2Res
                 min(1.0, global_scale.line_count / MIN_GLOBAL_LINES),
                 min(1.0, occupied_cells / MIN_SUPPORTED_REGIONS),
                 min(1.0, supported_local_regions / MIN_SUPPORTED_REGIONS),
+                min(1.0, stable_line_count / 8.0),
+                min(1.0, len(regions)),
             ]
         )
     )
     measurable = all(gate.passed for gate in gates)
+    families = (
+        fit_region_families(
+            merged_lines,
+            regions,
+            canonical_size,
+            seed=_measurement_seed(input_path),
+        )
+        if measurable
+        else []
+    )
+    checks = measure_consistency_checks(merged_lines, regions, families, rgb)
     limitations = [
         "geometry_measurement_v2_has_no_source_or_ai_decision",
-        "geometry_measurement_v2_local_family_fitting_not_implemented",
         "geometry_measurement_v2_special_imaging_not_assessed",
     ]
     if not measurable:
         limitations.insert(0, "geometry_measurement_v2_insufficient_structural_support")
-    return GeometryMeasurementV2Result(
+    artifacts = GeometryArtifactsV2()
+    if output_dir is not None:
+        output_dir.mkdir(parents=True, exist_ok=True)
+        write_geometry_v2_overlays(rgb, merged_lines, regions, families, checks, output_dir)
+        artifacts = GeometryArtifactsV2(
+            result_json="geometry_measurement_v2.json",
+            regions_overlay="regions_overlay.png",
+            families_overlay="families_overlay.png",
+            consistency_overlay="consistency_overlay.png",
+            repeat_spacing_overlay="repeat_spacing_overlay.png",
+        )
+    result = GeometryMeasurementV2Result(
         status="measurable" if measurable else "not_applicable",
         summary=(
-            "已取得双尺度线段测量，等待局部线族与一致性检查。"
+            "已完成双尺度线段、局部线族与结构一致性测量。"
             if measurable
             else "画面没有足够稳定的直线结构，暂不进行局部几何比较。"
         ),
@@ -185,8 +175,18 @@ def assess_geometry_measurement_v2(input_path: Path) -> GeometryMeasurementV2Res
         gates=gates,
         global_scale=global_scale,
         local_scales=local_scales,
+        merged_lines=merged_lines,
+        regions=regions,
+        families=families,
+        checks=checks,
+        artifacts=artifacts,
         limitations=limitations,
     )
+    if output_dir is not None:
+        (output_dir / "geometry_measurement_v2.json").write_text(
+            result.model_dump_json(indent=2), encoding="utf-8"
+        )
+    return result
 
 
 def _load_oriented_rgb(input_path: Path) -> np.ndarray:
@@ -293,3 +293,12 @@ def _occupied_global_cells(lines: list[GeometryLineV2], width: int, height: int)
         row = min(GRID_SIZE - 1, max(0, int(midpoint_y / height * GRID_SIZE)))
         counts[row, column] += 1
     return int(np.count_nonzero(counts >= MIN_LINES_PER_REGION))
+
+
+def _measurement_seed(input_path: Path) -> int:
+    """Use stable file bytes without exposing them to the measurement model."""
+
+    import hashlib
+
+    digest = hashlib.sha256(input_path.read_bytes()).digest()
+    return int.from_bytes(digest[:8], "big", signed=False)
