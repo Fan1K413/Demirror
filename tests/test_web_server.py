@@ -3,6 +3,7 @@ from __future__ import annotations
 import io
 import json
 from pathlib import Path
+from threading import Event
 
 from image_trust.web.jobs import LocalJobStore, WebJobOutcome, WebJobStatus
 from image_trust.web.server import create_app
@@ -147,4 +148,36 @@ def test_wsgi_capabilities_hide_key_and_upload_requires_explicit_opt_in(tmp_path
         store.wait(created["job_id"])
         assert observed_checks == [["openai"]]
     finally:
+        store.close()
+
+
+def test_wsgi_cancel_targets_only_the_job_in_the_url(tmp_path) -> None:
+    first_started = Event()
+    release_first = Event()
+
+    def runner(upload_path: Path, _: Path, __) -> WebJobOutcome:
+        if upload_path.read_bytes() == b"first-image":
+            first_started.set()
+            assert release_first.wait(timeout=5)
+        return WebJobOutcome(status=WebJobStatus.COMPLETED)
+
+    store = LocalJobStore(tmp_path / "jobs", runner)
+    app = create_app(store, tmp_path)
+    try:
+        first = store.create_job("first.jpg", b"first-image")
+        assert first_started.wait(timeout=5)
+        second = store.create_job("second.jpg", b"second-image")
+
+        cancelled = _request(app, "DELETE", f"/api/jobs/{second.job_id}")
+        body = json.loads(cancelled["body"])
+        assert cancelled["status"] == "200 OK"
+        assert body["job"]["job_id"] == second.job_id
+        assert body["job"]["status"] == "cancelled"
+        assert store.get_snapshot(first.job_id).job.status == WebJobStatus.RUNNING
+
+        release_first.set()
+        assert store.wait(first.job_id).job.status is WebJobStatus.COMPLETED
+        assert store.wait(second.job_id).job.status is WebJobStatus.CANCELLED
+    finally:
+        release_first.set()
         store.close()

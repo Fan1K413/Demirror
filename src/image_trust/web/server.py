@@ -31,7 +31,7 @@ def create_app(
     static_root: Path = STATIC_ROOT,
     remote_settings: RemoteVerificationSettings | None = None,
 ) -> Callable:
-    """Return a small WSGI application with upload, poll, and artifact routes."""
+    """Return a small WSGI application with upload, poll, cancel, and artifact routes."""
 
     def app(environ, start_response):
         method = environ.get("REQUEST_METHOD", "GET").upper()
@@ -44,6 +44,8 @@ def create_app(
             )
         if method == "POST" and path == "/api/jobs":
             return _create_job(environ, start_response, store)
+        if method == "DELETE" and path.startswith("/api/jobs/"):
+            return _cancel_job(path, start_response, store)
         if method == "GET" and path.startswith("/api/jobs/"):
             return _get_job_or_artifact(path, start_response, store)
         if method == "GET":
@@ -62,7 +64,11 @@ def serve_local_demo(
     """Construct, but do not start, a local-only server for CLI use and tests."""
 
     remote_settings = load_remote_verification_settings(project_root)
-    store = LocalJobStore(jobs_root, build_local_runner(project_root, remote_settings))
+    store = LocalJobStore(
+        jobs_root,
+        build_local_runner(project_root, remote_settings),
+        worker_project_root=project_root,
+    )
     server = make_server(host, port, create_app(store, remote_settings=remote_settings))
     server.job_store = store  # type: ignore[attr-defined]
     return server
@@ -103,6 +109,21 @@ def _field_truthy(fields: cgi.FieldStorage, name: str) -> bool:
         field = field[0]
     value = getattr(field, "value", "")
     return str(value).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _cancel_job(path: str, start_response, store: LocalJobStore):
+    """Cancel exactly the job named by the request path, never another queued job."""
+
+    fragments = path.split("/")
+    if len(fragments) != 4:
+        return _json(start_response, "404 Not Found", {"error": "not_found"})
+    job = store.cancel(fragments[3])
+    if job is None:
+        return _json(start_response, "404 Not Found", {"error": "job_not_found"})
+    snapshot = store.get_snapshot(job.job_id)
+    if snapshot is None:
+        return _json(start_response, "404 Not Found", {"error": "job_not_found"})
+    return _json(start_response, "200 OK", _snapshot_payload(snapshot))
 
 
 def _get_job_or_artifact(path: str, start_response, store: LocalJobStore):

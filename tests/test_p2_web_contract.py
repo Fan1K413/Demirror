@@ -43,7 +43,24 @@ def test_web_ui_has_a_separate_ai_pixel_signal_card() -> None:
     assert "URL.createObjectURL(selected)" in javascript
     assert "cancelButton.addEventListener(\"click\", clearSelected)" in javascript
     assert "function closeMetricDetails" in javascript
-    assert "window.addEventListener(\"wheel\", () => closeMetricDetails(), { passive: true })" in javascript
+    assert "cancelSelectedJob" in javascript
+    assert 'method: "DELETE"' in javascript
+    assert "window.addEventListener(\"scroll\", () => closeMetricDetails(), { passive: true })" in javascript
+    assert "window.addEventListener(\"wheel\"" not in javascript
+    assert "function keepMetricScrollLocal" in javascript
+    assert "function prepareMetricScrollbar" in javascript
+    assert "function syncMetricScrollbar" in javascript
+    assert 'metrics.addEventListener("wheel", keepMetricScrollLocal, { passive: false })' in javascript
+    assert "metric-scrollbar-thumb" in javascript
+    assert "scrollbar-width: none" in (
+        REPOSITORY_ROOT / "src" / "image_trust" / "web" / "static" / "styles.css"
+    ).read_text(encoding="utf-8")
+    assert "overscroll-behavior: contain" in (
+        REPOSITORY_ROOT / "src" / "image_trust" / "web" / "static" / "styles.css"
+    ).read_text(encoding="utf-8")
+    assert ".metric-scrollbar-thumb" in (
+        REPOSITORY_ROOT / "src" / "image_trust" / "web" / "static" / "styles.css"
+    ).read_text(encoding="utf-8")
     assert 'return "有一项检测未满足运行条件，未作为判断依据。";' in javascript
     assert 'class="evidence-table-head"' in html
     assert '"watermark": watermark_result.model_dump' in jobs
@@ -51,6 +68,9 @@ def test_web_ui_has_a_separate_ai_pixel_signal_card() -> None:
     assert "job.progress_percent" in javascript
     assert 'result["origin"] = origin.model_dump' in jobs
     assert '"p3": p3_result.model_dump' in jobs
+    assert "worker_project_root=project_root" in (
+        REPOSITORY_ROOT / "src" / "image_trust" / "web" / "server.py"
+    ).read_text(encoding="utf-8")
 
 
 def test_web_ui_keeps_hidden_panels_out_of_the_layout() -> None:

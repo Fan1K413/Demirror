@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const terminalStates = new Set(["completed", "partial", "rejected", "failed"]);
+  const terminalStates = new Set(["completed", "partial", "rejected", "failed", "cancelled"]);
   const stateLabels = {
     queued: ["等待开始", "文件已接收，正在等待本地分析。"],
     validating: ["检查文件", "正在确认图片格式、大小和可读取性。"],
@@ -10,6 +10,7 @@
     partial: ["部分完成", "已保留可用结果；部分检测没有取得结果。"],
     rejected: ["文件无法分析", "图片未通过输入检查。"],
     failed: ["分析未完成", "请查看下方说明后重新尝试。"],
+    cancelled: ["分析已取消", "这张图片的本地分析已停止。"],
   };
   const stageLabels = {
     queued: "等待本地分析开始。",
@@ -28,6 +29,7 @@
     camera: "正在测量相机参数一致性。",
     synthesis: "正在整理检测结果。",
     complete: "检测结束。",
+    cancelled: "已取消这张图片对应的分析任务。",
   };
   const observationLabels = {
     positive: "发现候选",
@@ -173,7 +175,9 @@
   const jobFilename = document.querySelector("#job-filename");
   const resultPanel = document.querySelector("#result-panel");
   let selected = null;
-  let activeJobId = null;
+  let selectedJobId = null;
+  let selectionRevision = 0;
+  let isSubmitting = false;
   let pollTimer = null;
   let previewUrl = null;
 
@@ -202,8 +206,7 @@
   function setSelected(file) {
     selected = file || null;
     selectedFile.textContent = selected ? `${selected.name} · ${(selected.size / 1024 / 1024).toFixed(2)} MB` : "未选择文件";
-    submitButton.disabled = !selected;
-    cancelButton.disabled = !selected;
+    updateSelectionControls();
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
       previewUrl = null;
@@ -224,10 +227,45 @@
     dropzone.classList.add("has-preview");
   }
 
+  function updateSelectionControls() {
+    input.disabled = isSubmitting || selectedJobId !== null;
+    submitButton.disabled = !selected || isSubmitting;
+    cancelButton.disabled = !selected;
+  }
+
+  async function cancelSelectedJob(jobId) {
+    const response = await fetch(`/api/jobs/${encodeURIComponent(jobId)}`, { method: "DELETE" });
+    let payload = null;
+    try {
+      payload = await response.json();
+    } catch (_) {
+      // The next submission still remains safe: it is addressed to a different job ID.
+    }
+    if (!response.ok) throw new Error(payload?.error || "无法取消这张图片的分析任务。");
+    return payload;
+  }
+
+  function reportCancellationFailure(error) {
+    analysisPanel.hidden = false;
+    statusDot.dataset.status = "failed";
+    statusLabel.textContent = "取消请求未完成";
+    statusDetail.textContent = error instanceof Error
+      ? `${error.message} 该图片的分析可能仍在继续。`
+      : "该图片的分析可能仍在继续。";
+  }
+
   function clearSelected() {
+    const jobId = selectedJobId;
+    selectionRevision += 1;
+    selectedJobId = null;
+    isSubmitting = false;
     input.value = "";
     setSelected(null);
     resetPanels();
+    submitButton.textContent = "分析图片";
+    if (jobId) {
+      void cancelSelectedJob(jobId).catch(reportCancellationFailure);
+    }
   }
 
   function updatePrivacySummary() {
@@ -265,7 +303,6 @@
 
   function resetPanels() {
     clearTimeout(pollTimer);
-    activeJobId = null;
     analysisPanel.hidden = true;
     resultPanel.hidden = true;
     progressBar.style.width = "0%";
@@ -321,12 +358,115 @@
       metricDetails.hidden = metrics.length === 0;
       metricDetails.open = false;
     }
+    window.requestAnimationFrame(() => syncMetricScrollbar(metricGrid));
   }
 
   function closeMetricDetails(except = null) {
     document.querySelectorAll(".metric-details[open]").forEach((details) => {
       if (details !== except) details.open = false;
     });
+  }
+
+  function keepMetricScrollLocal(event) {
+    const metrics = event.currentTarget;
+    if (!(metrics instanceof HTMLElement)) return;
+    const canScroll = metrics.scrollHeight > metrics.clientHeight;
+    const atTop = metrics.scrollTop <= 0;
+    const atBottom = metrics.scrollTop + metrics.clientHeight >= metrics.scrollHeight - 1;
+    if (!canScroll || (event.deltaY < 0 && atTop) || (event.deltaY > 0 && atBottom)) {
+      event.preventDefault();
+    }
+    event.stopPropagation();
+  }
+
+  function syncMetricScrollbar(metrics) {
+    const panel = metrics.parentElement;
+    if (!(panel instanceof HTMLElement) || !panel.classList.contains("metric-scroll-panel")) return;
+    const track = panel.querySelector(".metric-scrollbar");
+    const thumb = panel.querySelector(".metric-scrollbar-thumb");
+    if (!(track instanceof HTMLElement) || !(thumb instanceof HTMLElement)) return;
+    const details = panel.closest(".metric-details");
+    if (!(details instanceof HTMLElement) || !details.matches("[open]")) {
+      track.hidden = true;
+      return;
+    }
+    const maximumScroll = Math.max(0, metrics.scrollHeight - metrics.clientHeight);
+    const scrollable = maximumScroll > 1;
+    track.hidden = !scrollable;
+    if (!scrollable) {
+      thumb.style.height = "";
+      thumb.style.transform = "";
+      return;
+    }
+    const trackHeight = track.clientHeight;
+    if (!trackHeight) {
+      window.requestAnimationFrame(() => syncMetricScrollbar(metrics));
+      return;
+    }
+    const thumbHeight = Math.max(28, Math.round(trackHeight * metrics.clientHeight / metrics.scrollHeight));
+    const travel = Math.max(0, trackHeight - thumbHeight);
+    const offset = travel * metrics.scrollTop / maximumScroll;
+    thumb.style.height = `${thumbHeight}px`;
+    thumb.style.transform = `translateY(${offset}px)`;
+  }
+
+  function scrollMetricFromTrack(metrics, track, clientY) {
+    const thumb = track.querySelector(".metric-scrollbar-thumb");
+    if (!(thumb instanceof HTMLElement)) return;
+    const maximumScroll = Math.max(0, metrics.scrollHeight - metrics.clientHeight);
+    const bounds = track.getBoundingClientRect();
+    const thumbHeight = thumb.getBoundingClientRect().height;
+    const travel = Math.max(0, bounds.height - thumbHeight);
+    if (!maximumScroll || !travel) return;
+    const offset = Math.max(0, Math.min(travel, clientY - bounds.top - thumbHeight / 2));
+    metrics.scrollTop = offset / travel * maximumScroll;
+  }
+
+  function prepareMetricScrollbar(metrics) {
+    const details = metrics.closest(".metric-details");
+    if (!(details instanceof HTMLElement) || metrics.parentElement?.classList.contains("metric-scroll-panel")) return;
+    const panel = document.createElement("div");
+    panel.className = "metric-scroll-panel";
+    const track = document.createElement("span");
+    track.className = "metric-scrollbar";
+    track.setAttribute("aria-hidden", "true");
+    const thumb = document.createElement("span");
+    thumb.className = "metric-scrollbar-thumb";
+    track.append(thumb);
+    metrics.replaceWith(panel);
+    panel.append(metrics, track);
+
+    metrics.addEventListener("scroll", () => syncMetricScrollbar(metrics), { passive: true });
+    metrics.addEventListener("wheel", keepMetricScrollLocal, { passive: false });
+    track.addEventListener("pointerdown", (event) => {
+      if (event.target === thumb) return;
+      event.preventDefault();
+      event.stopPropagation();
+      scrollMetricFromTrack(metrics, track, event.clientY);
+    });
+    thumb.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const startY = event.clientY;
+      const startScroll = metrics.scrollTop;
+      const move = (nextEvent) => {
+        const maximumScroll = Math.max(0, metrics.scrollHeight - metrics.clientHeight);
+        const travel = Math.max(0, track.clientHeight - thumb.getBoundingClientRect().height);
+        if (maximumScroll && travel) metrics.scrollTop = Math.max(0, Math.min(maximumScroll, startScroll + (nextEvent.clientY - startY) / travel * maximumScroll));
+      };
+      const stop = () => {
+        window.removeEventListener("pointermove", move);
+        window.removeEventListener("pointerup", stop);
+      };
+      window.addEventListener("pointermove", move);
+      window.addEventListener("pointerup", stop, { once: true });
+    });
+    if ("ResizeObserver" in window) {
+      const observer = new ResizeObserver(() => syncMetricScrollbar(metrics));
+      observer.observe(metrics);
+      observer.observe(panel);
+    }
   }
 
   function renderOverall(result) {
@@ -730,18 +870,23 @@
     renderLimitations(job, result);
   }
 
-  async function poll(jobId) {
+  async function poll(jobId, revision) {
+    if (revision !== selectionRevision || jobId !== selectedJobId) return;
     try {
       const response = await fetch(`/api/jobs/${encodeURIComponent(jobId)}`, { cache: "no-store" });
       if (!response.ok) throw new Error("无法读取本地作业状态。");
       const payload = await response.json();
+      if (revision !== selectionRevision || jobId !== selectedJobId) return;
       renderStatus(payload.job);
       if (terminalStates.has(payload.job.status)) {
         if (payload.result) renderResult(payload.job, payload.result);
+        selectedJobId = null;
+        updateSelectionControls();
         return;
       }
-      pollTimer = window.setTimeout(() => poll(jobId), 900);
+      pollTimer = window.setTimeout(() => poll(jobId, revision), 900);
     } catch (error) {
+      if (revision !== selectionRevision || jobId !== selectedJobId) return;
       statusDot.dataset.status = "failed";
       statusLabel.textContent = "无法读取分析状态";
       statusDetail.textContent = error instanceof Error ? error.message : "请重新选择图片。";
@@ -751,9 +896,10 @@
   async function submit(event) {
     event.preventDefault();
     if (!selected) return;
+    const revision = selectionRevision;
     resetPanels();
-    submitButton.disabled = true;
-    cancelButton.disabled = true;
+    isSubmitting = true;
+    updateSelectionControls();
     submitButton.textContent = "正在提交…";
     const formData = new FormData();
     formData.append("file", selected, selected.name);
@@ -764,22 +910,37 @@
       const response = await fetch("/api/jobs", { method: "POST", body: formData });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || "提交失败");
-      activeJobId = payload.job.job_id;
+      if (revision !== selectionRevision) {
+        void cancelSelectedJob(payload.job.job_id).catch(reportCancellationFailure);
+        return;
+      }
+      selectedJobId = payload.job.job_id;
+      isSubmitting = false;
+      updateSelectionControls();
       renderStatus(payload.job);
-      await poll(activeJobId);
+      await poll(selectedJobId, revision);
     } catch (error) {
+      if (revision !== selectionRevision) return;
       analysisPanel.hidden = false;
       statusDot.dataset.status = "failed";
       statusLabel.textContent = "提交未完成";
       statusDetail.textContent = error instanceof Error ? error.message : "请重新选择图片后再试。";
     } finally {
-      submitButton.disabled = !selected;
-      cancelButton.disabled = !selected;
-      submitButton.textContent = "分析图片";
+      if (revision === selectionRevision) {
+        isSubmitting = false;
+        updateSelectionControls();
+        submitButton.textContent = "分析图片";
+      }
     }
   }
 
-  input.addEventListener("change", () => setSelected(input.files?.[0]));
+  input.addEventListener("change", () => {
+    if (isSubmitting || selectedJobId !== null) {
+      input.value = "";
+      return;
+    }
+    setSelected(input.files?.[0]);
+  });
   cancelButton.addEventListener("click", clearSelected);
   openaiProvenance.addEventListener("change", updatePrivacySummary);
   form.addEventListener("submit", submit);
@@ -792,18 +953,26 @@
     dropzone.classList.remove("is-dragging");
   }));
   dropzone.addEventListener("drop", (event) => {
+    if (isSubmitting || selectedJobId !== null) return;
     const file = event.dataTransfer?.files?.[0];
     if (file) setSelected(file);
   });
   document.querySelectorAll(".metric-details").forEach((details) => {
     details.addEventListener("toggle", () => {
-      if (details.open) closeMetricDetails(details);
+      if (details.open) {
+        closeMetricDetails(details);
+        const metrics = details.querySelector(".metric-grid");
+        if (metrics instanceof HTMLElement) window.requestAnimationFrame(() => syncMetricScrollbar(metrics));
+      }
     });
+  });
+  document.querySelectorAll(".metric-details .metric-grid").forEach((metrics) => {
+    prepareMetricScrollbar(metrics);
   });
   document.addEventListener("click", (event) => {
     if (!(event.target instanceof Element) || !event.target.closest(".metric-details")) closeMetricDetails();
   });
-  window.addEventListener("wheel", () => closeMetricDetails(), { passive: true });
+  window.addEventListener("scroll", () => closeMetricDetails(), { passive: true });
   updatePrivacySummary();
   loadCapabilities();
 })();

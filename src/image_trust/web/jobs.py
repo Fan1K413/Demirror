@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 import json
+import os
 import re
+import subprocess
+import sys
 import threading
+import time
 import uuid
-from concurrent.futures import Future, ThreadPoolExecutor
+from concurrent.futures import CancelledError, Future, ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
@@ -47,6 +51,7 @@ class WebJobStatus(str, Enum):
     PARTIAL = "partial"
     REJECTED = "rejected"
     FAILED = "failed"
+    CANCELLED = "cancelled"
 
 
 class WebJob(BaseModel):
@@ -99,6 +104,7 @@ class LocalJobStore:
         runner: JobRunner,
         *,
         max_workers: int = 1,
+        worker_project_root: Path | None = None,
     ) -> None:
         self.root = root.resolve()
         self.root.mkdir(parents=True, exist_ok=True)
@@ -106,6 +112,9 @@ class LocalJobStore:
         self._executor = ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="demirror")
         self._lock = threading.RLock()
         self._futures: dict[str, Future[None]] = {}
+        self._cancelled_job_ids: set[str] = set()
+        self._worker_project_root = worker_project_root.resolve() if worker_project_root is not None else None
+        self._worker_processes: dict[str, subprocess.Popen[bytes]] = {}
         self._mark_interrupted_jobs_failed()
 
     def create_job(
@@ -224,8 +233,47 @@ class LocalJobStore:
         with self._lock:
             future = self._futures.get(job_id)
         if future is not None:
-            future.result(timeout=timeout)
+            try:
+                future.result(timeout=timeout)
+            except CancelledError:
+                pass
         return self.get_snapshot(job_id)
+
+    def cancel(self, job_id: str) -> WebJob | None:
+        """Cancel a queued or active local job and release the single-job queue."""
+
+        with self._lock:
+            snapshot = self.get_snapshot(job_id)
+            if snapshot is None:
+                return None
+            if snapshot.job.status in {
+                WebJobStatus.COMPLETED,
+                WebJobStatus.PARTIAL,
+                WebJobStatus.REJECTED,
+                WebJobStatus.FAILED,
+                WebJobStatus.CANCELLED,
+            }:
+                return snapshot.job
+            self._cancelled_job_ids.add(job_id)
+            future = self._futures.get(job_id)
+            if future is not None:
+                future.cancel()
+            process = self._worker_processes.get(job_id)
+            errors = [
+                *snapshot.job.errors,
+                {"code": "cancelled_by_user", "message": "The local analysis was cancelled by the user."},
+            ]
+            cancelled = self._replace_job(
+                snapshot.job,
+                status=WebJobStatus.CANCELLED,
+                stage="cancelled",
+                progress_percent=100,
+                limitations=sorted({*snapshot.job.limitations, "web_job_cancelled"}),
+                errors=errors,
+            )
+        if process is not None:
+            _terminate_worker_process(process)
+        return cancelled
 
     def close(self) -> None:
         self._executor.shutdown(wait=True, cancel_futures=False)
@@ -235,7 +283,7 @@ class LocalJobStore:
         if job_dir is None:
             return
         current = self.get_snapshot(job_id)
-        if current is None:
+        if current is None or self._is_cancelled(job_id):
             return
         self._update_progress(
             job_id,
@@ -260,11 +308,16 @@ class LocalJobStore:
                     progress_percent=progress_percent,
                 )
 
-            outcome = self._runner(upload_path, job_dir, report_progress)
+            if self._worker_project_root is None:
+                outcome = self._runner(upload_path, job_dir, report_progress)
+            else:
+                outcome = self._run_worker_process(job_id, upload_path, job_dir)
+            if outcome is None or self._is_cancelled(job_id):
+                return
             result_path = job_dir / "web_result.json"
             _write_json(result_path, outcome.result)
             latest = self.get_snapshot(job_id)
-            if latest is None:
+            if latest is None or latest.job.status is WebJobStatus.CANCELLED:
                 return
             self._replace_job(
                 latest.job,
@@ -277,7 +330,7 @@ class LocalJobStore:
             )
         except Exception as error:
             latest = self.get_snapshot(job_id)
-            if latest is None:
+            if latest is None or self._is_cancelled(job_id) or latest.job.status is WebJobStatus.CANCELLED:
                 return
             self._replace_job(
                 latest.job,
@@ -287,6 +340,85 @@ class LocalJobStore:
                 limitations=["web_analysis_failed"],
                 errors=[{"code": type(error).__name__, "message": str(error)}],
             )
+
+    def _run_worker_process(
+        self,
+        job_id: str,
+        upload_path: Path,
+        job_dir: Path,
+    ) -> WebJobOutcome | None:
+        """Run the heavyweight pipeline in a killable process for the local server."""
+
+        if self._worker_project_root is None:
+            raise RuntimeError("worker_project_root_not_configured")
+        progress_path = job_dir / "worker_progress.json"
+        outcome_path = job_dir / "worker_outcome.json"
+        progress_path.unlink(missing_ok=True)
+        outcome_path.unlink(missing_ok=True)
+        creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0
+        process = subprocess.Popen(
+            [
+                sys.executable,
+                "-m",
+                "image_trust.web.worker",
+                "--project-root",
+                str(self._worker_project_root),
+                "--job-dir",
+                str(job_dir),
+                "--upload-path",
+                str(upload_path),
+            ],
+            cwd=self._worker_project_root,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            creationflags=creationflags,
+        )
+        with self._lock:
+            self._worker_processes[job_id] = process
+        last_progress: tuple[str, int] | None = None
+        try:
+            while process.poll() is None:
+                if self._is_cancelled(job_id):
+                    _terminate_worker_process(process)
+                    return None
+                last_progress = self._read_worker_progress(job_id, progress_path, last_progress)
+                time.sleep(0.05)
+            last_progress = self._read_worker_progress(job_id, progress_path, last_progress)
+            if self._is_cancelled(job_id):
+                return None
+            if outcome_path.is_file():
+                raw = json.loads(outcome_path.read_text(encoding="utf-8"))
+                return WebJobOutcome.model_validate(raw)
+            raise RuntimeError(f"web_worker_exited_without_outcome:{process.returncode}")
+        finally:
+            if process.poll() is None and self._is_cancelled(job_id):
+                _terminate_worker_process(process)
+            with self._lock:
+                self._worker_processes.pop(job_id, None)
+            progress_path.unlink(missing_ok=True)
+            outcome_path.unlink(missing_ok=True)
+
+    def _read_worker_progress(
+        self,
+        job_id: str,
+        progress_path: Path,
+        previous: tuple[str, int] | None,
+    ) -> tuple[str, int] | None:
+        try:
+            payload = json.loads(progress_path.read_text(encoding="utf-8"))
+            stage = str(payload["stage"])
+            progress_percent = int(payload["progress_percent"])
+        except (KeyError, OSError, TypeError, ValueError, json.JSONDecodeError):
+            return previous
+        current = (stage, progress_percent)
+        if current != previous:
+            self._update_progress(
+                job_id,
+                status=WebJobStatus.RUNNING,
+                stage=stage,
+                progress_percent=progress_percent,
+            )
+        return current
 
     def _replace_job(self, job: WebJob, **updates: Any) -> WebJob:
         updated = job.model_copy(
@@ -307,7 +439,7 @@ class LocalJobStore:
 
         with self._lock:
             snapshot = self.get_snapshot(job_id)
-            if snapshot is None:
+            if snapshot is None or self._is_cancelled(job_id) or snapshot.job.status is WebJobStatus.CANCELLED:
                 return None
             progress = max(snapshot.job.progress_percent, min(100, progress_percent))
             return self._replace_job(
@@ -359,6 +491,10 @@ class LocalJobStore:
         if not _JOB_ID_RE.fullmatch(job_id):
             return None
         return self.root / job_id
+
+    def _is_cancelled(self, job_id: str) -> bool:
+        with self._lock:
+            return job_id in self._cancelled_job_ids
 
 
 def build_local_runner(
@@ -495,6 +631,31 @@ def _safe_relative(root: Path, relative_path: str) -> Path:
     except ValueError as error:
         raise ValueError("unsafe_relative_artifact_path") from error
     return path
+
+
+def _terminate_worker_process(process: subprocess.Popen[bytes]) -> None:
+    """Stop one job worker, including child processes it started on Windows."""
+
+    if process.poll() is not None:
+        return
+    if os.name == "nt":
+        try:
+            subprocess.run(
+                ["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=5,
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            process.terminate()
+    else:
+        process.terminate()
+    try:
+        process.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait(timeout=5)
 
 
 def _now() -> str:

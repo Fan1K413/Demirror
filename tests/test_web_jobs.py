@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from threading import Event
 
 from image_trust.web.jobs import LocalJobStore, WebJob, WebJobOutcome, WebJobStatus
 
@@ -77,4 +78,38 @@ def test_local_job_store_marks_jobs_left_by_a_stopped_server_as_failed(tmp_path)
         assert "web_job_interrupted" in snapshot.job.limitations
         assert snapshot.job.errors[-1]["code"] == "server_interrupted"
     finally:
+        store.close()
+
+
+def test_local_job_store_cancels_only_the_named_queued_job(tmp_path) -> None:
+    first_started = Event()
+    release_first = Event()
+    executions: list[bytes] = []
+
+    def runner(upload_path: Path, _: Path, __) -> WebJobOutcome:
+        payload = upload_path.read_bytes()
+        executions.append(payload)
+        if payload == b"first-image":
+            first_started.set()
+            assert release_first.wait(timeout=5)
+        return WebJobOutcome(status=WebJobStatus.COMPLETED)
+
+    store = LocalJobStore(tmp_path / "jobs", runner)
+    try:
+        first = store.create_job("first.jpg", b"first-image")
+        assert first_started.wait(timeout=5)
+        second = store.create_job("second.jpg", b"second-image")
+
+        cancelled = store.cancel(second.job_id)
+        assert cancelled is not None
+        assert cancelled.job_id == second.job_id
+        assert cancelled.status is WebJobStatus.CANCELLED
+        assert store.get_snapshot(first.job_id).job.status is WebJobStatus.RUNNING
+
+        release_first.set()
+        assert store.wait(first.job_id).job.status is WebJobStatus.COMPLETED
+        assert store.wait(second.job_id).job.status is WebJobStatus.CANCELLED
+        assert executions == [b"first-image"]
+    finally:
+        release_first.set()
         store.close()
