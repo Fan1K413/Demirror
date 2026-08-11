@@ -19,6 +19,19 @@ Direction = Literal["supports_ai", "neutral"]
 Strength = Literal["strong", "limited", "none"]
 
 
+class WatermarkProviderSignal(BaseModel):
+    """Sanitized signal metadata returned by an official provider API."""
+
+    model_config = ConfigDict(frozen=True)
+
+    signal_type: Literal["c2pa", "synthid"]
+    outcome: Literal["detected", "not_detected"]
+    validation_state: Literal["trusted", "valid", "invalid", "not_present"] | None = None
+    model: str | None = None
+    issuer: str | None = None
+    generated_at: str | None = None
+
+
 class WatermarkCoverage(BaseModel):
     """The scheme and input domain to which one observation applies."""
 
@@ -70,12 +83,19 @@ class WatermarkAdapterResult(BaseModel):
     coverage: WatermarkCoverage
     score: WatermarkScore | None = None
     payload: WatermarkPayload = Field(default_factory=WatermarkPayload)
-    network_access: Literal["none"] = "none"
+    provider: Literal["openai"] | None = None
+    provider_signals: list[WatermarkProviderSignal] = Field(default_factory=list)
+    network_access: Literal["none", "explicit_opt_in"] = "none"
+    data_sent: bool = False
     limitations: list[str] = Field(default_factory=list)
     errors: list[dict[str, str]] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def validate_semantics(self) -> "WatermarkAdapterResult":
+        if self.network_access == "none" and self.data_sent:
+            raise ValueError("offline adapter cannot report external data transfer")
+        if self.provider_signals and self.provider is None:
+            raise ValueError("provider signals require a named provider")
         if self.run_status == "ok" and self.observation == "not_observed":
             raise ValueError("successful adapter must report positive or negative")
         if self.run_status != "ok" and self.observation != "not_observed":

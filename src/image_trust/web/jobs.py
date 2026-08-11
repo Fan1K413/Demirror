@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path, PurePosixPath
-from typing import Any, Callable
+from typing import Any, Callable, Iterable, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -26,9 +26,12 @@ from image_trust.provenance.config import load_c2pa_config
 from image_trust.schemas import RunStatus
 from image_trust.utils.config import load_config
 from image_trust.watermark.suite import (
+    aggregate_watermark_results,
     assess_implicit_watermarks,
     build_offline_watermark_adapters,
 )
+from image_trust.watermark.openai_provenance import OpenAIContentProvenanceAdapter
+from image_trust.watermark.remote import RemoteVerificationSettings
 
 
 MAX_UPLOAD_BYTES = 25 * 1024 * 1024
@@ -63,6 +66,7 @@ class WebJob(BaseModel):
     limitations: list[str] = Field(default_factory=list)
     errors: list[dict[str, str]] = Field(default_factory=list)
     result_artifact: str | None = None
+    external_checks: list[Literal["openai"]] = Field(default_factory=list)
 
 
 class WebJobOutcome(BaseModel):
@@ -104,9 +108,16 @@ class LocalJobStore:
         self._futures: dict[str, Future[None]] = {}
         self._mark_interrupted_jobs_failed()
 
-    def create_job(self, filename: str, content: bytes) -> WebJob:
+    def create_job(
+        self,
+        filename: str,
+        content: bytes,
+        *,
+        external_checks: Iterable[Literal["openai"]] = (),
+    ) -> WebJob:
         """Persist an uploaded local image and schedule its analysis."""
 
+        requested_external_checks = sorted(set(external_checks))
         safe_name = _safe_filename(filename)
         suffix = Path(safe_name).suffix.lower()
         now = _now()
@@ -129,6 +140,7 @@ class LocalJobStore:
                         "message": "Only PNG, JPEG, and static WebP uploads are accepted.",
                     }
                 ],
+                external_checks=requested_external_checks,
             )
             self._write_job(job_dir, job)
             return job
@@ -149,6 +161,7 @@ class LocalJobStore:
                         "message": f"Uploads must not exceed {MAX_UPLOAD_BYTES} bytes.",
                     }
                 ],
+                external_checks=requested_external_checks,
             )
             self._write_job(job_dir, job)
             return job
@@ -163,6 +176,7 @@ class LocalJobStore:
             updated_at_utc=now,
             status=WebJobStatus.QUEUED,
             stage="queued",
+            external_checks=requested_external_checks,
         )
         self._write_job(job_dir, job)
         with self._lock:
@@ -347,7 +361,10 @@ class LocalJobStore:
         return self.root / job_id
 
 
-def build_local_runner(project_root: Path) -> JobRunner:
+def build_local_runner(
+    project_root: Path,
+    remote_settings: RemoteVerificationSettings | None = None,
+) -> JobRunner:
     """Create the actual P0 + local C2PA + configured P1 runner."""
 
     root = project_root.resolve()
@@ -355,6 +372,7 @@ def build_local_runner(project_root: Path) -> JobRunner:
     c2pa_config = load_c2pa_config(root / "configs" / "p1_c2pa.yaml")
     camera_config = load_camera_config(root / "configs" / "p1_geocalib.yaml")
     watermark_adapters = build_offline_watermark_adapters()
+    configured_remote = remote_settings or RemoteVerificationSettings()
 
     def runner(
         upload_path: Path,
@@ -382,7 +400,17 @@ def build_local_runner(project_root: Path) -> JobRunner:
         c2pa_record = inspect_c2pa_asset(upload_path, c2pa_config)
         write_c2pa_record(job_dir / "c2pa" / "c2pa_result.json", c2pa_record)
         report_progress("watermark", 27)
-        watermark_result = assess_implicit_watermarks(upload_path, watermark_adapters)
+        offline_watermark = assess_implicit_watermarks(upload_path, watermark_adapters)
+        watermark_results = list(offline_watermark.adapters)
+        requested_external_checks = _requested_external_checks(job_dir)
+        if "openai" in requested_external_checks:
+            report_progress("openai_provenance", 28)
+            openai_result = assess_implicit_watermarks(
+                upload_path,
+                [OpenAIContentProvenanceAdapter(api_key=configured_remote.openai_api_key)],
+            )
+            watermark_results.extend(openai_result.adapters)
+        watermark_result = aggregate_watermark_results(watermark_results)
         limitations = list(p0_result.evidence.limitations)
         p3_result = assess_high_confidence_ai(
             upload_path,
@@ -423,6 +451,11 @@ def build_local_runner(project_root: Path) -> JobRunner:
             limitations.append("p1_camera_analysis_failed")
             status = WebJobStatus.PARTIAL
             camera_result = None
+        if requested_external_checks and any(
+            adapter.provider in requested_external_checks and adapter.run_status != "ok"
+            for adapter in watermark_result.adapters
+        ):
+            status = WebJobStatus.PARTIAL
         report_progress("synthesis", 96)
         origin = assess_origin(
             upload_path,
@@ -442,6 +475,14 @@ def build_local_runner(project_root: Path) -> JobRunner:
 def _safe_filename(filename: str) -> str:
     name = Path(filename).name.strip()
     return name or "upload.bin"
+
+
+def _requested_external_checks(job_dir: Path) -> set[str]:
+    try:
+        job = WebJob.model_validate_json((job_dir / "job.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return set()
+    return set(job.external_checks)
 
 
 def _safe_relative(root: Path, relative_path: str) -> Path:

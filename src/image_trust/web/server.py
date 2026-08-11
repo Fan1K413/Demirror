@@ -16,17 +16,32 @@ from image_trust.web.jobs import (
     WebJobSnapshot,
     build_local_runner,
 )
+from image_trust.watermark.remote import (
+    RemoteVerificationSettings,
+    load_remote_verification_settings,
+    remote_verification_capabilities,
+)
 
 
 STATIC_ROOT = Path(__file__).with_name("static")
 
 
-def create_app(store: LocalJobStore, static_root: Path = STATIC_ROOT) -> Callable:
+def create_app(
+    store: LocalJobStore,
+    static_root: Path = STATIC_ROOT,
+    remote_settings: RemoteVerificationSettings | None = None,
+) -> Callable:
     """Return a small WSGI application with upload, poll, and artifact routes."""
 
     def app(environ, start_response):
         method = environ.get("REQUEST_METHOD", "GET").upper()
         path = unquote(environ.get("PATH_INFO", "/"))
+        if method == "GET" and path == "/api/capabilities":
+            return _json(
+                start_response,
+                "200 OK",
+                {"external_verification": remote_verification_capabilities(remote_settings)},
+            )
         if method == "POST" and path == "/api/jobs":
             return _create_job(environ, start_response, store)
         if method == "GET" and path.startswith("/api/jobs/"):
@@ -46,8 +61,9 @@ def serve_local_demo(
 ) -> WSGIServer:
     """Construct, but do not start, a local-only server for CLI use and tests."""
 
-    store = LocalJobStore(jobs_root, build_local_runner(project_root))
-    server = make_server(host, port, create_app(store))
+    remote_settings = load_remote_verification_settings(project_root)
+    store = LocalJobStore(jobs_root, build_local_runner(project_root, remote_settings))
+    server = make_server(host, port, create_app(store, remote_settings=remote_settings))
     server.job_store = store  # type: ignore[attr-defined]
     return server
 
@@ -72,8 +88,21 @@ def _create_job(environ, start_response, store: LocalJobStore):
     if upload is None or not getattr(upload, "filename", None) or getattr(upload, "file", None) is None:
         return _json(start_response, "400 Bad Request", {"error": "file_field_required"})
     content = upload.file.read()
-    job = store.create_job(str(upload.filename), content)
+    external_checks = []
+    if _field_truthy(fields, "openai_provenance"):
+        external_checks.append("openai")
+    job = store.create_job(str(upload.filename), content, external_checks=external_checks)
     return _json(start_response, "202 Accepted", {"job": job.model_dump(mode="json")})
+
+
+def _field_truthy(fields: cgi.FieldStorage, name: str) -> bool:
+    if name not in fields:
+        return False
+    field = fields[name]
+    if isinstance(field, list):
+        field = field[0]
+    value = getattr(field, "value", "")
+    return str(value).strip().lower() in {"1", "true", "yes", "on"}
 
 
 def _get_job_or_artifact(path: str, start_response, store: LocalJobStore):

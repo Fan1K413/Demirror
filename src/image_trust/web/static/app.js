@@ -5,7 +5,7 @@
   const stateLabels = {
     queued: ["正在排队", "已创建本地作业，等待开始。"],
     validating: ["正在验证文件", "正在检查图片格式、大小与解码边界。"],
-    running: ["正在分析", "正在生成 AI 像素信号、相机元数据、几何证据、相机一致性记录和离线来源记录。"],
+    running: ["正在分析", "正在生成 AI 像素信号、相机元数据、几何证据、相机一致性记录和已选择的来源验证。"],
     completed: ["分析完成", "全部已配置的分析链路已完成。"],
     partial: ["分析部分完成", "基础几何结果已保留；部分附加分析未形成可用观测。"],
     rejected: ["文件未被接受", "图片未通过输入验证，因此没有继续分析。"],
@@ -18,6 +18,7 @@
     geometry: "正在提取线段并检查画面几何结构。",
     provenance: "正在读取元数据与离线来源记录。",
     watermark: "正在检查已配置的本地隐式水印方案。",
+    openai_provenance: "正在把本次图片发送给 OpenAI 官方来源验证 API。",
     ai_provenance: "已从可验证来源记录取得 AI 声明。",
     ai_dda: "正在运行 DDA 像素检测。",
     ai_safe: "正在运行 SAFE 频域检测。",
@@ -120,6 +121,21 @@
     trustmark_payload_withheld_from_result: "为减少标识泄露，结果中仅显示载荷摘要，不返回原始内容。",
     trustmark_remote_resolver_disabled: "离线模式不会连接远程服务解析标识归属。",
     trustmark_negative_is_not_camera_evidence: "未检出 TrustMark 不支持相机来源。",
+    openai_api_key_not_configured: "本机未配置 OPENAI_API_KEY，官方 OpenAI 来源验证没有运行。",
+    openai_api_key_rejected: "OpenAI 拒绝了本机 API Key；请检查密钥、项目和权限。",
+    openai_provenance_access_denied: "当前 OpenAI 项目没有内容来源验证接口的访问权限。",
+    openai_provenance_rate_limited: "OpenAI 来源验证暂时达到调用限额。",
+    openai_provenance_request_timed_out: "OpenAI 来源验证请求超时；本地检测结果仍已保留。",
+    openai_provenance_network_unavailable: "当前网络无法访问 OpenAI 来源验证 API；本地检测结果仍已保留。",
+    openai_provenance_http_error: "OpenAI 来源验证 API 返回错误；本地检测结果仍已保留。",
+    openai_provenance_response_invalid: "OpenAI 来源验证返回了无法安全解释的响应。",
+    openai_provenance_unhandled_failure: "OpenAI 来源验证发生未处理错误；请求细节和密钥没有写入结果。",
+    openai_response_too_large: "OpenAI 来源验证响应超过本地安全上限。",
+    openai_provenance_input_unavailable: "无法读取要发送给 OpenAI 的图片。",
+    openai_provenance_input_too_large: "图片超过 OpenAI 来源验证适配器的本地上传上限。",
+    openai_provider_signal_only_covers_supported_openai_content: "OpenAI 官方接口只检测其支持的 OpenAI 来源信号，不是通用 AI 检测器。",
+    openai_not_detected_does_not_rule_out_ai: "OpenAI 未检出不排除图片由 OpenAI 旧模型、其他 AI 工具生成，或水印已被变换破坏。",
+    openai_c2pa_signal_not_validated: "发现 OpenAI C2PA 相关信号，但没有形成有效或可信的验证状态，因此不参与综合判断。",
     camera_consistency_not_calibrated_for_origin_decision: "拍摄参数一致性尚未按来源类别校准，因此不参与三档判断。",
     c2pa_capture_declaration_not_trusted_for_camera_decision: "C2PA 捕获声明虽可读取，但未通过受信任来源链验证，因此不作为“可能为实拍”的依据。",
     opencv_lsd_quality_is_backend_relative_not_probability: "线段质量是 OpenCV LSD 内部相对量，不是来源概率。",
@@ -138,6 +154,12 @@
   const dropzone = document.querySelector("#dropzone");
   const selectedFile = document.querySelector("#selected-file");
   const submitButton = document.querySelector("#submit-button");
+  const externalChecks = document.querySelector("#external-checks");
+  const openaiOption = document.querySelector("#openai-option");
+  const openaiProvenance = document.querySelector("#openai-provenance");
+  const openaiCapability = document.querySelector("#openai-capability");
+  const googleOption = document.querySelector("#google-option");
+  const privacySummary = document.querySelector("#privacy-summary");
   const analysisPanel = document.querySelector("#analysis-panel");
   const statusDot = document.querySelector("#status-dot");
   const statusLabel = document.querySelector("#status-label");
@@ -177,6 +199,39 @@
     selected = file || null;
     selectedFile.textContent = selected ? `${selected.name} · ${(selected.size / 1024 / 1024).toFixed(2)} MB` : "尚未选择文件";
     submitButton.disabled = !selected;
+  }
+
+  function updatePrivacySummary() {
+    privacySummary.textContent = openaiProvenance.checked
+      ? "本次会把所选图片发送给 OpenAI 做来源验证；其他分析与证据仍保存在本机。"
+      : "默认不调用外部 API；文件与分析证据保存在本机的临时作业目录。";
+  }
+
+  async function loadCapabilities() {
+    try {
+      const response = await fetch("/api/capabilities", { cache: "no-store" });
+      if (!response.ok) throw new Error("capability request failed");
+      const payload = await response.json();
+      const openaiConfigured = payload.external_verification?.openai?.configured === true;
+      const googleConfigured = payload.external_verification?.google?.configured === true;
+      openaiOption.hidden = !openaiConfigured;
+      googleOption.hidden = !googleConfigured;
+      externalChecks.hidden = !(openaiConfigured || googleConfigured);
+      openaiProvenance.disabled = !openaiConfigured;
+      if (!openaiConfigured) openaiProvenance.checked = false;
+      openaiCapability.dataset.configured = String(openaiConfigured);
+      openaiCapability.textContent = openaiConfigured ? "已配置，可选" : "";
+      updatePrivacySummary();
+    } catch (_) {
+      externalChecks.hidden = true;
+      openaiOption.hidden = true;
+      googleOption.hidden = true;
+      openaiProvenance.disabled = true;
+      openaiProvenance.checked = false;
+      openaiCapability.dataset.configured = "false";
+      openaiCapability.textContent = "";
+      updatePrivacySummary();
+    }
   }
 
   function resetPanels() {
@@ -517,10 +572,19 @@
             : item.run_status === "failed"
               ? "运行失败"
               : "不可用";
-      metrics.push([item.adapter_id || item.scheme || "未命名方案", label]);
+      const name = item.provider === "openai"
+        ? "OpenAI 官方来源"
+        : item.adapter_id || item.scheme || "未命名方案";
+      metrics.push([name, label]);
+      (item.provider_signals || []).forEach((signal) => {
+        const signalName = signal.signal_type === "synthid" ? "OpenAI SynthID" : "OpenAI C2PA";
+        const outcome = signal.outcome === "detected" ? "已检出" : "未检出";
+        const validation = signal.validation_state ? ` · ${signal.validation_state}` : "";
+        metrics.push([signalName, `${outcome}${validation}`]);
+      });
     });
     if (positives.some((item) => item.evidence_class === "verified_provider_ai")) {
-      setCard("watermark", "检测到可信 AI 水印", "本地适配器形成了可进入综合判断的供应商来源证据。", metrics);
+      setCard("watermark", "检测到可信 AI 来源信号", "官方供应商验证检出了受支持的来源信号，并已作为强 AI 证据进入综合判断；它只覆盖该供应商支持的内容。", metrics);
       return;
     }
     if (positives.some((item) => item.evidence_class === "known_open_ai_watermark")) {
@@ -532,10 +596,18 @@
       return;
     }
     if (completed.length) {
-      setCard("watermark", "已完成本地检查", "已启用的方案未检出匹配；其他工具可能不加水印，水印也可能已被移除。", metrics);
+      const usedOpenAI = adapters.some((item) => item.provider === "openai");
+      setCard(
+        "watermark",
+        usedOpenAI ? "已完成来源信号检查" : "已完成本地检查",
+        usedOpenAI
+          ? "本地方案与已选择的 OpenAI 官方检查均未检出匹配；这不排除其他 AI、旧模型或已受损的水印。"
+          : "已启用的本地方案未检出匹配；其他工具可能不加水印，水印也可能已被移除。",
+        metrics,
+      );
       return;
     }
-    setCard("watermark", "本地检测不可用", "已配置的水印方案本次未形成观测；这不支持 AI 或实拍来源。", metrics);
+    setCard("watermark", "来源信号检测不可用", "已配置或已选择的方案本次未形成观测；这不支持 AI 或实拍来源。", metrics);
   }
 
   function addVisual(container, title, caption, src) {
@@ -631,6 +703,9 @@
     submitButton.textContent = "正在上传…";
     const formData = new FormData();
     formData.append("file", selected, selected.name);
+    if (openaiProvenance.checked && !openaiProvenance.disabled) {
+      formData.append("openai_provenance", "1");
+    }
     try {
       const response = await fetch("/api/jobs", { method: "POST", body: formData });
       const payload = await response.json();
@@ -650,6 +725,7 @@
   }
 
   input.addEventListener("change", () => setSelected(input.files?.[0]));
+  openaiProvenance.addEventListener("change", updatePrivacySummary);
   form.addEventListener("submit", submit);
   ["dragenter", "dragover"].forEach((eventName) => dropzone.addEventListener(eventName, (event) => {
     event.preventDefault();
@@ -669,4 +745,6 @@
     setSelected(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
+  updatePrivacySummary();
+  loadCapabilities();
 })();

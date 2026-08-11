@@ -14,7 +14,7 @@
           <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
           <span>Demirror</span>
         </a>
-        <div class="local-pill"><span></span>仅在本机处理</div>
+        <div class="local-pill"><span></span>默认仅在本机处理</div>
       </header>
 
       <main>
@@ -35,8 +35,27 @@
               <span class="upload-subtitle">或选择本机文件 · JPEG、PNG、静态 WebP · 最大 25 MB</span>
               <span id="selected-file" class="selected-file" aria-live="polite">尚未选择文件</span>
             </label>
+            <fieldset id="external-checks" class="external-checks" hidden>
+              <legend>可选官方在线验证</legend>
+              <label id="openai-option" class="external-option" for="openai-provenance" hidden>
+                <input id="openai-provenance" name="openai_provenance" type="checkbox" disabled>
+                <span>
+                  <strong>OpenAI 来源验证</strong>
+                  <small>仅勾选时把本次图片发送给 OpenAI，检查其支持的 C2PA 与 SynthID 信号。</small>
+                </span>
+                <em id="openai-capability">正在检查本机配置</em>
+              </label>
+              <div id="google-option" class="external-option external-manual" hidden>
+                <span class="manual-marker" aria-hidden="true">↗</span>
+                <span>
+                  <strong>Google SynthID</strong>
+                  <small>Google 尚未开放图片检测 API；可登录 Gemini 后手动上传验证。</small>
+                </span>
+                <a href="https://gemini.google.com/" target="_blank" rel="noopener noreferrer">前往官方验证</a>
+              </div>
+            </fieldset>
             <div class="upload-footer">
-              <p>不上传 URL，不调用外部 API；文件与分析证据保存在本机的临时作业目录。</p>
+              <p id="privacy-summary">默认不调用外部 API；文件与分析证据保存在本机的临时作业目录。</p>
               <button id="submit-button" class="primary-button" type="submit" disabled>开始分析</button>
             </div>
           </form>

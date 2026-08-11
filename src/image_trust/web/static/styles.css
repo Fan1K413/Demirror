@@ -64,6 +64,20 @@ h2 { margin-bottom: 0; font-size: 1.62rem; letter-spacing: -.045em; }
 .upload-title { font-weight: 800; letter-spacing: -.02em; }
 .upload-subtitle { margin-top: 8px; color: var(--muted); font-size: .84rem; }
 .selected-file { min-height: 1.3em; max-width: 90%; margin-top: 24px; overflow: hidden; color: var(--mint-strong); font-size: .84rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.external-checks { display: grid; gap: 9px; margin: 14px 0 0; padding: 14px; border: 1px solid var(--line); }
+.external-checks legend { padding: 0 7px; color: var(--muted); font-size: .72rem; font-weight: 800; letter-spacing: .06em; }
+.external-option { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 11px; align-items: center; padding: 11px 12px; background: #f4f6f1; color: var(--ink); }
+.external-option input { width: 17px; height: 17px; margin: 0; accent-color: var(--mint-strong); }
+.external-option span { min-width: 0; }
+.external-option strong, .external-option small { display: block; }
+.external-option strong { font-size: .82rem; }
+.external-option small { margin-top: 3px; color: var(--muted); font-size: .7rem; line-height: 1.45; }
+.external-option em, .external-option a { font-size: .7rem; font-style: normal; font-weight: 800; white-space: nowrap; }
+.external-option em { color: var(--muted); }
+.external-option em[data-configured="true"] { color: var(--mint-strong); }
+.external-option a { color: var(--mint-strong); text-decoration: none; }
+.external-option a:hover { text-decoration: underline; }
+.manual-marker { color: var(--orange); font-weight: 800; }
 .upload-footer { display: flex; gap: 28px; align-items: center; justify-content: space-between; padding: 18px 10px 6px; }
 .upload-footer p { max-width: 420px; margin: 0; color: var(--muted); font-size: .76rem; line-height: 1.5; }
 .primary-button, .quiet-button { border: 0; font-weight: 800; }
@@ -145,6 +159,8 @@ footer { padding: 52px 0 28px; color: #78817c; font-size: .72rem; text-align: ce
   .upload-footer, .analysis-panel, .section-heading { align-items: flex-start; flex-direction: column; }
   .upload-footer { gap: 15px; }
   .primary-button { width: 100%; }
+  .external-option { grid-template-columns: auto minmax(0, 1fr); }
+  .external-option em, .external-option a { grid-column: 2; justify-self: start; }
   .job-filename { max-width: 100%; }
   .visual-grid, .limitations ul { grid-template-columns: 1fr; }
   figure img { height: auto; aspect-ratio: 4 / 3; }

@@ -91,6 +91,11 @@ def test_unverified_identifier_cannot_be_decision_eligible() -> None:
         )
 
 
+def test_offline_adapter_cannot_claim_external_data_transfer() -> None:
+    with pytest.raises(ValidationError, match="offline adapter cannot report"):
+        _adapter_result(data_sent=True)
+
+
 def test_suite_keeps_unconfigured_and_failed_adapters_distinct(tmp_path: Path) -> None:
     asset = tmp_path / "asset.png"
     Image.new("RGB", (300, 300)).save(asset)
@@ -193,3 +198,32 @@ def test_unverified_identifier_does_not_change_origin_decision(tmp_path: Path) -
 
     assert result.decision == "no_ai_signal"
     assert result.implicit_watermark.adapters[0].observation == "positive"
+
+
+def test_verified_provider_watermark_produces_high_possible_ai(tmp_path: Path) -> None:
+    asset = tmp_path / "asset.png"
+    Image.new("RGB", (300, 300)).save(asset)
+    watermark = ImplicitWatermarkAssessment(
+        status="completed",
+        adapters=[
+            _adapter_result(
+                observation="positive",
+                evidence_class="verified_provider_ai",
+                direction="supports_ai",
+                strength="strong",
+                decision_eligible=True,
+                provider="openai",
+                network_access="explicit_opt_in",
+                data_sent=True,
+            )
+        ],
+        direction="supports_ai",
+        strength="strong",
+        decision_eligible=True,
+    )
+
+    result = assess_origin(asset, _ai(), _c2pa(), watermark_result=watermark)
+
+    assert result.decision == "possible_ai"
+    assert result.evidence_strength == "high"
+    assert result.supporting_evidence == ["已验证的供应商 AI 隐式水印"]

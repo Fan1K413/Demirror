@@ -56,9 +56,20 @@ def assess_implicit_watermarks(
                 )
             )
 
-    eligible = [result for result in results if result.decision_eligible]
-    completed = [result for result in results if result.run_status == "ok"]
-    if len(completed) == len(results):
+    return aggregate_watermark_results(results)
+
+
+def aggregate_watermark_results(
+    results: Iterable[WatermarkAdapterResult],
+) -> ImplicitWatermarkAssessment:
+    """Aggregate already-run local and opt-in remote adapter observations."""
+
+    collected = list(results)
+    if not collected:
+        return ImplicitWatermarkAssessment.not_configured()
+    eligible = [result for result in collected if result.decision_eligible]
+    completed = [result for result in collected if result.run_status == "ok"]
+    if len(completed) == len(collected):
         status = "completed"
     elif completed:
         status = "partial"
@@ -71,9 +82,9 @@ def assess_implicit_watermarks(
         strength = "limited"
     return ImplicitWatermarkAssessment(
         status=status,
-        adapters=results,
+        adapters=collected,
         direction="supports_ai" if eligible else "neutral",
         strength=strength,
         decision_eligible=bool(eligible),
-        limitations=sorted({item for result in results for item in result.limitations}),
+        limitations=sorted({item for result in collected for item in result.limitations}),
     )

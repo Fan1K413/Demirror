@@ -24,6 +24,7 @@ def test_local_job_store_persists_completed_job_and_artifact(tmp_path) -> None:
     store = LocalJobStore(tmp_path / "jobs", runner)
     try:
         created = store.create_job("example.jpg", b"image-bytes")
+        assert created.external_checks == []
         snapshot = store.wait(created.job_id)
         assert snapshot is not None
         assert snapshot.job.status is WebJobStatus.COMPLETED
