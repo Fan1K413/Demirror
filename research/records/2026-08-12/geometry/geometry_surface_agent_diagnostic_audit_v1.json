@@ -1,0 +1,725 @@
+{
+  "agent_annotation_audit_sha256": "b5742b6a6a96e85470c05c22d42df5d60d01d2d5f9bc2f5021bfd38fcf87e02b",
+  "ai_assisted_annotations_used": true,
+  "annotation_semantics": "AI-assisted source-blind preannotation; not human ground truth",
+  "authorized_diagnostic_packet_count": 30,
+  "baseline_audit_sha256": "ce3c79144bb6ee047c16511b7118308fa4b835b1b456af40170787cc12530c82",
+  "check_status_counts": {
+    "G1": {
+      "available": 30
+    },
+    "G2": {
+      "available": 22,
+      "not_applicable": 8
+    },
+    "G3": {
+      "available": 16,
+      "not_applicable": 14
+    },
+    "G4": {
+      "available": 29,
+      "not_applicable": 1
+    }
+  },
+  "comparison": {
+    "active_line_assignment_fraction": 0.6803576841467112,
+    "active_line_count": 6598,
+    "agent_annotation_audit_sha256": "b5742b6a6a96e85470c05c22d42df5d60d01d2d5f9bc2f5021bfd38fcf87e02b",
+    "agent_annotation_hash_closure_sha256": "deea477d38f27e59ba1b6c09a059dc132b7c999847337eb2df95b0d07f902972",
+    "ai_assisted_annotations_used": true,
+    "annotation_semantics": "AI-assisted source-blind preannotation; not human ground truth",
+    "annotation_status_counts": {
+      "completed": 30,
+      "unassessable": 6
+    },
+    "assessable_family_count": 199,
+    "assigned_active_line_count": 4489,
+    "baseline_audit_sha256": "ce3c79144bb6ee047c16511b7118308fa4b835b1b456af40170787cc12530c82",
+    "comparable_family_count": 199,
+    "comparable_family_fraction": 1.0,
+    "completed_packet_count": 30,
+    "config": {
+      "active_line_assignment_fraction_minimum": 0.7,
+      "assessable_family_count_minimum": 48,
+      "comparable_family_fraction_minimum": 0.75,
+      "completed_packet_count_minimum": 24,
+      "expected_packet_count": 36,
+      "macro_different_surface_pair_separation_minimum": 0.7,
+      "macro_same_surface_pair_retention_minimum": 0.7,
+      "non_split_family_specificity_minimum": 0.7,
+      "split_family_recall_minimum": 0.6,
+      "terminal_annotation_ratio_minimum": 1.0
+    },
+    "counterfactual_human_gates": {
+      "active_line_assignment_fraction_at_least_minimum": false,
+      "assessable_family_count_at_least_minimum": true,
+      "comparable_family_fraction_at_least_minimum": true,
+      "completed_packet_count_at_least_minimum": true,
+      "macro_different_surface_pair_separation_at_least_minimum": false,
+      "macro_same_surface_pair_retention_at_least_minimum": true,
+      "non_split_family_specificity_at_least_minimum": true,
+      "split_family_recall_at_least_minimum": false,
+      "terminal_annotation_ratio_at_least_minimum": true
+    },
+    "counterfactual_human_thresholds_passed": false,
+    "decision": "diagnostic_only_human_confirmation_still_required",
+    "diagnostic_protocol_sha256": "e5eead08325acf299a1d8983fb5e458dae4caa1e130a60ff6fe23da116813400",
+    "family_counts": {
+      "abstained": 0,
+      "false_negative": 143,
+      "false_positive": 2,
+      "true_negative": 17,
+      "true_positive": 37
+    },
+    "human_annotations_used": false,
+    "macro_different_surface_pair_separation": 0.0674513593644147,
+    "macro_same_surface_pair_retention": 0.9751273205264577,
+    "origin_scoring_authorized": false,
+    "packet_count": 36,
+    "pair_counts": {
+      "abstained": 75577,
+      "false_negative": 1099,
+      "false_positive": 36422,
+      "true_negative": 3314,
+      "true_positive": 27702
+    },
+    "posthoc_source_key_opened": false,
+    "replay_reviewer_ids": [
+      "grr-009e72fb44bf",
+      "grr-0c4e9bf1fb0e",
+      "grr-0ca6586274f5",
+      "grr-0ef16f4dfd37",
+      "grr-21b4a7e84fa7",
+      "grr-232de905853c",
+      "grr-2aba0c063fc0",
+      "grr-2d2a7ad3f419",
+      "grr-56a8d33a9715",
+      "grr-6a9d097e8306",
+      "grr-7295df27e532",
+      "grr-7ab243f367d8",
+      "grr-8e3ac3925ef7",
+      "grr-93754df2d0d3",
+      "grr-949d5adeda56",
+      "grr-98ad487eb68b",
+      "grr-9c3a9c365257",
+      "grr-a2c28b6b0df9",
+      "grr-b04b6672e300",
+      "grr-bd5662bc5d56",
+      "grr-bec47965a881",
+      "grr-c097f87c33d6",
+      "grr-ca2496d8b7bb",
+      "grr-cdbdcf7316f7",
+      "grr-d46b94aa8233",
+      "grr-dc955be40930",
+      "grr-e1d5766643a2",
+      "grr-f5eb6a008a8c",
+      "grr-fbce085cfd3c",
+      "grr-fcfa4545d488"
+    ],
+    "review_manifest_sha256": "88f3b2e80a729b1953aa65d89b36f29232774986947b1996e1485f1b6ec22ed3",
+    "schema_version": "geometry-surface-agent-comparison-v1",
+    "source_labels_used": false,
+    "status": "complete",
+    "web_integration_authorized": false
+  },
+  "comparison_record_count": 240,
+  "comparison_report_canonical_sha256": "116ffeed92d3cb15335c38a02f5f8dffde0179c4d4ddc376cc4bd9a0f37aa92a",
+  "counterfactual_human_thresholds_do_not_authorize_replay": true,
+  "decision": "diagnostic_only_human_confirmation_still_required",
+  "diagnostic_protocol_sha256": "e5eead08325acf299a1d8983fb5e458dae4caa1e130a60ff6fe23da116813400",
+  "finding_counts": {
+    "G1": 29,
+    "G2": 0,
+    "G3": 17,
+    "G4": 157
+  },
+  "human_annotations_used": false,
+  "human_confirmation_still_required": true,
+  "implementation_sha256": {
+    "scripts/run_geometry_surface_agent_diagnostic.py": "f6e12f8ef2d5eaf44a72601ed977220801fb351263a8fc309956f602410e1387",
+    "src/image_trust/geometry_ai/surface_agent_diagnostic.py": "c2fe9ce92da177e0b6c8968222f9432f630cbfe881d71e1e85bbc3885463862f"
+  },
+  "origin_scoring_authorized": false,
+  "posthoc_source_key_opened": false,
+  "processed_diagnostic_packet_count": 30,
+  "records": [
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "not_applicable",
+        "G3": "available",
+        "G4": "available"
+      },
+      "conditioned_family_count": 12,
+      "conditioned_region_count": 2,
+      "finding_counts": {
+        "G1": 3,
+        "G2": 0,
+        "G3": 1,
+        "G4": 11
+      },
+      "result_sha256": "60269a71125f64913f6c0210a63e59d1d2980164aad3aad26871fb2311c25376",
+      "reviewer_id": "grr-009e72fb44bf",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "not_applicable",
+        "G3": "available",
+        "G4": "not_applicable"
+      },
+      "conditioned_family_count": 13,
+      "conditioned_region_count": 2,
+      "finding_counts": {
+        "G1": 0,
+        "G2": 0,
+        "G3": 3,
+        "G4": 0
+      },
+      "result_sha256": "985e26a524bdcbfbb838612c1d97d0fda6433ea19176e33eecb222a80ab36a3b",
+      "reviewer_id": "grr-0c4e9bf1fb0e",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "available",
+        "G3": "available",
+        "G4": "available"
+      },
+      "conditioned_family_count": 14,
+      "conditioned_region_count": 2,
+      "finding_counts": {
+        "G1": 0,
+        "G2": 0,
+        "G3": 0,
+        "G4": 9
+      },
+      "result_sha256": "6750ea3d8971915b15d03efe42a2395227ae1abc638e2692bb242ab52ebb53e4",
+      "reviewer_id": "grr-0ca6586274f5",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "available",
+        "G3": "available",
+        "G4": "available"
+      },
+      "conditioned_family_count": 9,
+      "conditioned_region_count": 2,
+      "finding_counts": {
+        "G1": 1,
+        "G2": 0,
+        "G3": 0,
+        "G4": 4
+      },
+      "result_sha256": "c9857d6e4d42461c83961f0782a95c9f0ecb5dd196ae7393dc3267db1f3b04cc",
+      "reviewer_id": "grr-0ef16f4dfd37",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "available",
+        "G3": "available",
+        "G4": "available"
+      },
+      "conditioned_family_count": 9,
+      "conditioned_region_count": 2,
+      "finding_counts": {
+        "G1": 1,
+        "G2": 0,
+        "G3": 0,
+        "G4": 4
+      },
+      "result_sha256": "5f28e4fb05b863c86969f49e49fe952d2b88d305cb521bedb94ea525329c1b98",
+      "reviewer_id": "grr-21b4a7e84fa7",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "available",
+        "G3": "not_applicable",
+        "G4": "available"
+      },
+      "conditioned_family_count": 10,
+      "conditioned_region_count": 2,
+      "finding_counts": {
+        "G1": 0,
+        "G2": 0,
+        "G3": 0,
+        "G4": 3
+      },
+      "result_sha256": "81004fbdf33e9d818efe10b51a87759cd3252bf484824cb4eb3e93ad7f851c5b",
+      "reviewer_id": "grr-232de905853c",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "not_applicable",
+        "G3": "available",
+        "G4": "available"
+      },
+      "conditioned_family_count": 16,
+      "conditioned_region_count": 4,
+      "finding_counts": {
+        "G1": 0,
+        "G2": 0,
+        "G3": 0,
+        "G4": 2
+      },
+      "result_sha256": "5a7dbc85a464fef0cfafbc686ed2fe430f720e7dfc82c41a9d7e20e1e8ab22df",
+      "reviewer_id": "grr-2aba0c063fc0",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "available",
+        "G3": "available",
+        "G4": "available"
+      },
+      "conditioned_family_count": 13,
+      "conditioned_region_count": 2,
+      "finding_counts": {
+        "G1": 0,
+        "G2": 0,
+        "G3": 3,
+        "G4": 11
+      },
+      "result_sha256": "1088922d8282da09bf1ef0799408eb40577304fc1094b7c31d5c80380c68e28a",
+      "reviewer_id": "grr-2d2a7ad3f419",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "available",
+        "G3": "not_applicable",
+        "G4": "available"
+      },
+      "conditioned_family_count": 20,
+      "conditioned_region_count": 3,
+      "finding_counts": {
+        "G1": 1,
+        "G2": 0,
+        "G3": 0,
+        "G4": 6
+      },
+      "result_sha256": "1089be26c751b8aae4cc7d6020865b78a587951647c9fb211197bec1dc59a83a",
+      "reviewer_id": "grr-56a8d33a9715",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "available",
+        "G3": "not_applicable",
+        "G4": "available"
+      },
+      "conditioned_family_count": 10,
+      "conditioned_region_count": 4,
+      "finding_counts": {
+        "G1": 0,
+        "G2": 0,
+        "G3": 0,
+        "G4": 1
+      },
+      "result_sha256": "10412699dba4e9921fc15e8185e59aa8aab9d8b9a5165db74d0ec37007cdfd2b",
+      "reviewer_id": "grr-6a9d097e8306",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "available",
+        "G3": "not_applicable",
+        "G4": "available"
+      },
+      "conditioned_family_count": 12,
+      "conditioned_region_count": 3,
+      "finding_counts": {
+        "G1": 1,
+        "G2": 0,
+        "G3": 0,
+        "G4": 5
+      },
+      "result_sha256": "10c7232541254fe3c1c8d97b06793af27bc27173266853fc4213da9e01d73a6c",
+      "reviewer_id": "grr-7295df27e532",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "not_applicable",
+        "G3": "available",
+        "G4": "available"
+      },
+      "conditioned_family_count": 10,
+      "conditioned_region_count": 2,
+      "finding_counts": {
+        "G1": 0,
+        "G2": 0,
+        "G3": 1,
+        "G4": 4
+      },
+      "result_sha256": "3e146bc6c5c331debee4773e75578e7ce5222d36dc99f1179132475a311c7421",
+      "reviewer_id": "grr-7ab243f367d8",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "available",
+        "G3": "available",
+        "G4": "available"
+      },
+      "conditioned_family_count": 11,
+      "conditioned_region_count": 4,
+      "finding_counts": {
+        "G1": 2,
+        "G2": 0,
+        "G3": 1,
+        "G4": 3
+      },
+      "result_sha256": "0fcdb64b8cb0b266194918b1b7b5a6edf5b4c60811a49cb8ddacfb06b9b13ff6",
+      "reviewer_id": "grr-8e3ac3925ef7",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "available",
+        "G3": "available",
+        "G4": "available"
+      },
+      "conditioned_family_count": 8,
+      "conditioned_region_count": 1,
+      "finding_counts": {
+        "G1": 3,
+        "G2": 0,
+        "G3": 1,
+        "G4": 2
+      },
+      "result_sha256": "babfd4bb5dd40caefee686af1568b667cbabcdf35f5bed47c6a6cb19b036ccb8",
+      "reviewer_id": "grr-93754df2d0d3",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "not_applicable",
+        "G3": "available",
+        "G4": "available"
+      },
+      "conditioned_family_count": 8,
+      "conditioned_region_count": 1,
+      "finding_counts": {
+        "G1": 0,
+        "G2": 0,
+        "G3": 3,
+        "G4": 10
+      },
+      "result_sha256": "63ec57ea9d6caffa3a44b353cba45d3f3d58d7bc39e4bd755f9e0da094e2347b",
+      "reviewer_id": "grr-949d5adeda56",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "available",
+        "G3": "not_applicable",
+        "G4": "available"
+      },
+      "conditioned_family_count": 8,
+      "conditioned_region_count": 2,
+      "finding_counts": {
+        "G1": 5,
+        "G2": 0,
+        "G3": 0,
+        "G4": 2
+      },
+      "result_sha256": "18112f25d31eb7426244cc53642ed17da831e0c75f54777b3b16d828bafaefd2",
+      "reviewer_id": "grr-98ad487eb68b",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "available",
+        "G3": "available",
+        "G4": "available"
+      },
+      "conditioned_family_count": 25,
+      "conditioned_region_count": 5,
+      "finding_counts": {
+        "G1": 3,
+        "G2": 0,
+        "G3": 1,
+        "G4": 13
+      },
+      "result_sha256": "9d4c9926501e2ec7865509dd31c1b99b157090a0300bb613d7d52ba9d179ca83",
+      "reviewer_id": "grr-9c3a9c365257",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "available",
+        "G3": "not_applicable",
+        "G4": "available"
+      },
+      "conditioned_family_count": 14,
+      "conditioned_region_count": 6,
+      "finding_counts": {
+        "G1": 0,
+        "G2": 0,
+        "G3": 0,
+        "G4": 3
+      },
+      "result_sha256": "619479c070efa2efdf2c7248fb60f2f13885015a0fa2413bceef132b899429f5",
+      "reviewer_id": "grr-a2c28b6b0df9",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "available",
+        "G3": "not_applicable",
+        "G4": "available"
+      },
+      "conditioned_family_count": 13,
+      "conditioned_region_count": 4,
+      "finding_counts": {
+        "G1": 0,
+        "G2": 0,
+        "G3": 0,
+        "G4": 4
+      },
+      "result_sha256": "19013043082c5d5324da6c0154ec785baf8a53fe0d3ef9e14ff018433fe8cda2",
+      "reviewer_id": "grr-b04b6672e300",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "available",
+        "G3": "not_applicable",
+        "G4": "available"
+      },
+      "conditioned_family_count": 8,
+      "conditioned_region_count": 1,
+      "finding_counts": {
+        "G1": 2,
+        "G2": 0,
+        "G3": 0,
+        "G4": 7
+      },
+      "result_sha256": "e77c71f310495d1ab929804f954e794264489949e7f532a8b7b98d2fb8a900d0",
+      "reviewer_id": "grr-bd5662bc5d56",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "available",
+        "G3": "not_applicable",
+        "G4": "available"
+      },
+      "conditioned_family_count": 12,
+      "conditioned_region_count": 3,
+      "finding_counts": {
+        "G1": 1,
+        "G2": 0,
+        "G3": 0,
+        "G4": 5
+      },
+      "result_sha256": "14c9b77ca216e4cbb532d36643149f02da2f10b08aa272aef987cd946f65c6fe",
+      "reviewer_id": "grr-bec47965a881",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "not_applicable",
+        "G3": "not_applicable",
+        "G4": "available"
+      },
+      "conditioned_family_count": 10,
+      "conditioned_region_count": 4,
+      "finding_counts": {
+        "G1": 0,
+        "G2": 0,
+        "G3": 0,
+        "G4": 5
+      },
+      "result_sha256": "a3fbe7a34b4658afed5f0a21f303f61635b6131deb890b956d4cb3edcc87c5c6",
+      "reviewer_id": "grr-c097f87c33d6",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "not_applicable",
+        "G3": "available",
+        "G4": "available"
+      },
+      "conditioned_family_count": 10,
+      "conditioned_region_count": 2,
+      "finding_counts": {
+        "G1": 2,
+        "G2": 0,
+        "G3": 1,
+        "G4": 12
+      },
+      "result_sha256": "f6619f92e1e30ca4d54622451f30aee44d973ca5fd0333212ac2ca14f2ea6e4b",
+      "reviewer_id": "grr-ca2496d8b7bb",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "available",
+        "G3": "available",
+        "G4": "available"
+      },
+      "conditioned_family_count": 8,
+      "conditioned_region_count": 2,
+      "finding_counts": {
+        "G1": 1,
+        "G2": 0,
+        "G3": 1,
+        "G4": 4
+      },
+      "result_sha256": "8ecd6c62a482b1ccefc6bf23dd50e1efc5099f6b03143adfd28c9cb004e501c3",
+      "reviewer_id": "grr-cdbdcf7316f7",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "available",
+        "G3": "not_applicable",
+        "G4": "available"
+      },
+      "conditioned_family_count": 15,
+      "conditioned_region_count": 2,
+      "finding_counts": {
+        "G1": 1,
+        "G2": 0,
+        "G3": 0,
+        "G4": 7
+      },
+      "result_sha256": "14f58fd4d64fa8280aee0d77e5605ffdd7e8419dfe33ecd94cc34642b33a6c0b",
+      "reviewer_id": "grr-d46b94aa8233",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "not_applicable",
+        "G3": "not_applicable",
+        "G4": "available"
+      },
+      "conditioned_family_count": 15,
+      "conditioned_region_count": 5,
+      "finding_counts": {
+        "G1": 0,
+        "G2": 0,
+        "G3": 0,
+        "G4": 5
+      },
+      "result_sha256": "fbe892ee5033b59ddffcb65ae8cee9b9b59b17c78769bb46d3f838203db4d3a1",
+      "reviewer_id": "grr-dc955be40930",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "available",
+        "G3": "not_applicable",
+        "G4": "available"
+      },
+      "conditioned_family_count": 14,
+      "conditioned_region_count": 6,
+      "finding_counts": {
+        "G1": 0,
+        "G2": 0,
+        "G3": 0,
+        "G4": 3
+      },
+      "result_sha256": "b6167dfc44d5883f0c79c2417267e9bc5b6c0b43a266cc9e86c23318aef53d20",
+      "reviewer_id": "grr-e1d5766643a2",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "available",
+        "G3": "available",
+        "G4": "available"
+      },
+      "conditioned_family_count": 8,
+      "conditioned_region_count": 2,
+      "finding_counts": {
+        "G1": 1,
+        "G2": 0,
+        "G3": 1,
+        "G4": 3
+      },
+      "result_sha256": "3af0dafc2fd20b2f032809d32831da1668f4c4ede6baa50b73dc2d895569f0ae",
+      "reviewer_id": "grr-f5eb6a008a8c",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "available",
+        "G3": "available",
+        "G4": "available"
+      },
+      "conditioned_family_count": 10,
+      "conditioned_region_count": 2,
+      "finding_counts": {
+        "G1": 0,
+        "G2": 0,
+        "G3": 0,
+        "G4": 6
+      },
+      "result_sha256": "a5812eae2367f512f03c9fe9e93c17e169b23c3b0506fdc41c64257312749f0e",
+      "reviewer_id": "grr-fbce085cfd3c",
+      "status": "available"
+    },
+    {
+      "check_statuses": {
+        "G1": "available",
+        "G2": "available",
+        "G3": "not_applicable",
+        "G4": "available"
+      },
+      "conditioned_family_count": 16,
+      "conditioned_region_count": 4,
+      "finding_counts": {
+        "G1": 1,
+        "G2": 0,
+        "G3": 0,
+        "G4": 3
+      },
+      "result_sha256": "a0e4d79e25f49ff876b202549136127fa4cf09f2a4b56066806169aa23381268",
+      "reviewer_id": "grr-fcfa4545d488",
+      "status": "available"
+    }
+  ],
+  "result_status_counts": {
+    "available": 30
+  },
+  "review_manifest_sha256": "88f3b2e80a729b1953aa65d89b36f29232774986947b1996e1485f1b6ec22ed3",
+  "schema_version": "geometry-surface-agent-diagnostic-audit-v1",
+  "source_labels_used": false,
+  "status": "complete",
+  "web_integration_authorized": false
+}

@@ -1,0 +1,78 @@
+{
+  "schema_version": "demirror-geometry-surface-agent-diagnostic-protocol-v1",
+  "date_registered": "2026-08-12",
+  "status": "registered_before_agent_surface_comparison_or_conditioned_replay",
+  "registration_parent_commit": "22cf723f2b05a05efd6ce3eaafd4feb3d327cfa1",
+  "purpose": "Run the already completed source-blind AI-assisted annotations through the remaining surface comparison and surface-conditioned G1-G4 engineering path without representing them as independent human ground truth or satisfying the frozen human continuation gate.",
+  "hash_policy": "Normalize UTF-8 CRLF and CR line endings to LF before SHA-256 for tracked text and the blind manifest. Preserve raw artifact-byte hashes already recorded by the deterministic baseline audit.",
+  "frozen_inputs": {
+    "blind_root": "outputs/geometry_semantic_relation_pilot_v1/blind",
+    "review_manifest_sha256": "88f3b2e80a729b1953aa65d89b36f29232774986947b1996e1485f1b6ec22ed3",
+    "packet_count": 36,
+    "agent_annotation_root": "outputs/geometry_semantic_relation_pilot_v1/agent_annotations/v1",
+    "agent_annotation_subdirectories": [
+      "part_01_12_recovery",
+      "part_13_24",
+      "part_25_36"
+    ],
+    "agent_annotation_status_counts": {
+      "completed": 30,
+      "unassessable": 6
+    },
+    "agent_annotation_closure_sha256": "f1b4e53103700634c376733179b9d97b7206622f4720fe02ddfd76a0b51789fb",
+    "agent_semantic_annotation_closure_sha256": "25296e3bf98cbb6c83b94e03198afae718563b7365d3d2370297837d29f255ea",
+    "agent_assisted_protocol_sha256": "bb3cd7c12c7378370a6bb19e0557380dea0e5eb9242378a473b6d3356bcfcdf1",
+    "agent_assisted_audit_sha256": "b5742b6a6a96e85470c05c22d42df5d60d01d2d5f9bc2f5021bfd38fcf87e02b",
+    "deterministic_surface_audit_sha256": "ce3c79144bb6ee047c16511b7118308fa4b835b1b456af40170787cc12530c82",
+    "deterministic_result_hash_closure_sha256": "69fe85234a0709e4d941f5ea8bcdb47547d3b40e9a7113ba422b7ba2a143b965",
+    "human_continuation_protocol_sha256": "3c2956e12a999792d31555eb9e65889bfa134f4ea2c07919f20515a7bfbeed81",
+    "surface_comparison_implementation_sha256": "4397e35154b923ef6fcd7f7e867c5003f910e9a13f6c9f8ad89ca2678187ed9b",
+    "surface_conditioned_implementation_sha256": "b78935e5ff5c7279104b98475eede25d4b4efd580b02f1fe70cebcefdc7fded3",
+    "g1_g4_measurement_sha256": "5dc48fca0c8e8f1941223b039fe34e8fb02cd3d426b6835c7c9fdf3d9b008bd6"
+  },
+  "annotation_policy": {
+    "annotation_semantics": "AI-assisted source-blind preannotation; not human ground truth",
+    "comparison_population": "All 36 terminal AI-assisted annotations are retained in status counts. Only the 30 completed annotations enter relation metrics and diagnostic replay; six unassessable packets are reported and skipped.",
+    "hidden_duplicate_quality_receipt_required": false,
+    "reason": "The source key remains closed and the result is explicitly diagnostic, so no human-review quality claim or hidden-duplicate agreement is produced.",
+    "forbidden_claims": [
+      "independent human accuracy",
+      "human continuation gate success",
+      "origin evidence or AI probability",
+      "deployment eligibility"
+    ]
+  },
+  "comparison_metrics": {
+    "family_reference_positive": "AI-assisted split_across_surfaces",
+    "family_reference_negative": [
+      "AI-assisted coherent_within_surface",
+      "AI-assisted geometry_inconsistent_within_surface"
+    ],
+    "family_excluded": "AI-assisted unassessable",
+    "baseline_positive": "split_candidate",
+    "baseline_negative": "single_surface_candidate",
+    "baseline_abstention": "insufficient_support",
+    "pair_scope": "Remove AI-assisted outlier lines, enumerate unordered active-member pairs, compare shared AI-assisted surfaces with shared deterministic subfamilies, and report unassigned pairs as abstentions.",
+    "aggregation": "Report micro confusion counts and macro per-family same-surface retention and different-surface separation.",
+    "counterfactual_only": "Also evaluate the already frozen human continuation thresholds for orientation, but label them counterfactual and never convert their outcome into authorization."
+  },
+  "diagnostic_replay": {
+    "selection": "Run all and only reviewer IDs whose AI-assisted annotation status is completed.",
+    "inputs": [
+      "anonymous packet image",
+      "packet-declared geometry_measurement_v2.json",
+      "frozen deterministic surface baseline result",
+      "this diagnostic protocol and the validated AI-assisted audit"
+    ],
+    "measurement": "Reuse frozen deterministic surface scopes and the frozen G1-G4 implementation. Exclude G5.",
+    "failure_rule": "Protocol, manifest, agent audit, annotation closure, baseline result, identity, path or implementation drift fails before final diagnostic output is published.",
+    "output": "Per-packet G1-G4 diagnostics and aggregate availability or finding counts only. No AI score, probability, threshold selection or web artifact."
+  },
+  "decision": "diagnostic_only_human_confirmation_still_required",
+  "ai_assisted_annotations_used": true,
+  "human_annotations_used": false,
+  "posthoc_source_key_opened": false,
+  "source_labels_used": false,
+  "origin_scoring_authorized": false,
+  "web_integration_authorized": false
+}

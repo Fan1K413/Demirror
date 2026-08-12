@@ -1,6 +1,6 @@
 # 2026-08-12 研究记录清单
 
-本目录只保留能够支撑阶段结论的 24 份机器可读记录。筛选标准是：最终审计优先；保留
+本目录只保留能够支撑阶段结论的 28 份机器可读记录。筛选标准是：最终审计优先；保留
 复现最终审计所必需的预注册协议；保留会影响资源边界理解的关键失败收据；不保留已被
 最终结果取代的重复候选屏、连续采集协议版本和中间选择表。
 
@@ -27,6 +27,8 @@
 - `geometry_deterministic_surface_baseline_audit_v1.json`：36 个来源盲化 packet 的双次确定性、产物闭包、实现哈希和资源统计；只授权进入独立人工关系对比。
 - `geometry_surface_continuation_protocol_v1.json`：在读取独立人工答案前冻结基线—人工比较指标、门禁和通过后才可运行的表面条件 G1–G4 离线重放规则。
 - `geometry_surface_continuation_readiness_v1.json`：不读取人工标注、AI 辅助标注或来源密钥的非人工工程就绪审计；全部门禁通过，当前只等待独立人工标注与来源中立质量回执。
+- `geometry_surface_agent_diagnostic_protocol_v1.json`：按用户要求预先冻结 AI 辅助盲标的描述性表面对比和 G1–G4 诊断重放；明确不能代替人工门禁、来源计分或网页接入。
+- `geometry_surface_agent_diagnostic_audit_v1.json`：30 项完成态 AI 盲标的确定性表面对比与表面条件 G1–G4 诊断；反事实人审阈值失败，仍须以后独立人工确认。
 
 ## Real controls
 

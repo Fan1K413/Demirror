@@ -19,15 +19,23 @@ from image_trust.geometry_ai.surface_conditioned import (
     assess_surface_conditioned_g1_g4,
     build_surface_replay_authorization,
 )
+from image_trust.geometry_ai.surface_agent_diagnostic import (
+    assess_agent_surface_conditioned_g1_g4,
+    build_agent_diagnostic_replay_authorization,
+    compare_deterministic_surfaces_with_agent_annotations,
+)
 
 __all__ = [
     "assess_deterministic_surface_baseline",
+    "assess_agent_surface_conditioned_g1_g4",
     "assess_geometry_ai",
     "assess_geometry_measurement_v2",
     "assess_surface_conditioned_g1_g4",
     "build_relation_graph",
+    "build_agent_diagnostic_replay_authorization",
     "build_surface_replay_authorization",
     "compare_deterministic_surfaces_with_human",
+    "compare_deterministic_surfaces_with_agent_annotations",
     "extract_human_quality_receipt",
     "export_deterministic_surface_diagnostics",
     "export_relation_graph_diagnostics",

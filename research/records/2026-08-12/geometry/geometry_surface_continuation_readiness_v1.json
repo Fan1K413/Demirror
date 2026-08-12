@@ -24,7 +24,7 @@
     "scripts/audit_geometry_surface_human_comparison.py": "7490191331e2d03ca44712d801bf94857f91daa377d242ae769f2027c23989b0",
     "scripts/extract_geometry_human_quality_receipt.py": "2708eaa349ba70595442ef7f0b01be5e82716c91e350ff04e30a463aee3b14ea",
     "scripts/run_geometry_surface_conditioned_replay.py": "dd5c0a7baf3a3bbe0a3991a8c40a320001bf66553db258f0ff18842c782f7828",
-    "src/image_trust/geometry_ai/__init__.py": "360908463471b45772be16e7e30549c05fc881e4d41a780beb33fb2c4660cac1",
+    "src/image_trust/geometry_ai/__init__.py": "636fac8fdc267ea18f5702d155cad2ceebc949c62bf12cd5c7ca5229cfbbd933",
     "src/image_trust/geometry_ai/surface_comparison.py": "4397e35154b923ef6fcd7f7e867c5003f910e9a13f6c9f8ad89ca2678187ed9b",
     "src/image_trust/geometry_ai/surface_conditioned.py": "b78935e5ff5c7279104b98475eede25d4b4efd580b02f1fe70cebcefdc7fded3",
     "tests/test_geometry_surface_comparison.py": "5fcc17138226f2b1bca3375d09cf4ba441a3ebc01287c3ca4eb828c17221e2fd",
