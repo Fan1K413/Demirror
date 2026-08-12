@@ -1,0 +1,176 @@
+{
+  "schema_version": "demirror-openfake-confirmation-audit-v1",
+  "deployment_eligible": false,
+  "runtime_policy_changed": false,
+  "dataset": {
+    "name": "ComplexDataLab/OpenFake",
+    "revision": "3fd1109dc3258874243fa31c5bda9ee24260163b",
+    "diagnostic_window": [
+      0,
+      999
+    ],
+    "calibration_window": [
+      1000,
+      1999
+    ],
+    "confirmation_window": [
+      2000,
+      2999
+    ],
+    "per_cohort_generated_count": 80,
+    "per_cohort_real_count": 80,
+    "generated_models": [
+      "gpt-image-1.5",
+      "flux.2-klein-9b",
+      "z-image-turbo",
+      "midjourney-7"
+    ],
+    "real_sources": [
+      "docci",
+      "imagenet"
+    ],
+    "asset_sha256_overlap_between_all_three_cohorts": 0,
+    "selection": "Fixed row windows and score-blind stratum hashing before detector inference."
+  },
+  "forensic_real_quantile_candidate": {
+    "protocol_sha256": "be63693394805d087c4615956d595a97b0ac8d2247b2df6a9dbfa6d41e4c0de3",
+    "frozen_artifact_sha256": "60d27d8035eef44fe8487e1221a3bbfb2824064339e821eb199d3b65cd9cd789",
+    "frozen_two_view_threshold": 0.9850043654441835,
+    "calibration": {
+      "candidate_recall": 0.8625,
+      "candidate_false_positive_rate": 0.1375,
+      "generated_slice_recall": {
+        "flux.2-klein-9b": 0.7,
+        "gpt-image-1.5": 0.95,
+        "midjourney-7": 1.0,
+        "z-image-turbo": 0.8
+      }
+    },
+    "confirmation": {
+      "original": {
+        "baseline_recall": 0.475,
+        "candidate_recall": 0.875,
+        "candidate_recall_wilson_95": [
+          0.7849719790084033,
+          0.9306644238399513
+        ],
+        "baseline_false_positive_rate": 0.0625,
+        "candidate_false_positive_rate": 0.15,
+        "candidate_false_positive_rate_wilson_95": [
+          0.08794040506163547,
+          0.24413228561323347
+        ]
+      },
+      "jpeg85": {
+        "baseline_recall": 0.4875,
+        "candidate_recall": 0.875,
+        "candidate_recall_wilson_95": [
+          0.7849719790084033,
+          0.9306644238399513
+        ],
+        "baseline_false_positive_rate": 0.075,
+        "candidate_false_positive_rate": 0.1625,
+        "candidate_false_positive_rate_wilson_95": [
+          0.09749819402950367,
+          0.2584290434069771
+        ]
+      },
+      "generated_slice_recall": {
+        "flux.2-klein-9b": 0.75,
+        "gpt-image-1.5": 0.95,
+        "midjourney-7": 0.95,
+        "z-image-turbo": 0.85
+      },
+      "real_source_false_positive_rate_original": {
+        "docci": 0.075,
+        "imagenet": 0.225
+      }
+    },
+    "failed_checks": [
+      "jpeg85_false_positive_rate_point_above_0.15",
+      "jpeg85_false_positive_rate_wilson_upper_above_0.25"
+    ],
+    "passes": false,
+    "decision": "reject_without_confirmation_retuning",
+    "report_sha256": "a2c726f08d5f98409743bd8f9ba561a7cc6e88205c75eaef4114795423f4d9f6"
+  },
+  "six_score_logistic_candidate": {
+    "protocol_sha256": "83e744d758af444086afbb6fb9d103e41be2117bcdc5142901fd84757dd66560",
+    "frozen_artifact_sha256": "ea112860878ac64340c976c88ebdfa2a9e9d7b79deae2f1ed2badbd6233f9e35",
+    "frozen_probability_threshold": 0.4249925798991603,
+    "calibration": {
+      "candidate_recall": 0.925,
+      "candidate_false_positive_rate": 0.1375,
+      "generated_slice_recall_range": [
+        0.85,
+        1.0
+      ]
+    },
+    "confirmation": {
+      "original": {
+        "baseline_recall": 0.475,
+        "candidate_recall": 0.95,
+        "candidate_recall_wilson_95": [
+          0.8783772379535698,
+          0.9803864454644556
+        ],
+        "baseline_false_positive_rate": 0.0625,
+        "candidate_false_positive_rate": 0.2125,
+        "candidate_false_positive_rate_wilson_95": [
+          0.13712386717696146,
+          0.31422155730596657
+        ]
+      },
+      "jpeg85": {
+        "baseline_recall": 0.4875,
+        "candidate_recall": 0.95,
+        "candidate_recall_wilson_95": [
+          0.8783772379535698,
+          0.9803864454644556
+        ],
+        "baseline_false_positive_rate": 0.075,
+        "candidate_false_positive_rate": 0.225,
+        "candidate_false_positive_rate_wilson_95": [
+          0.14733207340846635,
+          0.3278678978360735
+        ]
+      },
+      "generated_slice_recall_range": [
+        0.9,
+        1.0
+      ],
+      "real_source_false_positive_rate_original": {
+        "docci": 0.2,
+        "imagenet": 0.225
+      }
+    },
+    "failed_checks": [
+      "original_and_jpeg85_false_positive_rate_point_above_0.15",
+      "original_and_jpeg85_false_positive_rate_wilson_upper_above_0.25"
+    ],
+    "passes": false,
+    "decision": "reject_without_confirmation_refit",
+    "report_sha256": "ada98e890c701f256efa8b99fe4e06bb2649073aa4401cf5e3099b27fc3242b7"
+  },
+  "resource_observation": {
+    "cpu_threads": 2,
+    "maximum_sampled_working_set_mib": {
+      "community": 417.3,
+      "nonescape": 436.6,
+      "forensic": 710.7
+    },
+    "maximum_batch_scoring_seconds_for_160_images_excluding_model_load": {
+      "community": 16.7,
+      "nonescape": 14.9,
+      "forensic": 52.1
+    },
+    "resource_gate_observation": "pass_for_offline_screening"
+  },
+  "conclusion": "Both pre-registered candidates improve every updated-generator slice, but neither controls confirmation real false positives at the registered gate. Keep the current runtime policy and reject both routes without confirmation retuning.",
+  "limitations": [
+    "Each cohort contains only 80 generated and 80 real cached assets.",
+    "Real-source false-positive concentration changes between DOCCI and ImageNet across cohorts, demonstrating source sensitivity.",
+    "Forensic CLIP and other base-detector training exposure to all OpenFake sources is not fully known.",
+    "The logistic and quantile candidates share one confirmation cohort; no comparison between them can authorize deployment."
+  ]
+}

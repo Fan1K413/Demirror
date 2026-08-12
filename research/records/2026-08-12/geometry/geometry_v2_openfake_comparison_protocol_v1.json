@@ -1,0 +1,75 @@
+{
+  "schema_version": "demirror-geometry-v2-openfake-comparison-protocol-v1",
+  "date_registered": "2026-08-12",
+  "status": "pre_registered_before_geometry_measurement",
+  "purpose": "Measure whether fixed geometry-v2 review rules separate updated generated images from real images without fitting a threshold or changing origin scoring.",
+  "cohort": {
+    "manifest": "data/openfake_community_recall_safety_v1/manifest.json",
+    "manifest_sha256": "aa8790bb0461ebf3a69059c53740f67fe14ef0707ed00381ddb5effb973a69dd",
+    "manifest_canonical_sha256": "e415fd7d8665c7085347e69acd8902aa0a1a7b9e2a939b43a12e003fc99c8001",
+    "dataset_revision": "3fd1109dc3258874243fa31c5bda9ee24260163b",
+    "row_window": [
+      3000,
+      3999
+    ],
+    "source_count": 160,
+    "label_counts": {
+      "fake": 80,
+      "real": 80
+    },
+    "model_counts": {
+      "docci": 40,
+      "flux.2-klein-9b": 20,
+      "gpt-image-1.5": 20,
+      "imagenet": 40,
+      "midjourney-7": 20,
+      "z-image-turbo": 20
+    },
+    "source_cluster_unique": true,
+    "threshold_selection_from_this_cohort": false
+  },
+  "implementation": {
+    "measurement_v2_sha256": "0284a573b814c2f417aad8ec3e5a9533abc1f0cdef52760819ca3cfad158e8cf",
+    "consistency_v2_sha256": "5dc48fca0c8e8f1941223b039fe34e8fb02cd3d426b6835c7c9fdf3d9b008bd6",
+    "measurement_types_sha256": "b814287c10043a220531e8d947ec1e40629529fa60007be59c3a49ebe79e1537",
+    "opencv_threads": 1,
+    "maximum_sampled_working_set_mib": 512,
+    "checks": [
+      "G1",
+      "G2",
+      "G3",
+      "G4"
+    ],
+    "g5": "not_run_without_registered_camera_measurement_batch",
+    "review_candidate_threshold": 0.5,
+    "threshold_source": "existing controlled-fixture review threshold; not fitted on OpenFake or FiveK",
+    "measurement_receives_label_or_model": false
+  },
+  "views": [
+    "registered manifest image",
+    "in-memory JPEG-85 re-encode of the same decoded image"
+  ],
+  "fixed_rules": {
+    "any_check": "at least one available G1-G4 anomaly score is at least 0.5",
+    "two_or_more_checks": "at least two available G1-G4 anomaly scores are at least 0.5",
+    "nonrepeat_any": "at least one available G1, G2 or G4 anomaly score is at least 0.5",
+    "g3_supported": "G3 is at least 0.5 and at least one available G1, G2 or G4 score is at least 0.5"
+  },
+  "required_reports": [
+    "measurement status, applicability and elapsed time by view and label",
+    "per-check availability, score mean and candidate prevalence by label and model",
+    "each fixed rule's generated-image hit rate and real-image review burden with Wilson 95 percent intervals",
+    "each fixed rule by generator and real-source slice",
+    "both-view, original-only, JPEG-85-only and neither-view identities by label",
+    "sampled process working-set peak and active 512 MiB fail-closed limit"
+  ],
+  "interpretation": {
+    "origin_scoring_authorized": false,
+    "threshold_selection_allowed": false,
+    "runtime_policy_change_allowed": false,
+    "sample_exclusion_after_measurement_allowed": false,
+    "best_rule_selection_from_this_cohort_allowed": false,
+    "candidate_means": "registered geometry pattern requiring review, not proof of AI generation",
+    "comparison_use": "identify whether G3-only review burden dominates and define what must be tested on a new holdout before any geometry score proposal"
+  }
+}

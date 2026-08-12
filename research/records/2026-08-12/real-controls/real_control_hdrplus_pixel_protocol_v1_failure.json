@@ -1,0 +1,29 @@
+{
+  "schema_version": "demirror-hdrplus-real-control-pixel-protocol-failure-v1",
+  "date": "2026-08-12",
+  "failed_protocol_raw_sha256": "3dde2872e4ef037b2f4f14decaa56b6a464d21ca5f19e5d09ed600726d08b0c3",
+  "failed_protocol_canonical_sha256": "b09cd3e54b277d026f17417f3ebe35253f19bcba45f6e860ee83ea73377e5602",
+  "detector": "dda",
+  "profile": "original",
+  "configured_max_working_set_bytes": 629145600,
+  "observed_failure": "MemoryError: observed working set 1502.2 MiB exceeds the audit limit 600.0 MiB",
+  "score_rows_produced": 0,
+  "final_report_written": false,
+  "partial_report_written": false,
+  "jpeg85_attempted": false,
+  "source_manifest_sha256": "3e5b27713f9d2a1cb01cded752899238bca6ced2c98181a0f151be3f76282fc1",
+  "score_manifest_sha256": "9c765533f131b7a25b835f9e6a01f5659de04d779bdced97a0987d64195e1c72",
+  "pre_existing_dda_resource_audit": {
+    "path": "models/ai_likelihood_dda_low_memory_audit_v1.json",
+    "raw_sha256": "afcee9f29980c335d64f18dd546e6bc57909ee5c1c21f43e76ba0e615046fafc",
+    "configured_working_set_stop_bytes": 2147483648,
+    "original_observed_peak_working_set_bytes": 1600221184,
+    "jpeg85_observed_peak_working_set_bytes": 1601683456
+  },
+  "cause": "The new HDR+ protocol mistakenly reused a 600 MiB limit registered for an additional Community inference gate, while the pre-existing DDA low-memory audit had already registered and required a 2 GiB stop.",
+  "decision": "v1_stopped_before_any_dda_score; preserve this receipt and require a new resource-only protocol version before DDA scoring",
+  "threshold_changed": false,
+  "model_changed": false,
+  "sample_changed": false,
+  "runtime_policy_changed": false
+}

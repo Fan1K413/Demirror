@@ -1,0 +1,468 @@
+{
+  "schema_version": "demirror-geometry-v2-fivek-extension-audit-v1",
+  "date": "2026-08-12",
+  "measurement_protocol_canonical_sha256": "af6e01f65b2d6c1789459889c191d48e7a960515b94e2b7c3aa4e4f10430b2b5",
+  "source_protocol_canonical_sha256": "6d6312338ad1b4790511f70655b06dbc5b36685ad20fd40d596ebcf4ec85bcc4",
+  "score_manifest_sha256": "6722e5a07bc3ebe4416bacde949e479b4ecfa1079ddf67b2f07a496db09a8321",
+  "source_manifest_sha256": "6f3962d588f8b2b9ae9c319bb455f7988fffd18225b0e978a08ee9bc3ad092b9",
+  "source_cluster_count": 32,
+  "review_candidate_threshold": 0.5,
+  "profiles": {
+    "original": {
+      "measurement_status_counts": {
+        "measurable": 23,
+        "not_applicable": 9
+      },
+      "applicability_mean": 0.9294270833333333,
+      "checks": {
+        "G1": {
+          "statuses": {
+            "available": 23,
+            "not_applicable": 9
+          },
+          "available_score_mean": 0.043478260869565216,
+          "finding_count": 1,
+          "candidate_count": 1,
+          "source_count": 32,
+          "candidate_rate": 0.03125,
+          "wilson_95_lower": 0.005537860164003122,
+          "wilson_95_upper": 0.15744263820012558
+        },
+        "G2": {
+          "statuses": {
+            "available": 18,
+            "not_applicable": 14
+          },
+          "available_score_mean": 0.0,
+          "finding_count": 0,
+          "candidate_count": 0,
+          "source_count": 32,
+          "candidate_rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.1071791982550706
+        },
+        "G3": {
+          "statuses": {
+            "available": 9,
+            "not_applicable": 23
+          },
+          "available_score_mean": 0.8888888888888888,
+          "finding_count": 10,
+          "candidate_count": 8,
+          "source_count": 32,
+          "candidate_rate": 0.25,
+          "wilson_95_lower": 0.1325240091850904,
+          "wilson_95_upper": 0.4210655899424448
+        },
+        "G4": {
+          "statuses": {
+            "available": 13,
+            "not_applicable": 19
+          },
+          "available_score_mean": 0.09675702095080232,
+          "finding_count": 8,
+          "candidate_count": 1,
+          "source_count": 32,
+          "candidate_rate": 0.03125,
+          "wilson_95_lower": 0.005537860164003122,
+          "wilson_95_upper": 0.15744263820012558
+        }
+      },
+      "any_check_review_candidate": {
+        "candidate_count": 8,
+        "source_count": 32,
+        "candidate_rate": 0.25,
+        "wilson_95_lower": 0.1325240091850904,
+        "wilson_95_upper": 0.4210655899424448
+      },
+      "review_candidate_sources": [
+        {
+          "row_idx": 15,
+          "asset_sha256": "96a132b09f1cd4a8b3fb544e26ee5a077888de990eae942ab3711f3acf6d0e74",
+          "candidate_checks": [
+            "G3"
+          ]
+        },
+        {
+          "row_idx": 18,
+          "asset_sha256": "d034bb5a8c3b0f5c777f3112045e8ebd737f6470def47e99fbb3948cb5a2834d",
+          "candidate_checks": [
+            "G3"
+          ]
+        },
+        {
+          "row_idx": 23,
+          "asset_sha256": "b6aeb9b445f7b90b5b054b23cb1f1583030d98813d815cb169808ca54950ec1c",
+          "candidate_checks": [
+            "G3"
+          ]
+        },
+        {
+          "row_idx": 25,
+          "asset_sha256": "39deb28f3e7a347645428c180e35890a468efdffa5c52c282f45f2ad1fa40830",
+          "candidate_checks": [
+            "G3"
+          ]
+        },
+        {
+          "row_idx": 32,
+          "asset_sha256": "352dbc307be6baa22ccbdfc67b9259a8989f844d3da329674105e663e8c539f6",
+          "candidate_checks": [
+            "G1",
+            "G3",
+            "G4"
+          ]
+        },
+        {
+          "row_idx": 34,
+          "asset_sha256": "c93486d709e374fd95ed321390dc765592da1e6313f0c513f9ee1d8128d1c184",
+          "candidate_checks": [
+            "G3"
+          ]
+        },
+        {
+          "row_idx": 35,
+          "asset_sha256": "e106ddbfbcec8615171e5b30d651e53048afbbc16508a432064a83b7b0c0d53f",
+          "candidate_checks": [
+            "G3"
+          ]
+        },
+        {
+          "row_idx": 38,
+          "asset_sha256": "7ce6a99ae8f6a451872a8279cab1b993bc4cb163621f495b25b48ecf2144a5ad",
+          "candidate_checks": [
+            "G3"
+          ]
+        }
+      ],
+      "review_candidate_by_camera_device": {
+        "Canon / Canon EOS 10D": {
+          "candidate_count": 1,
+          "source_count": 1,
+          "candidate_rate": 1.0,
+          "wilson_95_lower": 0.20654931437723745,
+          "wilson_95_upper": 1.0
+        },
+        "Canon / Canon EOS 5D": {
+          "candidate_count": 1,
+          "source_count": 9,
+          "candidate_rate": 0.1111111111111111,
+          "wilson_95_lower": 0.019890887638544907,
+          "wilson_95_upper": 0.434999705576656
+        },
+        "Canon / Canon EOS 5D Mark II": {
+          "candidate_count": 1,
+          "source_count": 2,
+          "candidate_rate": 0.5,
+          "wilson_95_lower": 0.09453120573423074,
+          "wilson_95_upper": 0.9054687942657693
+        },
+        "Canon / Canon EOS DIGITAL REBEL XSi": {
+          "candidate_count": 4,
+          "source_count": 9,
+          "candidate_rate": 0.4444444444444444,
+          "wilson_95_lower": 0.18877852109766452,
+          "wilson_95_upper": 0.733348706504507
+        },
+        "Canon / Canon EOS DIGITAL REBEL XTi": {
+          "candidate_count": 0,
+          "source_count": 1,
+          "candidate_rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.7934506856227626
+        },
+        "Canon / Canon EOS-1D Mark II": {
+          "candidate_count": 1,
+          "source_count": 3,
+          "candidate_rate": 0.3333333333333333,
+          "wilson_95_lower": 0.06149194472039621,
+          "wilson_95_upper": 0.7923403991979522
+        },
+        "NIKON CORPORATION / NIKON D700": {
+          "candidate_count": 0,
+          "source_count": 2,
+          "candidate_rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.6576197724933469
+        },
+        "NIKON CORPORATION / NIKON D70s": {
+          "candidate_count": 0,
+          "source_count": 4,
+          "candidate_rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.4898908364545973
+        },
+        "SONY / DSLR-A900": {
+          "candidate_count": 0,
+          "source_count": 1,
+          "candidate_rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.7934506856227626
+        }
+      }
+    },
+    "jpeg85": {
+      "measurement_status_counts": {
+        "measurable": 23,
+        "not_applicable": 9
+      },
+      "applicability_mean": 0.9278645833333333,
+      "checks": {
+        "G1": {
+          "statuses": {
+            "available": 23,
+            "not_applicable": 9
+          },
+          "available_score_mean": 0.08934147413387691,
+          "finding_count": 3,
+          "candidate_count": 2,
+          "source_count": 32,
+          "candidate_rate": 0.0625,
+          "wilson_95_lower": 0.017310567031640967,
+          "wilson_95_upper": 0.2014712314415458
+        },
+        "G2": {
+          "statuses": {
+            "available": 20,
+            "not_applicable": 12
+          },
+          "available_score_mean": 0.0,
+          "finding_count": 0,
+          "candidate_count": 0,
+          "source_count": 32,
+          "candidate_rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.1071791982550706
+        },
+        "G3": {
+          "statuses": {
+            "available": 8,
+            "not_applicable": 24
+          },
+          "available_score_mean": 0.875,
+          "finding_count": 8,
+          "candidate_count": 7,
+          "source_count": 32,
+          "candidate_rate": 0.21875,
+          "wilson_95_lower": 0.11023836252604186,
+          "wilson_95_upper": 0.3875499364924353
+        },
+        "G4": {
+          "statuses": {
+            "available": 11,
+            "not_applicable": 21
+          },
+          "available_score_mean": 0.09713602544329754,
+          "finding_count": 4,
+          "candidate_count": 2,
+          "source_count": 32,
+          "candidate_rate": 0.0625,
+          "wilson_95_lower": 0.017310567031640967,
+          "wilson_95_upper": 0.2014712314415458
+        }
+      },
+      "any_check_review_candidate": {
+        "candidate_count": 10,
+        "source_count": 32,
+        "candidate_rate": 0.3125,
+        "wilson_95_lower": 0.17952541633609734,
+        "wilson_95_upper": 0.4856667830095541
+      },
+      "review_candidate_sources": [
+        {
+          "row_idx": 12,
+          "asset_sha256": "84f46e425cdb8d3fedaa272e9e58b6c87067ef4bf1713556955275d5701897ca",
+          "candidate_checks": [
+            "G1"
+          ]
+        },
+        {
+          "row_idx": 15,
+          "asset_sha256": "96a132b09f1cd4a8b3fb544e26ee5a077888de990eae942ab3711f3acf6d0e74",
+          "candidate_checks": [
+            "G3"
+          ]
+        },
+        {
+          "row_idx": 18,
+          "asset_sha256": "d034bb5a8c3b0f5c777f3112045e8ebd737f6470def47e99fbb3948cb5a2834d",
+          "candidate_checks": [
+            "G3"
+          ]
+        },
+        {
+          "row_idx": 19,
+          "asset_sha256": "d78d554bcdb3aef8d8a4d70ffc83d7804497aa8e367f36f8797a35fb8c2d367c",
+          "candidate_checks": [
+            "G4"
+          ]
+        },
+        {
+          "row_idx": 23,
+          "asset_sha256": "b6aeb9b445f7b90b5b054b23cb1f1583030d98813d815cb169808ca54950ec1c",
+          "candidate_checks": [
+            "G3"
+          ]
+        },
+        {
+          "row_idx": 29,
+          "asset_sha256": "d9e573e176a834dab53877b48ecd6adb97f85ed51794d4702c0179b2235bd726",
+          "candidate_checks": [
+            "G3"
+          ]
+        },
+        {
+          "row_idx": 32,
+          "asset_sha256": "352dbc307be6baa22ccbdfc67b9259a8989f844d3da329674105e663e8c539f6",
+          "candidate_checks": [
+            "G1",
+            "G4"
+          ]
+        },
+        {
+          "row_idx": 34,
+          "asset_sha256": "c93486d709e374fd95ed321390dc765592da1e6313f0c513f9ee1d8128d1c184",
+          "candidate_checks": [
+            "G3"
+          ]
+        },
+        {
+          "row_idx": 35,
+          "asset_sha256": "e106ddbfbcec8615171e5b30d651e53048afbbc16508a432064a83b7b0c0d53f",
+          "candidate_checks": [
+            "G3"
+          ]
+        },
+        {
+          "row_idx": 38,
+          "asset_sha256": "7ce6a99ae8f6a451872a8279cab1b993bc4cb163621f495b25b48ecf2144a5ad",
+          "candidate_checks": [
+            "G3"
+          ]
+        }
+      ],
+      "review_candidate_by_camera_device": {
+        "Canon / Canon EOS 10D": {
+          "candidate_count": 1,
+          "source_count": 1,
+          "candidate_rate": 1.0,
+          "wilson_95_lower": 0.20654931437723745,
+          "wilson_95_upper": 1.0
+        },
+        "Canon / Canon EOS 5D": {
+          "candidate_count": 2,
+          "source_count": 9,
+          "candidate_rate": 0.2222222222222222,
+          "wilson_95_lower": 0.06322510711784671,
+          "wilson_95_upper": 0.5474110308930111
+        },
+        "Canon / Canon EOS 5D Mark II": {
+          "candidate_count": 1,
+          "source_count": 2,
+          "candidate_rate": 0.5,
+          "wilson_95_lower": 0.09453120573423074,
+          "wilson_95_upper": 0.9054687942657693
+        },
+        "Canon / Canon EOS DIGITAL REBEL XSi": {
+          "candidate_count": 3,
+          "source_count": 9,
+          "candidate_rate": 0.3333333333333333,
+          "wilson_95_lower": 0.1205838183869109,
+          "wilson_95_upper": 0.6457978644196036
+        },
+        "Canon / Canon EOS DIGITAL REBEL XTi": {
+          "candidate_count": 0,
+          "source_count": 1,
+          "candidate_rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.7934506856227626
+        },
+        "Canon / Canon EOS-1D Mark II": {
+          "candidate_count": 1,
+          "source_count": 3,
+          "candidate_rate": 0.3333333333333333,
+          "wilson_95_lower": 0.06149194472039621,
+          "wilson_95_upper": 0.7923403991979522
+        },
+        "NIKON CORPORATION / NIKON D700": {
+          "candidate_count": 1,
+          "source_count": 2,
+          "candidate_rate": 0.5,
+          "wilson_95_lower": 0.09453120573423074,
+          "wilson_95_upper": 0.9054687942657693
+        },
+        "NIKON CORPORATION / NIKON D70s": {
+          "candidate_count": 1,
+          "source_count": 4,
+          "candidate_rate": 0.25,
+          "wilson_95_lower": 0.04558726080970055,
+          "wilson_95_upper": 0.6993581574175981
+        },
+        "SONY / DSLR-A900": {
+          "candidate_count": 0,
+          "source_count": 1,
+          "candidate_rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.7934506856227626
+        }
+      }
+    }
+  },
+  "cross_view": {
+    "both_views": [
+      "352dbc307be6baa22ccbdfc67b9259a8989f844d3da329674105e663e8c539f6",
+      "7ce6a99ae8f6a451872a8279cab1b993bc4cb163621f495b25b48ecf2144a5ad",
+      "96a132b09f1cd4a8b3fb544e26ee5a077888de990eae942ab3711f3acf6d0e74",
+      "b6aeb9b445f7b90b5b054b23cb1f1583030d98813d815cb169808ca54950ec1c",
+      "c93486d709e374fd95ed321390dc765592da1e6313f0c513f9ee1d8128d1c184",
+      "d034bb5a8c3b0f5c777f3112045e8ebd737f6470def47e99fbb3948cb5a2834d",
+      "e106ddbfbcec8615171e5b30d651e53048afbbc16508a432064a83b7b0c0d53f"
+    ],
+    "original_only": [
+      "39deb28f3e7a347645428c180e35890a468efdffa5c52c282f45f2ad1fa40830"
+    ],
+    "jpeg85_only": [
+      "84f46e425cdb8d3fedaa272e9e58b6c87067ef4bf1713556955275d5701897ca",
+      "d78d554bcdb3aef8d8a4d70ffc83d7804497aa8e367f36f8797a35fb8c2d367c",
+      "d9e573e176a834dab53877b48ecd6adb97f85ed51794d4702c0179b2235bd726"
+    ],
+    "neither_view": [
+      "1c5cae081e969215bfbe08a505e3c9dcf9248e427ca3e4a47ee7caa93a3a1407",
+      "1cdf0793bb1a627324aa750d211f295d83f769ad5f230eb048514b3c56b1aea7",
+      "2648921fc11b6b9a33eac53e410a881e45cc190e6fdbd4a5ec9f77df75ca4423",
+      "45f4c09c8b4cbdd2f93a74494e6b1789f8998d6b7e0b630850c8047196fd08c2",
+      "4830116ad27f3e612d6f5b064f4c6c6a7f7bda8183b7237c1650e6a3190c6f77",
+      "54fd286536d0af5d1de0423c130646d47d1c3cec3d1631fbb244680047dacbe4",
+      "5acd5bbcc273db397686fa1a659883b882281c11d495c736e722de1428d09241",
+      "63980aab03f9b66212258ae3f6a6019c556c9097f62151b7cf4fabcaa2af83fe",
+      "6bd7b44b90064b7cdff9e580965e8286d74b5153d0c2add585c77efd66036fd6",
+      "76f9275892c923eb4c60c4067631c52a36bec1bb8bd3fff591a8abdb6c1109a2",
+      "8ceab02e31ae6d2323e3963081007a53cf16ff3a74ab725c4cf49240d24bf510",
+      "98d2886546effb30f7b71d14bcbc0a5757a9dbf11f514ac9e1a72c4cac47e7f4",
+      "9e07b76941884982f76e65513d065e51bcb45f9011c313076f7a7af5a5c67305",
+      "a4b47b853e0850898b5022dc9ee47b40b4bd1df058069cd6e5e28ef479629964",
+      "aa07ecb38f095fac8d962ee870981043b716e8f20fe273662a44eb34169278c1",
+      "bb23c679baff61c7ce5945057ae1b0bc445ae10fa572be1d1692c9b8dab5b012",
+      "db0b4e84fcdd71e60f22da3d8fdc7d6468f48e901c855729d71f25c308ae0072",
+      "e8b68c9165b617dc3d4af37bb6424152af6c7d53aabbd319c7163a486de73fc1",
+      "f0449d1a9cc60b8ddb2d548d9f1ec3c3eedeb1b2836ff9f468f968cf3ce37e50",
+      "f38f0a6f85e1a4fcbc3d89e6a031b0ca49e7df517c380cf9269f010ad370a378",
+      "fcc8319f475ea21e7e6241161a3725830fde10844cdee893a6194114ada13bda"
+    ],
+    "any_view": {
+      "candidate_count": 11,
+      "source_count": 32,
+      "candidate_rate": 0.34375,
+      "wilson_95_lower": 0.20410437924433172,
+      "wilson_95_upper": 0.5168891202103778
+    }
+  },
+  "origin_scoring_authorized": false,
+  "decision": "measurement_only_no_runtime_change",
+  "limitations": [
+    "review_candidates_are_not_ai_false_positives",
+    "g5_was_not_run_without_a_registered_camera_measurement_batch",
+    "one_source_dataset_does_not_estimate_natural_image_candidate_prevalence",
+    "no_threshold_was_selected_or_changed_from_fivek_results"
+  ]
+}

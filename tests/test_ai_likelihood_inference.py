@@ -3,7 +3,11 @@ from __future__ import annotations
 from PIL import Image
 import pytest
 
-from image_trust.ai_likelihood.dda import DdaScore, assess_high_confidence_ai
+from image_trust.ai_likelihood.dda import (
+    DdaScore,
+    DdaUnavailableError,
+    assess_high_confidence_ai,
+)
 from image_trust.ai_likelihood.community_forensics import CommunityForensicsScore
 from image_trust.ai_likelihood.forensic_clip import ForensicClipScore
 from image_trust.ai_likelihood.safe import SafeScore
@@ -67,6 +71,14 @@ def test_dda_high_signal_is_conservative_and_auditable(monkeypatch, tmp_path) ->
     detector = next(signal for signal in result.signals if signal.name == "dda_pixel_detector")
     assert detector.value == 0.945
     assert detector.details["high_confidence_threshold"] == 0.94
+    assert [signal.name for signal in result.signals] == [
+        "verified_c2pa",
+        "dda_pixel_detector",
+        "safe_pixel_detector",
+        "forensic_clip_detector",
+        "community_forensics_detector",
+        "nonescape_mini_detector",
+    ]
     assert progress == [
         ("ai_dda", 30),
         ("ai_safe", 42),
@@ -105,6 +117,60 @@ def test_safe_high_signal_can_complement_a_low_dda_score(monkeypatch, tmp_path) 
     detector = next(signal for signal in result.signals if signal.name == "safe_pixel_detector")
     assert detector.value == 0.95
     assert detector.details["high_confidence_threshold"] == 0.9
+
+
+def test_one_unavailable_detector_does_not_stop_later_channels(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    def unavailable(*_args, **_kwargs):
+        raise DdaUnavailableError("dda_worker_failed")
+
+    monkeypatch.setattr(
+        "image_trust.ai_likelihood.dda.score_dda_isolated",
+        unavailable,
+    )
+    monkeypatch.setattr(
+        "image_trust.ai_likelihood.dda.score_safe_isolated",
+        lambda *_args, **_kwargs: SafeScore(
+            0.95,
+            "center_crop_256_rgb_to_tensor_dwt_bior1.3",
+        ),
+    )
+
+    result = assess_high_confidence_ai(tmp_path / "asset.png", _record())
+
+    assert result.risk_band == "high"
+    assert result.decision_threshold == 0.94
+    assert next(
+        signal for signal in result.signals if signal.name == "dda_pixel_detector"
+    ).status == "unavailable"
+    assert next(
+        signal for signal in result.signals if signal.name == "safe_pixel_detector"
+    ).status == "available"
+
+
+def test_unavailable_non_primary_detector_does_not_replace_next_success_threshold(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    monkeypatch.setattr(
+        "image_trust.ai_likelihood.dda.score_forensic_clip_isolated",
+        lambda *_args, **_kwargs: ForensicClipScore(
+            0.993,
+            "resize_256x256_clip_normalization_temperature_0.594889",
+        ),
+    )
+
+    result = assess_high_confidence_ai(
+        tmp_path / "asset.png",
+        _record(),
+        audit_path=tmp_path / "missing-dda-audit.json",
+        safe_audit_path=tmp_path / "missing-safe-audit.json",
+    )
+
+    assert result.risk_band == "high"
+    assert result.decision_threshold == pytest.approx(0.9925177097320557)
 
 
 def test_compression_stable_signal_can_complement_other_low_scores(monkeypatch, tmp_path) -> None:
@@ -221,6 +287,46 @@ def test_static_webp_pixel_high_signal_is_limited_review_only(monkeypatch, tmp_p
     assert "static_webp_pixel_high_scores_are_limited_review_only_without_format_calibration" in result.limitations
     detector = next(signal for signal in result.signals if signal.name == "community_forensics_detector")
     assert detector.details["high_confidence_eligible"] is False
+
+
+def test_later_low_score_cannot_clear_an_earlier_limited_webp_signal(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    monkeypatch.setattr(
+        "image_trust.ai_likelihood.dda.score_dda_isolated",
+        lambda *_args, **_kwargs: DdaScore(0.97, "center_crop_336_clip_normalization"),
+    )
+    monkeypatch.setattr(
+        "image_trust.ai_likelihood.dda.score_safe_isolated",
+        lambda *_args, **_kwargs: SafeScore(
+            0.1,
+            "center_crop_256_rgb_to_tensor_dwt_bior1.3",
+        ),
+    )
+    monkeypatch.setattr(
+        "image_trust.ai_likelihood.dda.score_forensic_clip_isolated",
+        lambda *_args, **_kwargs: ForensicClipScore(
+            0.1,
+            "resize_256x256_clip_normalization_temperature_0.594889",
+        ),
+    )
+    monkeypatch.setattr(
+        "image_trust.ai_likelihood.dda.score_community_forensics_isolated",
+        lambda *_args, **_kwargs: CommunityForensicsScore(
+            0.1,
+            "resize_shorter_256_center_crop_224_imagenet_normalization",
+        ),
+    )
+    input_path = tmp_path / "renamed-input.bin"
+    Image.new("RGB", (8, 8), "white").save(input_path, format="WEBP", quality=80)
+
+    result = assess_high_confidence_ai(input_path, _record())
+
+    assert result.risk_band == "medium"
+    assert result.reliability_label == "limited"
+    dda = next(signal for signal in result.signals if signal.name == "dda_pixel_detector")
+    assert dda.details["high_confidence_eligible"] is False
 
 
 def test_community_forensics_limited_signal_is_not_camera_evidence(monkeypatch, tmp_path) -> None:

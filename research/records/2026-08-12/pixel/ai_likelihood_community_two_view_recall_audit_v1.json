@@ -1,0 +1,244 @@
+{
+  "schema_version": "demirror-community-two-view-recall-safety-audit-v1",
+  "date": "2026-08-12",
+  "protocol_sha256": "41f5b149b145a909d8757538e276b648c07f5ad27ee7ce6c64682821d811c4b1",
+  "screen_sha256": "6c12156fa9bf2a05c2be10f8ede2663db6f0cd5dd447c89c487ed1391dc8973d",
+  "manifest_sha256": "aa8790bb0461ebf3a69059c53740f67fe14ef0707ed00381ddb5effb973a69dd",
+  "prior_manifest_sha256": {
+    "openfake_unseen_pilot_v1": "22d84851047eaa073d5e59ceccccec3fac774d5513f9caee42289511cd9b3270",
+    "openfake_recalibration_calibration_v1": "c0b2df90533e16baad0ab9613ed7d4cc2a074573aab150e990c69bccf34f467c",
+    "openfake_recalibration_confirmation_v1": "e48fb7fa12aa444d8f627abef3d7f9040e103da7a08238a26458f84e0e84665c"
+  },
+  "score_report_sha256": {
+    "community_original": "e21694ca79b4fcd13919e1f8df11f67ca918157740e9ec1d16816290eba54b91",
+    "community_jpeg85": "88688ee25f4ab7d67bcd2eddd0377d237511080d95ae08a6f4f72b354961cfb2",
+    "community_jpeg85_twice": "589d17cd65322bc8cdfac7766b956e3e1075500a4ff188065994a4f92857a248",
+    "nonescape_original": "57c4cad64f316a2f8e62e1a84b82635854b94e98ae0e6ab3e7a0898f18122275",
+    "nonescape_jpeg85": "80e11c73fbb07ec3e0cceb553632ab8126644504a818ce96344d9e509b47c2e3"
+  },
+  "registered_thresholds": {
+    "community": 0.5,
+    "nonescape": 0.9260923266410828
+  },
+  "labels": {
+    "fake": {
+      "original": {
+        "baseline": {
+          "hits": 31,
+          "count": 80,
+          "rate": 0.3875
+        },
+        "candidate": {
+          "hits": 31,
+          "count": 80,
+          "rate": 0.3875
+        },
+        "candidate_minus_baseline_hits": 0
+      },
+      "jpeg85": {
+        "baseline": {
+          "hits": 30,
+          "count": 80,
+          "rate": 0.375
+        },
+        "candidate": {
+          "hits": 30,
+          "count": 80,
+          "rate": 0.375
+        },
+        "candidate_minus_baseline_hits": 0
+      }
+    },
+    "real": {
+      "original": {
+        "baseline": {
+          "hits": 5,
+          "count": 80,
+          "rate": 0.0625
+        },
+        "candidate": {
+          "hits": 5,
+          "count": 80,
+          "rate": 0.0625
+        },
+        "candidate_minus_baseline_hits": 0
+      },
+      "jpeg85": {
+        "baseline": {
+          "hits": 6,
+          "count": 80,
+          "rate": 0.075
+        },
+        "candidate": {
+          "hits": 6,
+          "count": 80,
+          "rate": 0.075
+        },
+        "candidate_minus_baseline_hits": 0
+      }
+    }
+  },
+  "generated_slices": {
+    "flux.2-klein-9b": {
+      "original": {
+        "baseline": {
+          "hits": 2,
+          "count": 20,
+          "rate": 0.1
+        },
+        "candidate": {
+          "hits": 2,
+          "count": 20,
+          "rate": 0.1
+        }
+      },
+      "jpeg85": {
+        "baseline": {
+          "hits": 3,
+          "count": 20,
+          "rate": 0.15
+        },
+        "candidate": {
+          "hits": 3,
+          "count": 20,
+          "rate": 0.15
+        }
+      }
+    },
+    "gpt-image-1.5": {
+      "original": {
+        "baseline": {
+          "hits": 10,
+          "count": 20,
+          "rate": 0.5
+        },
+        "candidate": {
+          "hits": 10,
+          "count": 20,
+          "rate": 0.5
+        }
+      },
+      "jpeg85": {
+        "baseline": {
+          "hits": 10,
+          "count": 20,
+          "rate": 0.5
+        },
+        "candidate": {
+          "hits": 10,
+          "count": 20,
+          "rate": 0.5
+        }
+      }
+    },
+    "midjourney-7": {
+      "original": {
+        "baseline": {
+          "hits": 9,
+          "count": 20,
+          "rate": 0.45
+        },
+        "candidate": {
+          "hits": 9,
+          "count": 20,
+          "rate": 0.45
+        }
+      },
+      "jpeg85": {
+        "baseline": {
+          "hits": 7,
+          "count": 20,
+          "rate": 0.35
+        },
+        "candidate": {
+          "hits": 7,
+          "count": 20,
+          "rate": 0.35
+        }
+      }
+    },
+    "z-image-turbo": {
+      "original": {
+        "baseline": {
+          "hits": 10,
+          "count": 20,
+          "rate": 0.5
+        },
+        "candidate": {
+          "hits": 10,
+          "count": 20,
+          "rate": 0.5
+        }
+      },
+      "jpeg85": {
+        "baseline": {
+          "hits": 10,
+          "count": 20,
+          "rate": 0.5
+        },
+        "candidate": {
+          "hits": 10,
+          "count": 20,
+          "rate": 0.5
+        }
+      }
+    }
+  },
+  "changed_rows": [],
+  "failed_checks": [],
+  "passes_recall_safety_gate": true,
+  "resource_observation": {
+    "community_original": {
+      "cpu_threads": 2,
+      "batch_size": 8,
+      "scored_count": 160,
+      "elapsed_seconds_excluding_model_load": 14.781499800010351,
+      "images_per_second": 10.824341383807884,
+      "observed_peak_working_set_bytes": 436846592
+    },
+    "community_jpeg85": {
+      "cpu_threads": 2,
+      "batch_size": 8,
+      "scored_count": 160,
+      "elapsed_seconds_excluding_model_load": 15.130266699998174,
+      "images_per_second": 10.574830118494825,
+      "observed_peak_working_set_bytes": 438374400
+    },
+    "community_jpeg85_twice": {
+      "cpu_threads": 2,
+      "batch_size": 8,
+      "scored_count": 160,
+      "elapsed_seconds_excluding_model_load": 17.387678800005233,
+      "images_per_second": 9.20191831470638,
+      "observed_peak_working_set_bytes": 440344576
+    },
+    "nonescape_original": {
+      "cpu_threads": 2,
+      "batch_size": 8,
+      "scored_count": 160,
+      "elapsed_seconds_excluding_model_load": 12.195292899996275,
+      "images_per_second": 13.119816089046035,
+      "observed_peak_working_set_bytes": 454991872
+    },
+    "nonescape_jpeg85": {
+      "cpu_threads": 2,
+      "batch_size": 8,
+      "scored_count": 160,
+      "elapsed_seconds_excluding_model_load": 14.696854999987409,
+      "images_per_second": 10.886682899173808,
+      "observed_peak_working_set_bytes": 455356416
+    }
+  },
+  "decision": {
+    "result": "eligible_for_independent_raise_real_benefit_gate",
+    "deployment_eligible": false,
+    "runtime_policy_changed": false,
+    "independent_camera_native_real_gate_required": true
+  },
+  "limitations": [
+    "a_pass_is_recall_safety_evidence_not_a_real_photo_accuracy_claim",
+    "the_candidate_was_selected_on_prior_openfake_and_fivek_results",
+    "openfake_cached_assets_do_not_replace_camera_native_controls",
+    "no_threshold_weight_or_runtime_rule_changes_from_this_audit"
+  ]
+}

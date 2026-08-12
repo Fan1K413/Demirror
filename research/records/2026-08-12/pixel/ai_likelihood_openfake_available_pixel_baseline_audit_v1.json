@@ -1,0 +1,923 @@
+{
+  "schema_version": "openfake-available-pixel-baseline-audit-v1",
+  "date": "2026-08-12",
+  "deployment_eligible": false,
+  "runtime_policy_changed": true,
+  "score_policy_changed": false,
+  "dataset": "ComplexDataLab/OpenFake",
+  "dataset_revision": "3fd1109dc3258874243fa31c5bda9ee24260163b",
+  "confirmation_manifest_sha256": "e48fb7fa12aa444d8f627abef3d7f9040e103da7a08238a26458f84e0e84665c",
+  "scope": {
+    "product_channels": [
+      "community_forensics",
+      "nonescape_mini",
+      "forensic_clip",
+      "safe",
+      "dda"
+    ],
+    "per_image_unavailable_policy": "not_imputed",
+    "interpretation": "Five-channel product baseline with explicit per-image availability."
+  },
+  "registered_thresholds": {
+    "community_limited": 0.5,
+    "nonescape_high": 0.9260923266410828,
+    "forensic_limited": 0.9919478297233582,
+    "safe_high": 0.9,
+    "dda_high": 0.94
+  },
+  "frozen_candidate_thresholds": {
+    "forensic_two_view": 0.9850043654441835,
+    "six_score_logistic": 0.4249925798991603
+  },
+  "resource_evidence": {
+    "dda_audit_path": "models/ai_likelihood_dda_low_memory_audit_v1.json",
+    "dda_audit_sha256": "afcee9f29980c335d64f18dd546e6bc57909ee5c1c21f43e76ba0e615046fafc",
+    "safe_original_peak_working_set_bytes": 516952064,
+    "safe_jpeg85_peak_working_set_bytes": 491700224,
+    "dda_original_peak_working_set_bytes": 1600221184,
+    "dda_jpeg85_peak_working_set_bytes": 1601683456
+  },
+  "evaluation": {
+    "profiles": {
+      "original": {
+        "available_channel_baseline": {
+          "generated_count": 80,
+          "real_count": 80,
+          "true_positive": 55,
+          "false_positive": 6,
+          "recall": 0.6875,
+          "recall_wilson_95": [
+            0.5793222425531256,
+            0.7784959588710517
+          ],
+          "false_positive_rate": 0.075,
+          "false_positive_rate_wilson_95": [
+            0.03482524929300514,
+            0.15412016081219287
+          ]
+        },
+        "baseline_component_hits": {
+          "community_limited": {
+            "generated_hits": 8,
+            "generated_hit_rate": 0.1,
+            "unique_generated_hits": 1,
+            "real_hits": 0,
+            "real_hit_rate": 0.0,
+            "unique_real_hits": 0
+          },
+          "nonescape_high": {
+            "generated_hits": 34,
+            "generated_hit_rate": 0.425,
+            "unique_generated_hits": 17,
+            "real_hits": 5,
+            "real_hit_rate": 0.0625,
+            "unique_real_hits": 5
+          },
+          "forensic_limited": {
+            "generated_hits": 26,
+            "generated_hit_rate": 0.325,
+            "unique_generated_hits": 15,
+            "real_hits": 0,
+            "real_hit_rate": 0.0,
+            "unique_real_hits": 0
+          },
+          "safe_high": {
+            "generated_hits": 0,
+            "generated_hit_rate": 0.0,
+            "unique_generated_hits": 0,
+            "real_hits": 0,
+            "real_hit_rate": 0.0,
+            "unique_real_hits": 0
+          },
+          "dda_high": {
+            "generated_hits": 12,
+            "generated_hit_rate": 0.15,
+            "unique_generated_hits": 2,
+            "real_hits": 1,
+            "real_hit_rate": 0.0125,
+            "unique_real_hits": 1
+          }
+        },
+        "baseline_error_attribution": {
+          "diagnostic_only": true,
+          "threshold_selection_allowed": false,
+          "generated_false_negatives": [
+            {
+              "row_idx": 2062,
+              "model": "midjourney-7",
+              "asset_sha256": "aa05876cb481dd83fef0fb4cdb1b64a238fa654dbf8f1a4f29afbfc606ca70bb",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2177,
+              "model": "midjourney-7",
+              "asset_sha256": "000c8212bcdb6cda7c3ec159252e5ac7025473c63af0c5500af47d719d1c2d04",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2182,
+              "model": "flux.2-klein-9b",
+              "asset_sha256": "e32c4a37464896e9a28105ea614ff4fb8e46de635104acf53396189701f3662f",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2326,
+              "model": "flux.2-klein-9b",
+              "asset_sha256": "7fe6f0c5a8028016e2b031c97b445f69a7df261e9e0ae079aaf8955389c5f9b3",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2327,
+              "model": "flux.2-klein-9b",
+              "asset_sha256": "12d337c6b4c74be0550dfcdc2bd2a2905e1b03127e1642d1d2d2efede4511416",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2330,
+              "model": "gpt-image-1.5",
+              "asset_sha256": "f27309dc633093f24908eb23d9ab47f9a4652fd2818fb24e5e22b846866fb675",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2339,
+              "model": "gpt-image-1.5",
+              "asset_sha256": "14ddb8cba8753a52a6ff0d8c7b8b962537a4a0196a00160f9899cccb8287ad9d",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2347,
+              "model": "gpt-image-1.5",
+              "asset_sha256": "f094c3209de4bba516c7a847bfec9af7bb5e2141c7e245deb7ef0eecb1d91d51",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2388,
+              "model": "flux.2-klein-9b",
+              "asset_sha256": "4556131d10bb472ef5df6a91a9f7a38e1c46e39502071f79a62c961c04e2f718",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2391,
+              "model": "midjourney-7",
+              "asset_sha256": "542a83b6d695826d1ceb5dd3fdb24ffd328c58a5a6236fa9ec9e3e046817cca5",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2434,
+              "model": "z-image-turbo",
+              "asset_sha256": "757c495627ddc8ca9bfab4d16b09971fcd98824d89e7518146bab1cf3a196259",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2435,
+              "model": "midjourney-7",
+              "asset_sha256": "98fd85dbb66fa0e8cd827cf9cb2842c24205d5bb2ab258a9d307995386d672e4",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2456,
+              "model": "midjourney-7",
+              "asset_sha256": "457dc7bf5c54f0d8d341259aebc8b97767f8b55aaa70c3214401f8317f232f98",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2464,
+              "model": "z-image-turbo",
+              "asset_sha256": "ff5ef82e7d5aaeb668af3c2bd6a0b374640e8014512f3436a94ed741a121d8e9",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2499,
+              "model": "flux.2-klein-9b",
+              "asset_sha256": "b9ad884e1287324c777dc9fa73f1375396b2b67e9922c20231bc047eb3ede58f",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2517,
+              "model": "gpt-image-1.5",
+              "asset_sha256": "f8e1fc89cae66284ce90cdefb265f6c4957f82a532399b6d3608f18cce81f399",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2529,
+              "model": "z-image-turbo",
+              "asset_sha256": "13ee8271183cf14c5e8d2a4b9d0e687b7d9b508be230fe71de70bad2601b4de3",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2609,
+              "model": "flux.2-klein-9b",
+              "asset_sha256": "768c9ea73effff42c44c0f40a14255c7567d7209879d5cfaad8e61c564d67035",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2661,
+              "model": "midjourney-7",
+              "asset_sha256": "21aae7bd6beb85e99b4a0933c687137d66fad38f303e780f12b07f56c1daaebb",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2701,
+              "model": "flux.2-klein-9b",
+              "asset_sha256": "7c3ecbec4de9ea28e4a785eaef67ea6c60d55c8bd832701f16e81cecffeb1d0d",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2703,
+              "model": "flux.2-klein-9b",
+              "asset_sha256": "8e83d832627f273167cde235cb4e1b785288507d14f40d45175aabdb5be1fcac",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2795,
+              "model": "flux.2-klein-9b",
+              "asset_sha256": "15956b2adbb4906696339e713bca2bbefde449e43fd5e18185353d957bdf7c9b",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2911,
+              "model": "z-image-turbo",
+              "asset_sha256": "756e3b44eec18201c3d20bbfeef4c51e57e7421d8d217e691cdd97e2eec8f122",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2923,
+              "model": "z-image-turbo",
+              "asset_sha256": "383ab205ba23edad17f739a4d4722847485550ead1ba263172020e9b28cc75f4",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2955,
+              "model": "gpt-image-1.5",
+              "asset_sha256": "730a18e4dd3b4042728b2162cb43b36af989447574af6f48840b7a4ccd90d2b5",
+              "hit_components": []
+            }
+          ],
+          "generated_false_negatives_by_model": {
+            "flux.2-klein-9b": 9,
+            "gpt-image-1.5": 5,
+            "midjourney-7": 6,
+            "z-image-turbo": 5
+          },
+          "real_false_positives": [
+            {
+              "row_idx": 2171,
+              "model": "imagenet",
+              "asset_sha256": "3fee10cef50a83af61c23d33b5330a37a4ec65f0f97c7e9825cb53a4c61d8e83",
+              "hit_components": [
+                "nonescape_high"
+              ]
+            },
+            {
+              "row_idx": 2270,
+              "model": "imagenet",
+              "asset_sha256": "1557328d08ac3b4f2b94d2035121d5658f3e7c48fd419e7372df65d1c37602e1",
+              "hit_components": [
+                "nonescape_high"
+              ]
+            },
+            {
+              "row_idx": 2354,
+              "model": "imagenet",
+              "asset_sha256": "bb8a9db4d1a8773e93e8554299511c48f46b33e32a5c469963936559a2ef4036",
+              "hit_components": [
+                "nonescape_high"
+              ]
+            },
+            {
+              "row_idx": 2362,
+              "model": "imagenet",
+              "asset_sha256": "35d57f22b13971575926fc6c8f75aa8bd10b37fe00fa6f14b9ef3ab03bce680b",
+              "hit_components": [
+                "nonescape_high"
+              ]
+            },
+            {
+              "row_idx": 2369,
+              "model": "docci",
+              "asset_sha256": "02be213635f942d0bfa5248757b4e71960d03c352a08c4e879d5855076b5499b",
+              "hit_components": [
+                "dda_high"
+              ]
+            },
+            {
+              "row_idx": 2460,
+              "model": "imagenet",
+              "asset_sha256": "b024d0304acdeedba88e6eb09ce9ef81628c5a70c1dc3bbf94cbf7f2d798a966",
+              "hit_components": [
+                "nonescape_high"
+              ]
+            }
+          ],
+          "real_false_positives_by_source": {
+            "docci": 1,
+            "imagenet": 5
+          },
+          "hit_pattern_counts": {
+            "fake": {
+              "forensic_limited+nonescape_high": 5,
+              "dda_high+nonescape_high": 5,
+              "forensic_limited": 15,
+              "nonescape_high": 17,
+              "none": 25,
+              "community_limited+forensic_limited": 1,
+              "community_limited+nonescape_high": 3,
+              "community_limited": 1,
+              "dda_high": 2,
+              "dda_high+forensic_limited+nonescape_high": 3,
+              "community_limited+dda_high+forensic_limited": 1,
+              "community_limited+dda_high": 1,
+              "community_limited+forensic_limited+nonescape_high": 1
+            },
+            "real": {
+              "none": 74,
+              "nonescape_high": 5,
+              "dda_high": 1
+            }
+          }
+        },
+        "safe_not_applicable": 2,
+        "dda_not_applicable": 14,
+        "candidates": {
+          "forensic_two_view_recalibration": {
+            "metrics": {
+              "generated_count": 80,
+              "real_count": 80,
+              "true_positive": 70,
+              "false_positive": 13,
+              "recall": 0.875,
+              "recall_wilson_95": [
+                0.7849719790084033,
+                0.9306644238399513
+              ],
+              "false_positive_rate": 0.1625,
+              "false_positive_rate_wilson_95": [
+                0.09749819402950367,
+                0.2584290434069771
+              ]
+            },
+            "incremental_true_positive": 15,
+            "incremental_false_positive": 7,
+            "by_generated_model": {
+              "flux.2-klein-9b": {
+                "count": 20,
+                "baseline_recall": 0.55,
+                "candidate_recall": 0.75,
+                "incremental_true_positive": 4
+              },
+              "gpt-image-1.5": {
+                "count": 20,
+                "baseline_recall": 0.75,
+                "candidate_recall": 0.95,
+                "incremental_true_positive": 4
+              },
+              "midjourney-7": {
+                "count": 20,
+                "baseline_recall": 0.7,
+                "candidate_recall": 0.95,
+                "incremental_true_positive": 5
+              },
+              "z-image-turbo": {
+                "count": 20,
+                "baseline_recall": 0.75,
+                "candidate_recall": 0.85,
+                "incremental_true_positive": 2
+              }
+            },
+            "by_real_source": {
+              "docci": {
+                "count": 40,
+                "baseline_false_positive_rate": 0.025,
+                "candidate_false_positive_rate": 0.1,
+                "incremental_false_positive": 3
+              },
+              "imagenet": {
+                "count": 40,
+                "baseline_false_positive_rate": 0.125,
+                "candidate_false_positive_rate": 0.225,
+                "incremental_false_positive": 4
+              }
+            }
+          },
+          "six_score_logistic": {
+            "metrics": {
+              "generated_count": 80,
+              "real_count": 80,
+              "true_positive": 77,
+              "false_positive": 18,
+              "recall": 0.9625,
+              "recall_wilson_95": [
+                0.8954527990995489,
+                0.9871654310800886
+              ],
+              "false_positive_rate": 0.225,
+              "false_positive_rate_wilson_95": [
+                0.14733207340846635,
+                0.3278678978360735
+              ]
+            },
+            "incremental_true_positive": 22,
+            "incremental_false_positive": 12,
+            "by_generated_model": {
+              "flux.2-klein-9b": {
+                "count": 20,
+                "baseline_recall": 0.55,
+                "candidate_recall": 0.9,
+                "incremental_true_positive": 7
+              },
+              "gpt-image-1.5": {
+                "count": 20,
+                "baseline_recall": 0.75,
+                "candidate_recall": 0.95,
+                "incremental_true_positive": 4
+              },
+              "midjourney-7": {
+                "count": 20,
+                "baseline_recall": 0.7,
+                "candidate_recall": 1.0,
+                "incremental_true_positive": 6
+              },
+              "z-image-turbo": {
+                "count": 20,
+                "baseline_recall": 0.75,
+                "candidate_recall": 1.0,
+                "incremental_true_positive": 5
+              }
+            },
+            "by_real_source": {
+              "docci": {
+                "count": 40,
+                "baseline_false_positive_rate": 0.025,
+                "candidate_false_positive_rate": 0.225,
+                "incremental_false_positive": 8
+              },
+              "imagenet": {
+                "count": 40,
+                "baseline_false_positive_rate": 0.125,
+                "candidate_false_positive_rate": 0.225,
+                "incremental_false_positive": 4
+              }
+            }
+          }
+        }
+      },
+      "jpeg85": {
+        "available_channel_baseline": {
+          "generated_count": 80,
+          "real_count": 80,
+          "true_positive": 53,
+          "false_positive": 8,
+          "recall": 0.6625,
+          "recall_wilson_95": [
+            0.5535652339817697,
+            0.756543873919184
+          ],
+          "false_positive_rate": 0.1,
+          "false_positive_rate_wilson_95": [
+            0.05154761556738083,
+            0.18510688806104086
+          ]
+        },
+        "baseline_component_hits": {
+          "community_limited": {
+            "generated_hits": 8,
+            "generated_hit_rate": 0.1,
+            "unique_generated_hits": 0,
+            "real_hits": 1,
+            "real_hit_rate": 0.0125,
+            "unique_real_hits": 1
+          },
+          "nonescape_high": {
+            "generated_hits": 35,
+            "generated_hit_rate": 0.4375,
+            "unique_generated_hits": 14,
+            "real_hits": 5,
+            "real_hit_rate": 0.0625,
+            "unique_real_hits": 5
+          },
+          "forensic_limited": {
+            "generated_hits": 28,
+            "generated_hit_rate": 0.35,
+            "unique_generated_hits": 12,
+            "real_hits": 0,
+            "real_hit_rate": 0.0,
+            "unique_real_hits": 0
+          },
+          "safe_high": {
+            "generated_hits": 0,
+            "generated_hit_rate": 0.0,
+            "unique_generated_hits": 0,
+            "real_hits": 0,
+            "real_hit_rate": 0.0,
+            "unique_real_hits": 0
+          },
+          "dda_high": {
+            "generated_hits": 13,
+            "generated_hit_rate": 0.1625,
+            "unique_generated_hits": 2,
+            "real_hits": 2,
+            "real_hit_rate": 0.025,
+            "unique_real_hits": 2
+          }
+        },
+        "baseline_error_attribution": {
+          "diagnostic_only": true,
+          "threshold_selection_allowed": false,
+          "generated_false_negatives": [
+            {
+              "row_idx": 2062,
+              "model": "midjourney-7",
+              "asset_sha256": "aa05876cb481dd83fef0fb4cdb1b64a238fa654dbf8f1a4f29afbfc606ca70bb",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2177,
+              "model": "midjourney-7",
+              "asset_sha256": "000c8212bcdb6cda7c3ec159252e5ac7025473c63af0c5500af47d719d1c2d04",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2182,
+              "model": "flux.2-klein-9b",
+              "asset_sha256": "e32c4a37464896e9a28105ea614ff4fb8e46de635104acf53396189701f3662f",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2326,
+              "model": "flux.2-klein-9b",
+              "asset_sha256": "7fe6f0c5a8028016e2b031c97b445f69a7df261e9e0ae079aaf8955389c5f9b3",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2327,
+              "model": "flux.2-klein-9b",
+              "asset_sha256": "12d337c6b4c74be0550dfcdc2bd2a2905e1b03127e1642d1d2d2efede4511416",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2330,
+              "model": "gpt-image-1.5",
+              "asset_sha256": "f27309dc633093f24908eb23d9ab47f9a4652fd2818fb24e5e22b846866fb675",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2339,
+              "model": "gpt-image-1.5",
+              "asset_sha256": "14ddb8cba8753a52a6ff0d8c7b8b962537a4a0196a00160f9899cccb8287ad9d",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2347,
+              "model": "gpt-image-1.5",
+              "asset_sha256": "f094c3209de4bba516c7a847bfec9af7bb5e2141c7e245deb7ef0eecb1d91d51",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2388,
+              "model": "flux.2-klein-9b",
+              "asset_sha256": "4556131d10bb472ef5df6a91a9f7a38e1c46e39502071f79a62c961c04e2f718",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2391,
+              "model": "midjourney-7",
+              "asset_sha256": "542a83b6d695826d1ceb5dd3fdb24ffd328c58a5a6236fa9ec9e3e046817cca5",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2434,
+              "model": "z-image-turbo",
+              "asset_sha256": "757c495627ddc8ca9bfab4d16b09971fcd98824d89e7518146bab1cf3a196259",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2435,
+              "model": "midjourney-7",
+              "asset_sha256": "98fd85dbb66fa0e8cd827cf9cb2842c24205d5bb2ab258a9d307995386d672e4",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2456,
+              "model": "midjourney-7",
+              "asset_sha256": "457dc7bf5c54f0d8d341259aebc8b97767f8b55aaa70c3214401f8317f232f98",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2464,
+              "model": "z-image-turbo",
+              "asset_sha256": "ff5ef82e7d5aaeb668af3c2bd6a0b374640e8014512f3436a94ed741a121d8e9",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2499,
+              "model": "flux.2-klein-9b",
+              "asset_sha256": "b9ad884e1287324c777dc9fa73f1375396b2b67e9922c20231bc047eb3ede58f",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2502,
+              "model": "midjourney-7",
+              "asset_sha256": "6a4d29da47337d5f70e4f3b235b5a77d21ca1de6c71499f2f5a9c99d57233352",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2517,
+              "model": "gpt-image-1.5",
+              "asset_sha256": "f8e1fc89cae66284ce90cdefb265f6c4957f82a532399b6d3608f18cce81f399",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2529,
+              "model": "z-image-turbo",
+              "asset_sha256": "13ee8271183cf14c5e8d2a4b9d0e687b7d9b508be230fe71de70bad2601b4de3",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2609,
+              "model": "flux.2-klein-9b",
+              "asset_sha256": "768c9ea73effff42c44c0f40a14255c7567d7209879d5cfaad8e61c564d67035",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2661,
+              "model": "midjourney-7",
+              "asset_sha256": "21aae7bd6beb85e99b4a0933c687137d66fad38f303e780f12b07f56c1daaebb",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2701,
+              "model": "flux.2-klein-9b",
+              "asset_sha256": "7c3ecbec4de9ea28e4a785eaef67ea6c60d55c8bd832701f16e81cecffeb1d0d",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2703,
+              "model": "flux.2-klein-9b",
+              "asset_sha256": "8e83d832627f273167cde235cb4e1b785288507d14f40d45175aabdb5be1fcac",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2795,
+              "model": "flux.2-klein-9b",
+              "asset_sha256": "15956b2adbb4906696339e713bca2bbefde449e43fd5e18185353d957bdf7c9b",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2911,
+              "model": "z-image-turbo",
+              "asset_sha256": "756e3b44eec18201c3d20bbfeef4c51e57e7421d8d217e691cdd97e2eec8f122",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2923,
+              "model": "z-image-turbo",
+              "asset_sha256": "383ab205ba23edad17f739a4d4722847485550ead1ba263172020e9b28cc75f4",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2939,
+              "model": "gpt-image-1.5",
+              "asset_sha256": "578934925bbd813f70347973038e9cfe9bddfcf6f881255b57ef378e0e7ce606",
+              "hit_components": []
+            },
+            {
+              "row_idx": 2955,
+              "model": "gpt-image-1.5",
+              "asset_sha256": "730a18e4dd3b4042728b2162cb43b36af989447574af6f48840b7a4ccd90d2b5",
+              "hit_components": []
+            }
+          ],
+          "generated_false_negatives_by_model": {
+            "flux.2-klein-9b": 9,
+            "gpt-image-1.5": 6,
+            "midjourney-7": 7,
+            "z-image-turbo": 5
+          },
+          "real_false_positives": [
+            {
+              "row_idx": 2171,
+              "model": "imagenet",
+              "asset_sha256": "3fee10cef50a83af61c23d33b5330a37a4ec65f0f97c7e9825cb53a4c61d8e83",
+              "hit_components": [
+                "nonescape_high"
+              ]
+            },
+            {
+              "row_idx": 2270,
+              "model": "imagenet",
+              "asset_sha256": "1557328d08ac3b4f2b94d2035121d5658f3e7c48fd419e7372df65d1c37602e1",
+              "hit_components": [
+                "nonescape_high"
+              ]
+            },
+            {
+              "row_idx": 2354,
+              "model": "imagenet",
+              "asset_sha256": "bb8a9db4d1a8773e93e8554299511c48f46b33e32a5c469963936559a2ef4036",
+              "hit_components": [
+                "nonescape_high"
+              ]
+            },
+            {
+              "row_idx": 2362,
+              "model": "imagenet",
+              "asset_sha256": "35d57f22b13971575926fc6c8f75aa8bd10b37fe00fa6f14b9ef3ab03bce680b",
+              "hit_components": [
+                "nonescape_high"
+              ]
+            },
+            {
+              "row_idx": 2369,
+              "model": "docci",
+              "asset_sha256": "02be213635f942d0bfa5248757b4e71960d03c352a08c4e879d5855076b5499b",
+              "hit_components": [
+                "dda_high"
+              ]
+            },
+            {
+              "row_idx": 2460,
+              "model": "imagenet",
+              "asset_sha256": "b024d0304acdeedba88e6eb09ce9ef81628c5a70c1dc3bbf94cbf7f2d798a966",
+              "hit_components": [
+                "nonescape_high"
+              ]
+            },
+            {
+              "row_idx": 2723,
+              "model": "docci",
+              "asset_sha256": "712c2ef1c7bd59a1d43c385bb64d91223ac27a5469899dc2c41f8cf6ee016ee0",
+              "hit_components": [
+                "community_limited"
+              ]
+            },
+            {
+              "row_idx": 2994,
+              "model": "imagenet",
+              "asset_sha256": "c4168d3abcbd33f1abc5da485c6353a199455edbc903201cb1920c6b1adf7422",
+              "hit_components": [
+                "dda_high"
+              ]
+            }
+          ],
+          "real_false_positives_by_source": {
+            "docci": 2,
+            "imagenet": 6
+          },
+          "hit_pattern_counts": {
+            "fake": {
+              "forensic_limited+nonescape_high": 9,
+              "dda_high+nonescape_high": 4,
+              "nonescape_high": 14,
+              "none": 27,
+              "forensic_limited": 12,
+              "community_limited+forensic_limited": 1,
+              "community_limited+nonescape_high": 3,
+              "community_limited+dda_high": 2,
+              "dda_high+forensic_limited+nonescape_high": 4,
+              "dda_high": 2,
+              "community_limited+dda_high+forensic_limited": 1,
+              "community_limited+forensic_limited+nonescape_high": 1
+            },
+            "real": {
+              "none": 72,
+              "nonescape_high": 5,
+              "dda_high": 2,
+              "community_limited": 1
+            }
+          }
+        },
+        "safe_not_applicable": 2,
+        "dda_not_applicable": 14,
+        "candidates": {
+          "forensic_two_view_recalibration": {
+            "metrics": {
+              "generated_count": 80,
+              "real_count": 80,
+              "true_positive": 70,
+              "false_positive": 15,
+              "recall": 0.875,
+              "recall_wilson_95": [
+                0.7849719790084033,
+                0.9306644238399513
+              ],
+              "false_positive_rate": 0.1875,
+              "false_positive_rate_wilson_95": [
+                0.11705310466977323,
+                0.28658322628993116
+              ]
+            },
+            "incremental_true_positive": 17,
+            "incremental_false_positive": 7,
+            "by_generated_model": {
+              "flux.2-klein-9b": {
+                "count": 20,
+                "baseline_recall": 0.55,
+                "candidate_recall": 0.75,
+                "incremental_true_positive": 4
+              },
+              "gpt-image-1.5": {
+                "count": 20,
+                "baseline_recall": 0.7,
+                "candidate_recall": 0.95,
+                "incremental_true_positive": 5
+              },
+              "midjourney-7": {
+                "count": 20,
+                "baseline_recall": 0.65,
+                "candidate_recall": 0.95,
+                "incremental_true_positive": 6
+              },
+              "z-image-turbo": {
+                "count": 20,
+                "baseline_recall": 0.75,
+                "candidate_recall": 0.85,
+                "incremental_true_positive": 2
+              }
+            },
+            "by_real_source": {
+              "docci": {
+                "count": 40,
+                "baseline_false_positive_rate": 0.05,
+                "candidate_false_positive_rate": 0.125,
+                "incremental_false_positive": 3
+              },
+              "imagenet": {
+                "count": 40,
+                "baseline_false_positive_rate": 0.15,
+                "candidate_false_positive_rate": 0.25,
+                "incremental_false_positive": 4
+              }
+            }
+          },
+          "six_score_logistic": {
+            "metrics": {
+              "generated_count": 80,
+              "real_count": 80,
+              "true_positive": 77,
+              "false_positive": 20,
+              "recall": 0.9625,
+              "recall_wilson_95": [
+                0.8954527990995489,
+                0.9871654310800886
+              ],
+              "false_positive_rate": 0.25,
+              "false_positive_rate_wilson_95": [
+                0.16806231857542375,
+                0.3548467461923397
+              ]
+            },
+            "incremental_true_positive": 24,
+            "incremental_false_positive": 12,
+            "by_generated_model": {
+              "flux.2-klein-9b": {
+                "count": 20,
+                "baseline_recall": 0.55,
+                "candidate_recall": 0.9,
+                "incremental_true_positive": 7
+              },
+              "gpt-image-1.5": {
+                "count": 20,
+                "baseline_recall": 0.7,
+                "candidate_recall": 0.95,
+                "incremental_true_positive": 5
+              },
+              "midjourney-7": {
+                "count": 20,
+                "baseline_recall": 0.65,
+                "candidate_recall": 1.0,
+                "incremental_true_positive": 7
+              },
+              "z-image-turbo": {
+                "count": 20,
+                "baseline_recall": 0.75,
+                "candidate_recall": 1.0,
+                "incremental_true_positive": 5
+              }
+            },
+            "by_real_source": {
+              "docci": {
+                "count": 40,
+                "baseline_false_positive_rate": 0.05,
+                "candidate_false_positive_rate": 0.25,
+                "incremental_false_positive": 8
+              },
+              "imagenet": {
+                "count": 40,
+                "baseline_false_positive_rate": 0.15,
+                "candidate_false_positive_rate": 0.25,
+                "incremental_false_positive": 4
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "decision": "adopt_low_memory_dda_loader_retain_registered_scores_and_reject_both_candidates",
+  "limitations": [
+    "DDA and SAFE unavailable rows remain unavailable and are not scored as zero.",
+    "The confirmation cohort contains 80 generated and 80 real assets from a fixed 1,000-row window.",
+    "The two rejected candidates already used this confirmation cohort and cannot be retuned on it.",
+    "DDA uses a 336-pixel center crop, so its cohort denominator is smaller than the other channels."
+  ]
+}

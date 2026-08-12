@@ -1,0 +1,120 @@
+{
+  "schema_version": "demirror-dda-low-memory-audit-v1",
+  "date": "2026-08-12",
+  "detector": "dda",
+  "checkpoint_sha256": "b27a31d39374803ddeff02bfabb2be76e190b04300490cddfafb24f683f37e3e",
+  "loader": "meta_device_plus_mmap_plus_assign",
+  "configured_working_set_stop_bytes": 2147483648,
+  "prior_copy_loader": {
+    "audit": "models/ai_likelihood_dda_openfake_resource_audit_v1.json",
+    "observed_working_set_mib_at_stop": 2667.4,
+    "rows_scored": 0,
+    "result": "stopped_before_first_score"
+  },
+  "equivalence": {
+    "control_asset_sha256": "5ac13888e0533d0721049b71078d7538d4d5223a462c749484ae216f6436c159",
+    "historical_copy_loader_score": 0.04306003823876381,
+    "low_memory_loader_score": 0.04306003823876381,
+    "absolute_score_difference": 0,
+    "observed_peak_working_set_bytes": 1575419904,
+    "report_sha256": "9010f3de7c06f5eaacf6367752bd01a1e0383254d1d0930443612e8a60421f87"
+  },
+  "openfake_confirmation": {
+    "dataset": "ComplexDataLab/OpenFake",
+    "dataset_revision": "3fd1109dc3258874243fa31c5bda9ee24260163b",
+    "manifest_sha256": "e48fb7fa12aa444d8f627abef3d7f9040e103da7a08238a26458f84e0e84665c",
+    "registered_threshold": 0.94,
+    "original": {
+      "selected_count": 160,
+      "available_count": 146,
+      "not_applicable_count": 14,
+      "generated_available_count": 80,
+      "real_available_count": 66,
+      "generated_hits": 12,
+      "real_hits": 1,
+      "recall_on_available_generated": 0.15,
+      "false_positive_rate_on_available_real": 0.015151515151515152,
+      "observed_peak_working_set_bytes": 1600221184,
+      "report_sha256": "a14b84deb024ce58777763263bec451b65cd28f3a3bee2901e1267d62ce6bf77"
+    },
+    "jpeg85": {
+      "selected_count": 160,
+      "available_count": 146,
+      "not_applicable_count": 14,
+      "generated_available_count": 80,
+      "real_available_count": 66,
+      "generated_hits": 13,
+      "real_hits": 2,
+      "recall_on_available_generated": 0.1625,
+      "false_positive_rate_on_available_real": 0.030303030303030304,
+      "observed_peak_working_set_bytes": 1601683456,
+      "report_sha256": "a1e48442d501a592008eb57b04a8424f51ee2d49b306c740dd4d0eb97130db7d"
+    },
+    "cross_view_at_registered_threshold": {
+      "generated": {
+        "both_views": 12,
+        "original_only": 0,
+        "jpeg85_only": 1,
+        "neither": 67
+      },
+      "real": {
+        "both_views": 1,
+        "original_only": 0,
+        "jpeg85_only": 1,
+        "neither": 78
+      }
+    },
+    "generated_model_slices": {
+      "flux.2-klein-9b": {
+        "count": 20,
+        "original_hits": 0,
+        "jpeg85_hits": 0,
+        "both_views": 0
+      },
+      "gpt-image-1.5": {
+        "count": 20,
+        "original_hits": 4,
+        "jpeg85_hits": 4,
+        "both_views": 4
+      },
+      "midjourney-7": {
+        "count": 20,
+        "original_hits": 2,
+        "jpeg85_hits": 2,
+        "both_views": 2
+      },
+      "z-image-turbo": {
+        "count": 20,
+        "original_hits": 6,
+        "jpeg85_hits": 7,
+        "both_views": 6
+      }
+    },
+    "real_source_slices": {
+      "docci": {
+        "count": 40,
+        "available_per_view": 40,
+        "original_hits": 1,
+        "jpeg85_hits": 1,
+        "both_views": 1
+      },
+      "imagenet": {
+        "count": 40,
+        "available_per_view": 26,
+        "original_hits": 0,
+        "jpeg85_hits": 1,
+        "both_views": 0
+      }
+    }
+  },
+  "decision": "adopt_low_memory_loader",
+  "runtime_policy_changed": true,
+  "limitations": [
+    "The working set is sampled after model load and every scored batch, not an operating-system high-water mark.",
+    "DDA remains a low-recall high-threshold signal and is not an AI probability by itself.",
+    "Inputs smaller than the registered 336-pixel center crop are unavailable and are not scored as zero.",
+    "JPEG-85 creates one additional generated hit and one additional real hit; compression is not monotonic negative evidence.",
+    "No FLUX.2-Klein-9B sample crosses the registered threshold in either view.",
+    "The OpenFake confirmation cohort is frozen and cannot be reused to tune the DDA threshold."
+  ]
+}

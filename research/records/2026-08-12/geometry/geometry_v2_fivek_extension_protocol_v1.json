@@ -1,0 +1,41 @@
+{
+  "schema_version": "demirror-geometry-v2-fivek-extension-protocol-v1",
+  "date_registered": "2026-08-12",
+  "status": "pre_registered_before_geometry_measurement",
+  "source_protocol": "models/real_control_fivek_extension_protocol_v1.json",
+  "source_protocol_canonical_sha256": "6d6312338ad1b4790511f70655b06dbc5b36685ad20fd40d596ebcf4ec85bcc4",
+  "source_selection": {
+    "global_hash_ranks": [9, 40],
+    "source_cluster_count": 32,
+    "diagnostic_ranks_1_8_excluded": true
+  },
+  "views": [
+    "registered metadata-free JPEG-95 derived view",
+    "in-memory JPEG-85 re-encode of the same derived view"
+  ],
+  "measurement": {
+    "implementation": "geometry-measurement-v2",
+    "checks": ["G1", "G2", "G3", "G4"],
+    "g5": "not_run_without_registered_camera_measurement_batch",
+    "review_candidate_threshold": 0.5,
+    "threshold_source": "existing controlled-fixture review threshold; not fitted on FiveK",
+    "opencv_threads": 1,
+    "source_label_consumed_by_measurement": false
+  },
+  "required_reports": [
+    "measurement applicability and gate coverage",
+    "per-check available/not-applicable/failed counts",
+    "per-check finding counts and review-candidate counts",
+    "any-check review-candidate burden per source view",
+    "both-view, original-only and JPEG-85-only candidate identities",
+    "camera-device slices when source tags are available"
+  ],
+  "interpretation": {
+    "ai_or_camera_accuracy_claim_allowed": false,
+    "origin_scoring_authorized": false,
+    "threshold_selection_allowed": false,
+    "sample_exclusion_after_measurement_allowed": false,
+    "candidate_means": "geometry pattern requiring human review, not evidence that the image is AI-generated",
+    "all_zero_means": "no registered review candidate in this cohort, not proof of camera origin"
+  }
+}

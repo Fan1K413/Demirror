@@ -1,0 +1,138 @@
+{
+  "schema_version": "demirror-pixel-fusion-recall-audit-v1",
+  "created_at": "2026-08-11",
+  "purpose": "Frozen-threshold, SHA-256-deduplicated recall audit for the registered Community Forensics and Nonescape Mini rules.",
+  "runtime_changed": false,
+  "rules": {
+    "possible_ai_review": "community_score >= 0.5 OR nonescape_score >= 0.9260923266410828",
+    "high_ai_signal": "community_score >= 0.8866265416145325 OR nonescape_score >= 0.9260923266410828"
+  },
+  "duplicate_audit": {
+    "row_count": 1050,
+    "unique_sha256_count": 675,
+    "generated_rows": 525,
+    "unique_generated_sha256": 525,
+    "real_rows": 525,
+    "unique_real_sha256": 150,
+    "repeated_real_rows": 375
+  },
+  "profiles": {
+    "original_decode": {
+      "generated_count": 525,
+      "unique_real_count": 150,
+      "possible_ai_review": {
+        "true_positive": 493,
+        "false_positive": 20,
+        "recall": 0.939047619047619,
+        "recall_wilson_95": [
+          0.9152201730284159,
+          0.9564966568661631
+        ],
+        "false_positive_rate": 0.13333333333333333,
+        "false_positive_rate_wilson_95": [
+          0.0879980047055142,
+          0.196980174497742
+        ],
+        "missed_generated_count": 32,
+        "misses_by_generator": {
+          "Deepfloyd": 14,
+          "Kandinsky": 4,
+          "Pixart": 9,
+          "SDXL": 5
+        },
+        "misses_by_scene": {
+          "indoor": 9,
+          "outdoor": 23
+        },
+        "nonescape_additional_generated_hits": 6
+      },
+      "high_ai_signal": {
+        "true_positive": 456,
+        "false_positive": 6,
+        "recall": 0.8685714285714285,
+        "recall_wilson_95": [
+          0.8369739117305267,
+          0.8948144031701285
+        ],
+        "false_positive_rate": 0.04,
+        "false_positive_rate_wilson_95": [
+          0.01845916060207442,
+          0.08451346421655606
+        ]
+      },
+      "possible_recall_by_generator": {
+        "Deepfloyd": 0.8133333333333334,
+        "Kandinsky": 0.9733333333333334,
+        "Pixart": 0.94,
+        "SDXL": 0.9666666666666667
+      }
+    },
+    "jpeg85_reencode": {
+      "generated_count": 525,
+      "unique_real_count": 150,
+      "possible_ai_review": {
+        "true_positive": 480,
+        "false_positive": 18,
+        "recall": 0.9142857142857143,
+        "recall_wilson_95": [
+          0.8872283066317881,
+          0.9353244504270879
+        ],
+        "false_positive_rate": 0.12,
+        "false_positive_rate_wilson_95": [
+          0.07726903087841022,
+          0.18170835484132794
+        ],
+        "missed_generated_count": 45,
+        "misses_by_generator": {
+          "Deepfloyd": 17,
+          "Kandinsky": 8,
+          "Pixart": 15,
+          "SDXL": 5
+        },
+        "misses_by_scene": {
+          "indoor": 15,
+          "outdoor": 30
+        },
+        "nonescape_additional_generated_hits": 8
+      },
+      "high_ai_signal": {
+        "true_positive": 425,
+        "false_positive": 5,
+        "recall": 0.8095238095238095,
+        "recall_wilson_95": [
+          0.7737327304922142,
+          0.8408181799540725
+        ],
+        "false_positive_rate": 0.03333333333333333,
+        "false_positive_rate_wilson_95": [
+          0.01432043189809255,
+          0.07565179617877894
+        ]
+      },
+      "possible_recall_by_generator": {
+        "Deepfloyd": 0.7733333333333333,
+        "Kandinsky": 0.9466666666666667,
+        "Pixart": 0.9,
+        "SDXL": 0.9666666666666667
+      }
+    }
+  },
+  "decision": {
+    "status": "audit_only",
+    "summary": "Keep the registered thresholds unchanged. The recall-oriented rule is useful, but JPEG-85 recall lower confidence bound is below the proposed 0.90 promotion gate and the current controls do not cover recent closed-source generators.",
+    "next_evaluation_unit": "Frozen misses plus SHA-256-unique matched real controls; final verification must use generator-isolated, transformation-aware data that was not used to select candidates or thresholds."
+  },
+  "limitations": [
+    "The four generator-labelled reports reuse the same real photographs; only the SHA-256-deduplicated overall false-positive rate is a valid unique-control estimate.",
+    "The generated samples cover DeepFloyd, Kandinsky, PixArt, and SDXL, not recent closed-source generators.",
+    "Community Forensics and Nonescape Mini are correlated learned pixel detectors, not independent votes.",
+    "The possible-AI rule is a recall-oriented review rule, not a calibrated probability of AI origin.",
+    "This audit evaluates cached detector scores and does not measure current end-to-end latency, memory, decode failures, or unsupported input sizes."
+  ],
+  "reproduction": {
+    "script": "scripts/audit_pixel_fusion_recall.py",
+    "original_output": "outputs/pixel_fusion_recall_audit_v1/original.json",
+    "jpeg85_output": "outputs/pixel_fusion_recall_audit_v1/jpeg85.json"
+  }
+}

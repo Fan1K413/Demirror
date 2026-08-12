@@ -1,0 +1,2398 @@
+{
+  "schema_version": "demirror-geometry-v2-openfake-comparison-audit-v1",
+  "date": "2026-08-12",
+  "measurement_protocol_canonical_sha256": "74821e5be7e4a880b67ade5d5cf71aaf663d5468b9287f9c02cca78ddfa044e9",
+  "manifest_sha256": "aa8790bb0461ebf3a69059c53740f67fe14ef0707ed00381ddb5effb973a69dd",
+  "source_cluster_count": 160,
+  "review_candidate_threshold": 0.5,
+  "profiles": {
+    "original": {
+      "measurement_status_by_label": {
+        "fake": {
+          "measurable": 67,
+          "not_applicable": 13
+        },
+        "real": {
+          "measurable": 64,
+          "not_applicable": 16
+        }
+      },
+      "applicability_mean_by_label": {
+        "fake": 0.9667708333333331,
+        "real": 0.9583333333333336
+      },
+      "elapsed_seconds_total": 1177.5972042001085,
+      "checks": {
+        "G1": {
+          "by_label": {
+            "fake": {
+              "status_counts": {
+                "available": 67,
+                "not_applicable": 13
+              },
+              "available_score_mean": 0.0364531926974253,
+              "hit_count": 1,
+              "source_count": 80,
+              "hit_rate": 0.0125,
+              "wilson_95_lower": 0.0022099755204522745,
+              "wilson_95_upper": 0.06746270077668665
+            },
+            "real": {
+              "status_counts": {
+                "available": 63,
+                "not_applicable": 17
+              },
+              "available_score_mean": 0.060527290289273845,
+              "hit_count": 2,
+              "source_count": 80,
+              "hit_rate": 0.025,
+              "wilson_95_lower": 0.006882893202970648,
+              "wilson_95_upper": 0.0866443298557801
+            }
+          },
+          "by_model": {
+            "docci": {
+              "status_counts": {
+                "available": 32,
+                "not_applicable": 8
+              },
+              "available_score_mean": 0.08133563197923953,
+              "hit_count": 2,
+              "source_count": 40,
+              "hit_rate": 0.05,
+              "wilson_95_lower": 0.013820667386148344,
+              "wilson_95_upper": 0.16503877369140962
+            },
+            "flux.2-klein-9b": {
+              "status_counts": {
+                "available": 19,
+                "not_applicable": 1
+              },
+              "available_score_mean": 0.013735670523233908,
+              "hit_count": 0,
+              "source_count": 20,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.16112515805281938
+            },
+            "gpt-image-1.5": {
+              "status_counts": {
+                "available": 11,
+                "not_applicable": 9
+              },
+              "available_score_mean": 0.008018246184468605,
+              "hit_count": 0,
+              "source_count": 20,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.16112515805281938
+            },
+            "imagenet": {
+              "status_counts": {
+                "available": 31,
+                "not_applicable": 9
+              },
+              "available_score_mean": 0.039047711770599576,
+              "hit_count": 0,
+              "source_count": 40,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.08762160119728664
+            },
+            "midjourney-7": {
+              "status_counts": {
+                "available": 17,
+                "not_applicable": 3
+              },
+              "available_score_mean": 0.09040221187779249,
+              "hit_count": 1,
+              "source_count": 20,
+              "hit_rate": 0.05,
+              "wilson_95_lower": 0.008881448800795402,
+              "wilson_95_upper": 0.23613119344674205
+            },
+            "z-image-turbo": {
+              "status_counts": {
+                "available": 20
+              },
+              "available_score_mean": 0.0278173930417212,
+              "hit_count": 0,
+              "source_count": 20,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.16112515805281938
+            }
+          }
+        },
+        "G2": {
+          "by_label": {
+            "fake": {
+              "status_counts": {
+                "available": 49,
+                "not_applicable": 31
+              },
+              "available_score_mean": 0.0,
+              "hit_count": 0,
+              "source_count": 80,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.0458181295355271
+            },
+            "real": {
+              "status_counts": {
+                "available": 48,
+                "not_applicable": 32
+              },
+              "available_score_mean": 0.0,
+              "hit_count": 0,
+              "source_count": 80,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.0458181295355271
+            }
+          },
+          "by_model": {
+            "docci": {
+              "status_counts": {
+                "available": 27,
+                "not_applicable": 13
+              },
+              "available_score_mean": 0.0,
+              "hit_count": 0,
+              "source_count": 40,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.08762160119728664
+            },
+            "flux.2-klein-9b": {
+              "status_counts": {
+                "available": 16,
+                "not_applicable": 4
+              },
+              "available_score_mean": 0.0,
+              "hit_count": 0,
+              "source_count": 20,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.16112515805281938
+            },
+            "gpt-image-1.5": {
+              "status_counts": {
+                "available": 7,
+                "not_applicable": 13
+              },
+              "available_score_mean": 0.0,
+              "hit_count": 0,
+              "source_count": 20,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.16112515805281938
+            },
+            "imagenet": {
+              "status_counts": {
+                "available": 21,
+                "not_applicable": 19
+              },
+              "available_score_mean": 0.0,
+              "hit_count": 0,
+              "source_count": 40,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.08762160119728664
+            },
+            "midjourney-7": {
+              "status_counts": {
+                "available": 12,
+                "not_applicable": 8
+              },
+              "available_score_mean": 0.0,
+              "hit_count": 0,
+              "source_count": 20,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.16112515805281938
+            },
+            "z-image-turbo": {
+              "status_counts": {
+                "available": 14,
+                "not_applicable": 6
+              },
+              "available_score_mean": 0.0,
+              "hit_count": 0,
+              "source_count": 20,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.16112515805281938
+            }
+          }
+        },
+        "G3": {
+          "by_label": {
+            "fake": {
+              "status_counts": {
+                "available": 28,
+                "not_applicable": 52
+              },
+              "available_score_mean": 0.6238382472375209,
+              "hit_count": 18,
+              "source_count": 80,
+              "hit_rate": 0.225,
+              "wilson_95_lower": 0.14733207340846635,
+              "wilson_95_upper": 0.3278678978360735
+            },
+            "real": {
+              "status_counts": {
+                "available": 17,
+                "not_applicable": 63
+              },
+              "available_score_mean": 0.5662120197112404,
+              "hit_count": 10,
+              "source_count": 80,
+              "hit_rate": 0.125,
+              "wilson_95_lower": 0.06933557616004862,
+              "wilson_95_upper": 0.21502802099159665
+            }
+          },
+          "by_model": {
+            "docci": {
+              "status_counts": {
+                "available": 11,
+                "not_applicable": 29
+              },
+              "available_score_mean": 0.5288167701672637,
+              "hit_count": 6,
+              "source_count": 40,
+              "hit_rate": 0.15,
+              "wilson_95_lower": 0.07061187717320358,
+              "wilson_95_upper": 0.2907232436648971
+            },
+            "flux.2-klein-9b": {
+              "status_counts": {
+                "available": 8,
+                "not_applicable": 12
+              },
+              "available_score_mean": 0.6182667260182385,
+              "hit_count": 5,
+              "source_count": 20,
+              "hit_rate": 0.25,
+              "wilson_95_lower": 0.11186170140766569,
+              "wilson_95_upper": 0.468700877618744
+            },
+            "gpt-image-1.5": {
+              "status_counts": {
+                "available": 4,
+                "not_applicable": 16
+              },
+              "available_score_mean": 0.9578131079815535,
+              "hit_count": 4,
+              "source_count": 20,
+              "hit_rate": 0.2,
+              "wilson_95_lower": 0.08065766257979806,
+              "wilson_95_upper": 0.41601743225189364
+            },
+            "imagenet": {
+              "status_counts": {
+                "available": 6,
+                "not_applicable": 34
+              },
+              "available_score_mean": 0.634769977208531,
+              "hit_count": 4,
+              "source_count": 40,
+              "hit_rate": 0.1,
+              "wilson_95_lower": 0.03957952868260638,
+              "wilson_95_upper": 0.23051775227522298
+            },
+            "midjourney-7": {
+              "status_counts": {
+                "available": 3,
+                "not_applicable": 17
+              },
+              "available_score_mean": 0.6219801140926625,
+              "hit_count": 2,
+              "source_count": 20,
+              "hit_rate": 0.1,
+              "wilson_95_lower": 0.027866481213768224,
+              "wilson_95_upper": 0.3010336452284873
+            },
+            "z-image-turbo": {
+              "status_counts": {
+                "available": 13,
+                "not_applicable": 7
+              },
+              "available_score_mean": 0.5249341800231133,
+              "hit_count": 7,
+              "source_count": 20,
+              "hit_rate": 0.35,
+              "wilson_95_lower": 0.18119182410108206,
+              "wilson_95_upper": 0.5671457233147638
+            }
+          }
+        },
+        "G4": {
+          "by_label": {
+            "fake": {
+              "status_counts": {
+                "available": 39,
+                "not_applicable": 41
+              },
+              "available_score_mean": 0.28439602441698175,
+              "hit_count": 10,
+              "source_count": 80,
+              "hit_rate": 0.125,
+              "wilson_95_lower": 0.06933557616004862,
+              "wilson_95_upper": 0.21502802099159665
+            },
+            "real": {
+              "status_counts": {
+                "available": 42,
+                "not_applicable": 38
+              },
+              "available_score_mean": 0.3304341053195025,
+              "hit_count": 12,
+              "source_count": 80,
+              "hit_rate": 0.15,
+              "wilson_95_lower": 0.08794040506163547,
+              "wilson_95_upper": 0.24413228561323347
+            }
+          },
+          "by_model": {
+            "docci": {
+              "status_counts": {
+                "available": 16,
+                "not_applicable": 24
+              },
+              "available_score_mean": 0.29230869359163625,
+              "hit_count": 4,
+              "source_count": 40,
+              "hit_rate": 0.1,
+              "wilson_95_lower": 0.03957952868260638,
+              "wilson_95_upper": 0.23051775227522298
+            },
+            "flux.2-klein-9b": {
+              "status_counts": {
+                "available": 9,
+                "not_applicable": 11
+              },
+              "available_score_mean": 0.40319657879015736,
+              "hit_count": 4,
+              "source_count": 20,
+              "hit_rate": 0.2,
+              "wilson_95_lower": 0.08065766257979806,
+              "wilson_95_upper": 0.41601743225189364
+            },
+            "gpt-image-1.5": {
+              "status_counts": {
+                "available": 7,
+                "not_applicable": 13
+              },
+              "available_score_mean": 0.15852285814166928,
+              "hit_count": 1,
+              "source_count": 20,
+              "hit_rate": 0.05,
+              "wilson_95_lower": 0.008881448800795402,
+              "wilson_95_upper": 0.23613119344674205
+            },
+            "imagenet": {
+              "status_counts": {
+                "available": 26,
+                "not_applicable": 14
+              },
+              "available_score_mean": 0.35389589715203573,
+              "hit_count": 8,
+              "source_count": 40,
+              "hit_rate": 0.2,
+              "wilson_95_lower": 0.10499989725437704,
+              "wilson_95_upper": 0.347573063463995
+            },
+            "midjourney-7": {
+              "status_counts": {
+                "available": 8,
+                "not_applicable": 12
+              },
+              "available_score_mean": 0.389456034435876,
+              "hit_count": 3,
+              "source_count": 20,
+              "hit_rate": 0.15,
+              "wilson_95_lower": 0.052368745896216595,
+              "wilson_95_upper": 0.36041886474075696
+            },
+            "z-image-turbo": {
+              "status_counts": {
+                "available": 15,
+                "not_applicable": 5
+              },
+              "available_score_mean": 0.21582449737814519,
+              "hit_count": 2,
+              "source_count": 20,
+              "hit_rate": 0.1,
+              "wilson_95_lower": 0.027866481213768224,
+              "wilson_95_upper": 0.3010336452284873
+            }
+          }
+        }
+      },
+      "fixed_rules": {
+        "any_check": {
+          "by_label": {
+            "fake": {
+              "hit_count": 24,
+              "source_count": 80,
+              "hit_rate": 0.3,
+              "wilson_95_lower": 0.2106457126008134,
+              "wilson_95_upper": 0.40768153921339734
+            },
+            "real": {
+              "hit_count": 18,
+              "source_count": 80,
+              "hit_rate": 0.225,
+              "wilson_95_lower": 0.14733207340846635,
+              "wilson_95_upper": 0.3278678978360735
+            }
+          },
+          "by_model": {
+            "docci": {
+              "hit_count": 10,
+              "source_count": 40,
+              "hit_rate": 0.25,
+              "wilson_95_lower": 0.14187118639096302,
+              "wilson_95_upper": 0.40193961420768026
+            },
+            "flux.2-klein-9b": {
+              "hit_count": 7,
+              "source_count": 20,
+              "hit_rate": 0.35,
+              "wilson_95_lower": 0.18119182410108206,
+              "wilson_95_upper": 0.5671457233147638
+            },
+            "gpt-image-1.5": {
+              "hit_count": 4,
+              "source_count": 20,
+              "hit_rate": 0.2,
+              "wilson_95_lower": 0.08065766257979806,
+              "wilson_95_upper": 0.41601743225189364
+            },
+            "imagenet": {
+              "hit_count": 8,
+              "source_count": 40,
+              "hit_rate": 0.2,
+              "wilson_95_lower": 0.10499989725437704,
+              "wilson_95_upper": 0.347573063463995
+            },
+            "midjourney-7": {
+              "hit_count": 6,
+              "source_count": 20,
+              "hit_rate": 0.3,
+              "wilson_95_lower": 0.1454772448676043,
+              "wilson_95_upper": 0.5189728183535235
+            },
+            "z-image-turbo": {
+              "hit_count": 7,
+              "source_count": 20,
+              "hit_rate": 0.35,
+              "wilson_95_lower": 0.18119182410108206,
+              "wilson_95_upper": 0.5671457233147638
+            }
+          },
+          "balanced_accuracy_if_used_as_classifier": 0.5375
+        },
+        "two_or_more_checks": {
+          "by_label": {
+            "fake": {
+              "hit_count": 5,
+              "source_count": 80,
+              "hit_rate": 0.0625,
+              "wilson_95_lower": 0.026989375670841982,
+              "wilson_95_upper": 0.13810148767274424
+            },
+            "real": {
+              "hit_count": 6,
+              "source_count": 80,
+              "hit_rate": 0.075,
+              "wilson_95_lower": 0.03482524929300514,
+              "wilson_95_upper": 0.15412016081219287
+            }
+          },
+          "by_model": {
+            "docci": {
+              "hit_count": 2,
+              "source_count": 40,
+              "hit_rate": 0.05,
+              "wilson_95_lower": 0.013820667386148344,
+              "wilson_95_upper": 0.16503877369140962
+            },
+            "flux.2-klein-9b": {
+              "hit_count": 2,
+              "source_count": 20,
+              "hit_rate": 0.1,
+              "wilson_95_lower": 0.027866481213768224,
+              "wilson_95_upper": 0.3010336452284873
+            },
+            "gpt-image-1.5": {
+              "hit_count": 1,
+              "source_count": 20,
+              "hit_rate": 0.05,
+              "wilson_95_lower": 0.008881448800795402,
+              "wilson_95_upper": 0.23613119344674205
+            },
+            "imagenet": {
+              "hit_count": 4,
+              "source_count": 40,
+              "hit_rate": 0.1,
+              "wilson_95_lower": 0.03957952868260638,
+              "wilson_95_upper": 0.23051775227522298
+            },
+            "midjourney-7": {
+              "hit_count": 0,
+              "source_count": 20,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.16112515805281938
+            },
+            "z-image-turbo": {
+              "hit_count": 2,
+              "source_count": 20,
+              "hit_rate": 0.1,
+              "wilson_95_lower": 0.027866481213768224,
+              "wilson_95_upper": 0.3010336452284873
+            }
+          },
+          "balanced_accuracy_if_used_as_classifier": 0.49375
+        },
+        "nonrepeat_any": {
+          "by_label": {
+            "fake": {
+              "hit_count": 11,
+              "source_count": 80,
+              "hit_rate": 0.1375,
+              "wilson_95_lower": 0.07854714324339108,
+              "wilson_95_upper": 0.22967100066986607
+            },
+            "real": {
+              "hit_count": 14,
+              "source_count": 80,
+              "hit_rate": 0.175,
+              "wilson_95_lower": 0.10720636440977926,
+              "wilson_95_upper": 0.2725754197883133
+            }
+          },
+          "by_model": {
+            "docci": {
+              "hit_count": 6,
+              "source_count": 40,
+              "hit_rate": 0.15,
+              "wilson_95_lower": 0.07061187717320358,
+              "wilson_95_upper": 0.2907232436648971
+            },
+            "flux.2-klein-9b": {
+              "hit_count": 4,
+              "source_count": 20,
+              "hit_rate": 0.2,
+              "wilson_95_lower": 0.08065766257979806,
+              "wilson_95_upper": 0.41601743225189364
+            },
+            "gpt-image-1.5": {
+              "hit_count": 1,
+              "source_count": 20,
+              "hit_rate": 0.05,
+              "wilson_95_lower": 0.008881448800795402,
+              "wilson_95_upper": 0.23613119344674205
+            },
+            "imagenet": {
+              "hit_count": 8,
+              "source_count": 40,
+              "hit_rate": 0.2,
+              "wilson_95_lower": 0.10499989725437704,
+              "wilson_95_upper": 0.347573063463995
+            },
+            "midjourney-7": {
+              "hit_count": 4,
+              "source_count": 20,
+              "hit_rate": 0.2,
+              "wilson_95_lower": 0.08065766257979806,
+              "wilson_95_upper": 0.41601743225189364
+            },
+            "z-image-turbo": {
+              "hit_count": 2,
+              "source_count": 20,
+              "hit_rate": 0.1,
+              "wilson_95_lower": 0.027866481213768224,
+              "wilson_95_upper": 0.3010336452284873
+            }
+          },
+          "balanced_accuracy_if_used_as_classifier": 0.48124999999999996
+        },
+        "g3_supported": {
+          "by_label": {
+            "fake": {
+              "hit_count": 5,
+              "source_count": 80,
+              "hit_rate": 0.0625,
+              "wilson_95_lower": 0.026989375670841982,
+              "wilson_95_upper": 0.13810148767274424
+            },
+            "real": {
+              "hit_count": 6,
+              "source_count": 80,
+              "hit_rate": 0.075,
+              "wilson_95_lower": 0.03482524929300514,
+              "wilson_95_upper": 0.15412016081219287
+            }
+          },
+          "by_model": {
+            "docci": {
+              "hit_count": 2,
+              "source_count": 40,
+              "hit_rate": 0.05,
+              "wilson_95_lower": 0.013820667386148344,
+              "wilson_95_upper": 0.16503877369140962
+            },
+            "flux.2-klein-9b": {
+              "hit_count": 2,
+              "source_count": 20,
+              "hit_rate": 0.1,
+              "wilson_95_lower": 0.027866481213768224,
+              "wilson_95_upper": 0.3010336452284873
+            },
+            "gpt-image-1.5": {
+              "hit_count": 1,
+              "source_count": 20,
+              "hit_rate": 0.05,
+              "wilson_95_lower": 0.008881448800795402,
+              "wilson_95_upper": 0.23613119344674205
+            },
+            "imagenet": {
+              "hit_count": 4,
+              "source_count": 40,
+              "hit_rate": 0.1,
+              "wilson_95_lower": 0.03957952868260638,
+              "wilson_95_upper": 0.23051775227522298
+            },
+            "midjourney-7": {
+              "hit_count": 0,
+              "source_count": 20,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.16112515805281938
+            },
+            "z-image-turbo": {
+              "hit_count": 2,
+              "source_count": 20,
+              "hit_rate": 0.1,
+              "wilson_95_lower": 0.027866481213768224,
+              "wilson_95_upper": 0.3010336452284873
+            }
+          },
+          "balanced_accuracy_if_used_as_classifier": 0.49375
+        }
+      }
+    },
+    "jpeg85": {
+      "measurement_status_by_label": {
+        "fake": {
+          "measurable": 66,
+          "not_applicable": 14
+        },
+        "real": {
+          "measurable": 66,
+          "not_applicable": 14
+        }
+      },
+      "applicability_mean_by_label": {
+        "fake": 0.9643749999999999,
+        "real": 0.9582291666666667
+      },
+      "elapsed_seconds_total": 1141.439139099588,
+      "checks": {
+        "G1": {
+          "by_label": {
+            "fake": {
+              "status_counts": {
+                "available": 66,
+                "not_applicable": 14
+              },
+              "available_score_mean": 0.07047292429515625,
+              "hit_count": 3,
+              "source_count": 80,
+              "hit_rate": 0.0375,
+              "wilson_95_lower": 0.012834568919911402,
+              "wilson_95_upper": 0.10454720090045115
+            },
+            "real": {
+              "status_counts": {
+                "available": 65,
+                "not_applicable": 15
+              },
+              "available_score_mean": 0.06849669500661994,
+              "hit_count": 3,
+              "source_count": 80,
+              "hit_rate": 0.0375,
+              "wilson_95_lower": 0.012834568919911402,
+              "wilson_95_upper": 0.10454720090045115
+            }
+          },
+          "by_model": {
+            "docci": {
+              "status_counts": {
+                "available": 33,
+                "not_applicable": 7
+              },
+              "available_score_mean": 0.07996467544195117,
+              "hit_count": 2,
+              "source_count": 40,
+              "hit_rate": 0.05,
+              "wilson_95_lower": 0.013820667386148344,
+              "wilson_95_upper": 0.16503877369140962
+            },
+            "flux.2-klein-9b": {
+              "status_counts": {
+                "available": 18,
+                "not_applicable": 2
+              },
+              "available_score_mean": 0.01471548661365184,
+              "hit_count": 0,
+              "source_count": 20,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.16112515805281938
+            },
+            "gpt-image-1.5": {
+              "status_counts": {
+                "available": 11,
+                "not_applicable": 9
+              },
+              "available_score_mean": 0.08444767032144566,
+              "hit_count": 1,
+              "source_count": 20,
+              "hit_rate": 0.05,
+              "wilson_95_lower": 0.008881448800795402,
+              "wilson_95_upper": 0.23613119344674205
+            },
+            "imagenet": {
+              "status_counts": {
+                "available": 32,
+                "not_applicable": 8
+              },
+              "available_score_mean": 0.0566703401826846,
+              "hit_count": 1,
+              "source_count": 40,
+              "hit_rate": 0.025,
+              "wilson_95_lower": 0.0044268315026814095,
+              "wilson_95_upper": 0.1288136896347409
+            },
+            "midjourney-7": {
+              "status_counts": {
+                "available": 17,
+                "not_applicable": 3
+              },
+              "available_score_mean": 0.06670930324586646,
+              "hit_count": 1,
+              "source_count": 20,
+              "hit_rate": 0.05,
+              "wilson_95_lower": 0.008881448800795402,
+              "wilson_95_upper": 0.23613119344674205
+            },
+            "z-image-turbo": {
+              "status_counts": {
+                "available": 20
+              },
+              "available_score_mean": 0.1161675857859473,
+              "hit_count": 1,
+              "source_count": 20,
+              "hit_rate": 0.05,
+              "wilson_95_lower": 0.008881448800795402,
+              "wilson_95_upper": 0.23613119344674205
+            }
+          }
+        },
+        "G2": {
+          "by_label": {
+            "fake": {
+              "status_counts": {
+                "available": 48,
+                "not_applicable": 32
+              },
+              "available_score_mean": 0.0,
+              "hit_count": 0,
+              "source_count": 80,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.0458181295355271
+            },
+            "real": {
+              "status_counts": {
+                "available": 52,
+                "not_applicable": 28
+              },
+              "available_score_mean": 0.0,
+              "hit_count": 0,
+              "source_count": 80,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.0458181295355271
+            }
+          },
+          "by_model": {
+            "docci": {
+              "status_counts": {
+                "available": 27,
+                "not_applicable": 13
+              },
+              "available_score_mean": 0.0,
+              "hit_count": 0,
+              "source_count": 40,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.08762160119728664
+            },
+            "flux.2-klein-9b": {
+              "status_counts": {
+                "available": 15,
+                "not_applicable": 5
+              },
+              "available_score_mean": 0.0,
+              "hit_count": 0,
+              "source_count": 20,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.16112515805281938
+            },
+            "gpt-image-1.5": {
+              "status_counts": {
+                "available": 5,
+                "not_applicable": 15
+              },
+              "available_score_mean": 0.0,
+              "hit_count": 0,
+              "source_count": 20,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.16112515805281938
+            },
+            "imagenet": {
+              "status_counts": {
+                "available": 25,
+                "not_applicable": 15
+              },
+              "available_score_mean": 0.0,
+              "hit_count": 0,
+              "source_count": 40,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.08762160119728664
+            },
+            "midjourney-7": {
+              "status_counts": {
+                "available": 11,
+                "not_applicable": 9
+              },
+              "available_score_mean": 0.0,
+              "hit_count": 0,
+              "source_count": 20,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.16112515805281938
+            },
+            "z-image-turbo": {
+              "status_counts": {
+                "available": 17,
+                "not_applicable": 3
+              },
+              "available_score_mean": 0.0,
+              "hit_count": 0,
+              "source_count": 20,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.16112515805281938
+            }
+          }
+        },
+        "G3": {
+          "by_label": {
+            "fake": {
+              "status_counts": {
+                "available": 31,
+                "not_applicable": 49
+              },
+              "available_score_mean": 0.695591393550828,
+              "hit_count": 22,
+              "source_count": 80,
+              "hit_rate": 0.275,
+              "wilson_95_lower": 0.18917757188084197,
+              "wilson_95_upper": 0.3814405864101452
+            },
+            "real": {
+              "status_counts": {
+                "available": 20,
+                "not_applicable": 60
+              },
+              "available_score_mean": 0.6768898177972416,
+              "hit_count": 14,
+              "source_count": 80,
+              "hit_rate": 0.175,
+              "wilson_95_lower": 0.10720636440977926,
+              "wilson_95_upper": 0.2725754197883133
+            }
+          },
+          "by_model": {
+            "docci": {
+              "status_counts": {
+                "available": 13,
+                "not_applicable": 27
+              },
+              "available_score_mean": 0.6696005439664313,
+              "hit_count": 9,
+              "source_count": 40,
+              "hit_rate": 0.225,
+              "wilson_95_lower": 0.12316091323540743,
+              "wilson_95_upper": 0.37503096742310027
+            },
+            "flux.2-klein-9b": {
+              "status_counts": {
+                "available": 8,
+                "not_applicable": 12
+              },
+              "available_score_mean": 0.8660533514943884,
+              "hit_count": 7,
+              "source_count": 20,
+              "hit_rate": 0.35,
+              "wilson_95_lower": 0.18119182410108206,
+              "wilson_95_upper": 0.5671457233147638
+            },
+            "gpt-image-1.5": {
+              "status_counts": {
+                "available": 7,
+                "not_applicable": 13
+              },
+              "available_score_mean": 0.6893846235030985,
+              "hit_count": 5,
+              "source_count": 20,
+              "hit_rate": 0.25,
+              "wilson_95_lower": 0.11186170140766569,
+              "wilson_95_upper": 0.468700877618744
+            },
+            "imagenet": {
+              "status_counts": {
+                "available": 7,
+                "not_applicable": 33
+              },
+              "available_score_mean": 0.6904270406258891,
+              "hit_count": 5,
+              "source_count": 40,
+              "hit_rate": 0.125,
+              "wilson_95_lower": 0.05459500250945401,
+              "wilson_95_upper": 0.261121198388511
+            },
+            "midjourney-7": {
+              "status_counts": {
+                "available": 4,
+                "not_applicable": 16
+              },
+              "available_score_mean": 0.75,
+              "hit_count": 3,
+              "source_count": 20,
+              "hit_rate": 0.15,
+              "wilson_95_lower": 0.052368745896216595,
+              "wilson_95_upper": 0.36041886474075696
+            },
+            "z-image-turbo": {
+              "status_counts": {
+                "available": 12,
+                "not_applicable": 8
+              },
+              "available_score_mean": 0.5674345019665726,
+              "hit_count": 7,
+              "source_count": 20,
+              "hit_rate": 0.35,
+              "wilson_95_lower": 0.18119182410108206,
+              "wilson_95_upper": 0.5671457233147638
+            }
+          }
+        },
+        "G4": {
+          "by_label": {
+            "fake": {
+              "status_counts": {
+                "available": 38,
+                "not_applicable": 42
+              },
+              "available_score_mean": 0.2911046652390822,
+              "hit_count": 8,
+              "source_count": 80,
+              "hit_rate": 0.1,
+              "wilson_95_lower": 0.05154761556738083,
+              "wilson_95_upper": 0.18510688806104086
+            },
+            "real": {
+              "status_counts": {
+                "available": 41,
+                "not_applicable": 39
+              },
+              "available_score_mean": 0.3182115136894253,
+              "hit_count": 12,
+              "source_count": 80,
+              "hit_rate": 0.15,
+              "wilson_95_lower": 0.08794040506163547,
+              "wilson_95_upper": 0.24413228561323347
+            }
+          },
+          "by_model": {
+            "docci": {
+              "status_counts": {
+                "available": 18,
+                "not_applicable": 22
+              },
+              "available_score_mean": 0.29872205294814236,
+              "hit_count": 5,
+              "source_count": 40,
+              "hit_rate": 0.125,
+              "wilson_95_lower": 0.05459500250945401,
+              "wilson_95_upper": 0.261121198388511
+            },
+            "flux.2-klein-9b": {
+              "status_counts": {
+                "available": 10,
+                "not_applicable": 10
+              },
+              "available_score_mean": 0.4395433081944754,
+              "hit_count": 5,
+              "source_count": 20,
+              "hit_rate": 0.25,
+              "wilson_95_lower": 0.11186170140766569,
+              "wilson_95_upper": 0.468700877618744
+            },
+            "gpt-image-1.5": {
+              "status_counts": {
+                "available": 6,
+                "not_applicable": 14
+              },
+              "available_score_mean": 0.18935392537419146,
+              "hit_count": 0,
+              "source_count": 20,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.16112515805281938
+            },
+            "imagenet": {
+              "status_counts": {
+                "available": 23,
+                "not_applicable": 17
+              },
+              "available_score_mean": 0.33346413513912504,
+              "hit_count": 7,
+              "source_count": 40,
+              "hit_rate": 0.175,
+              "wilson_95_lower": 0.0874541374603592,
+              "wilson_95_upper": 0.31949990331787714
+            },
+            "midjourney-7": {
+              "status_counts": {
+                "available": 7,
+                "not_applicable": 13
+              },
+              "available_score_mean": 0.27662082138198085,
+              "hit_count": 1,
+              "source_count": 20,
+              "hit_rate": 0.05,
+              "wilson_95_lower": 0.008881448800795402,
+              "wilson_95_upper": 0.23613119344674205
+            },
+            "z-image-turbo": {
+              "status_counts": {
+                "available": 15,
+                "not_applicable": 5
+              },
+              "available_score_mean": 0.23960499301475688,
+              "hit_count": 2,
+              "source_count": 20,
+              "hit_rate": 0.1,
+              "wilson_95_lower": 0.027866481213768224,
+              "wilson_95_upper": 0.3010336452284873
+            }
+          }
+        }
+      },
+      "fixed_rules": {
+        "any_check": {
+          "by_label": {
+            "fake": {
+              "hit_count": 29,
+              "source_count": 80,
+              "hit_rate": 0.3625,
+              "wilson_95_lower": 0.2657079306444915,
+              "wilson_95_upper": 0.4718920549777783
+            },
+            "real": {
+              "hit_count": 26,
+              "source_count": 80,
+              "hit_rate": 0.325,
+              "wilson_95_lower": 0.2324416184435817,
+              "wilson_95_upper": 0.4335947268938527
+            }
+          },
+          "by_model": {
+            "docci": {
+              "hit_count": 14,
+              "source_count": 40,
+              "hit_rate": 0.35,
+              "wilson_95_lower": 0.2213452887317629,
+              "wilson_95_upper": 0.5049411916274231
+            },
+            "flux.2-klein-9b": {
+              "hit_count": 10,
+              "source_count": 20,
+              "hit_rate": 0.5,
+              "wilson_95_lower": 0.2992980081982123,
+              "wilson_95_upper": 0.7007019918017877
+            },
+            "gpt-image-1.5": {
+              "hit_count": 6,
+              "source_count": 20,
+              "hit_rate": 0.3,
+              "wilson_95_lower": 0.1454772448676043,
+              "wilson_95_upper": 0.5189728183535235
+            },
+            "imagenet": {
+              "hit_count": 12,
+              "source_count": 40,
+              "hit_rate": 0.3,
+              "wilson_95_lower": 0.18074845229746528,
+              "wilson_95_upper": 0.45430018818144935
+            },
+            "midjourney-7": {
+              "hit_count": 4,
+              "source_count": 20,
+              "hit_rate": 0.2,
+              "wilson_95_lower": 0.08065766257979806,
+              "wilson_95_upper": 0.41601743225189364
+            },
+            "z-image-turbo": {
+              "hit_count": 9,
+              "source_count": 20,
+              "hit_rate": 0.45,
+              "wilson_95_lower": 0.2581978582556243,
+              "wilson_95_upper": 0.6579146575496577
+            }
+          },
+          "balanced_accuracy_if_used_as_classifier": 0.51875
+        },
+        "two_or_more_checks": {
+          "by_label": {
+            "fake": {
+              "hit_count": 4,
+              "source_count": 80,
+              "hit_rate": 0.05,
+              "wilson_95_lower": 0.01961355453554428,
+              "wilson_95_upper": 0.1216227620464301
+            },
+            "real": {
+              "hit_count": 3,
+              "source_count": 80,
+              "hit_rate": 0.0375,
+              "wilson_95_lower": 0.012834568919911402,
+              "wilson_95_upper": 0.10454720090045115
+            }
+          },
+          "by_model": {
+            "docci": {
+              "hit_count": 2,
+              "source_count": 40,
+              "hit_rate": 0.05,
+              "wilson_95_lower": 0.013820667386148344,
+              "wilson_95_upper": 0.16503877369140962
+            },
+            "flux.2-klein-9b": {
+              "hit_count": 2,
+              "source_count": 20,
+              "hit_rate": 0.1,
+              "wilson_95_lower": 0.027866481213768224,
+              "wilson_95_upper": 0.3010336452284873
+            },
+            "gpt-image-1.5": {
+              "hit_count": 0,
+              "source_count": 20,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.16112515805281938
+            },
+            "imagenet": {
+              "hit_count": 1,
+              "source_count": 40,
+              "hit_rate": 0.025,
+              "wilson_95_lower": 0.0044268315026814095,
+              "wilson_95_upper": 0.1288136896347409
+            },
+            "midjourney-7": {
+              "hit_count": 1,
+              "source_count": 20,
+              "hit_rate": 0.05,
+              "wilson_95_lower": 0.008881448800795402,
+              "wilson_95_upper": 0.23613119344674205
+            },
+            "z-image-turbo": {
+              "hit_count": 1,
+              "source_count": 20,
+              "hit_rate": 0.05,
+              "wilson_95_lower": 0.008881448800795402,
+              "wilson_95_upper": 0.23613119344674205
+            }
+          },
+          "balanced_accuracy_if_used_as_classifier": 0.50625
+        },
+        "nonrepeat_any": {
+          "by_label": {
+            "fake": {
+              "hit_count": 10,
+              "source_count": 80,
+              "hit_rate": 0.125,
+              "wilson_95_lower": 0.06933557616004862,
+              "wilson_95_upper": 0.21502802099159665
+            },
+            "real": {
+              "hit_count": 15,
+              "source_count": 80,
+              "hit_rate": 0.1875,
+              "wilson_95_lower": 0.11705310466977323,
+              "wilson_95_upper": 0.28658322628993116
+            }
+          },
+          "by_model": {
+            "docci": {
+              "hit_count": 7,
+              "source_count": 40,
+              "hit_rate": 0.175,
+              "wilson_95_lower": 0.0874541374603592,
+              "wilson_95_upper": 0.31949990331787714
+            },
+            "flux.2-klein-9b": {
+              "hit_count": 5,
+              "source_count": 20,
+              "hit_rate": 0.25,
+              "wilson_95_lower": 0.11186170140766569,
+              "wilson_95_upper": 0.468700877618744
+            },
+            "gpt-image-1.5": {
+              "hit_count": 1,
+              "source_count": 20,
+              "hit_rate": 0.05,
+              "wilson_95_lower": 0.008881448800795402,
+              "wilson_95_upper": 0.23613119344674205
+            },
+            "imagenet": {
+              "hit_count": 8,
+              "source_count": 40,
+              "hit_rate": 0.2,
+              "wilson_95_lower": 0.10499989725437704,
+              "wilson_95_upper": 0.347573063463995
+            },
+            "midjourney-7": {
+              "hit_count": 1,
+              "source_count": 20,
+              "hit_rate": 0.05,
+              "wilson_95_lower": 0.008881448800795402,
+              "wilson_95_upper": 0.23613119344674205
+            },
+            "z-image-turbo": {
+              "hit_count": 3,
+              "source_count": 20,
+              "hit_rate": 0.15,
+              "wilson_95_lower": 0.052368745896216595,
+              "wilson_95_upper": 0.36041886474075696
+            }
+          },
+          "balanced_accuracy_if_used_as_classifier": 0.46875
+        },
+        "g3_supported": {
+          "by_label": {
+            "fake": {
+              "hit_count": 3,
+              "source_count": 80,
+              "hit_rate": 0.0375,
+              "wilson_95_lower": 0.012834568919911402,
+              "wilson_95_upper": 0.10454720090045115
+            },
+            "real": {
+              "hit_count": 3,
+              "source_count": 80,
+              "hit_rate": 0.0375,
+              "wilson_95_lower": 0.012834568919911402,
+              "wilson_95_upper": 0.10454720090045115
+            }
+          },
+          "by_model": {
+            "docci": {
+              "hit_count": 2,
+              "source_count": 40,
+              "hit_rate": 0.05,
+              "wilson_95_lower": 0.013820667386148344,
+              "wilson_95_upper": 0.16503877369140962
+            },
+            "flux.2-klein-9b": {
+              "hit_count": 2,
+              "source_count": 20,
+              "hit_rate": 0.1,
+              "wilson_95_lower": 0.027866481213768224,
+              "wilson_95_upper": 0.3010336452284873
+            },
+            "gpt-image-1.5": {
+              "hit_count": 0,
+              "source_count": 20,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.16112515805281938
+            },
+            "imagenet": {
+              "hit_count": 1,
+              "source_count": 40,
+              "hit_rate": 0.025,
+              "wilson_95_lower": 0.0044268315026814095,
+              "wilson_95_upper": 0.1288136896347409
+            },
+            "midjourney-7": {
+              "hit_count": 0,
+              "source_count": 20,
+              "hit_rate": 0.0,
+              "wilson_95_lower": 0.0,
+              "wilson_95_upper": 0.16112515805281938
+            },
+            "z-image-turbo": {
+              "hit_count": 1,
+              "source_count": 20,
+              "hit_rate": 0.05,
+              "wilson_95_lower": 0.008881448800795402,
+              "wilson_95_upper": 0.23613119344674205
+            }
+          },
+          "balanced_accuracy_if_used_as_classifier": 0.5
+        }
+      }
+    }
+  },
+  "cross_view": {
+    "any_check": {
+      "both_views": {
+        "by_label": {
+          "fake": 20,
+          "real": 15
+        },
+        "by_model": {
+          "docci": 8,
+          "flux.2-klein-9b": 6,
+          "gpt-image-1.5": 3,
+          "imagenet": 7,
+          "midjourney-7": 4,
+          "z-image-turbo": 7
+        },
+        "row_indices": [
+          3013,
+          3023,
+          3026,
+          3096,
+          3110,
+          3118,
+          3158,
+          3171,
+          3194,
+          3208,
+          3227,
+          3230,
+          3402,
+          3446,
+          3509,
+          3525,
+          3530,
+          3613,
+          3632,
+          3661,
+          3665,
+          3683,
+          3728,
+          3729,
+          3801,
+          3813,
+          3823,
+          3845,
+          3868,
+          3872,
+          3899,
+          3902,
+          3933,
+          3991,
+          3998
+        ]
+      },
+      "original_only": {
+        "by_label": {
+          "fake": 4,
+          "real": 3
+        },
+        "by_model": {
+          "docci": 2,
+          "flux.2-klein-9b": 1,
+          "gpt-image-1.5": 1,
+          "imagenet": 1,
+          "midjourney-7": 2
+        },
+        "row_indices": [
+          3173,
+          3275,
+          3345,
+          3772,
+          3900,
+          3928,
+          3967
+        ]
+      },
+      "jpeg85_only": {
+        "by_label": {
+          "fake": 9,
+          "real": 11
+        },
+        "by_model": {
+          "docci": 6,
+          "flux.2-klein-9b": 4,
+          "gpt-image-1.5": 3,
+          "imagenet": 5,
+          "z-image-turbo": 2
+        },
+        "row_indices": [
+          3017,
+          3097,
+          3115,
+          3155,
+          3220,
+          3295,
+          3298,
+          3324,
+          3334,
+          3384,
+          3515,
+          3588,
+          3625,
+          3740,
+          3741,
+          3759,
+          3761,
+          3791,
+          3805,
+          3882
+        ]
+      },
+      "neither_view": {
+        "by_label": {
+          "fake": 47,
+          "real": 51
+        },
+        "by_model": {
+          "docci": 24,
+          "flux.2-klein-9b": 9,
+          "gpt-image-1.5": 13,
+          "imagenet": 27,
+          "midjourney-7": 14,
+          "z-image-turbo": 11
+        },
+        "row_indices": [
+          3002,
+          3007,
+          3018,
+          3020,
+          3035,
+          3049,
+          3069,
+          3088,
+          3092,
+          3107,
+          3126,
+          3140,
+          3145,
+          3150,
+          3157,
+          3168,
+          3176,
+          3182,
+          3209,
+          3219,
+          3221,
+          3238,
+          3244,
+          3270,
+          3281,
+          3306,
+          3317,
+          3336,
+          3356,
+          3357,
+          3371,
+          3374,
+          3383,
+          3398,
+          3400,
+          3425,
+          3431,
+          3449,
+          3452,
+          3478,
+          3491,
+          3494,
+          3510,
+          3514,
+          3516,
+          3529,
+          3550,
+          3561,
+          3571,
+          3578,
+          3582,
+          3598,
+          3609,
+          3610,
+          3615,
+          3617,
+          3621,
+          3623,
+          3624,
+          3629,
+          3642,
+          3646,
+          3669,
+          3674,
+          3678,
+          3679,
+          3680,
+          3684,
+          3692,
+          3694,
+          3712,
+          3715,
+          3716,
+          3718,
+          3725,
+          3770,
+          3789,
+          3793,
+          3794,
+          3798,
+          3799,
+          3804,
+          3816,
+          3818,
+          3831,
+          3839,
+          3850,
+          3856,
+          3908,
+          3924,
+          3934,
+          3938,
+          3943,
+          3960,
+          3964,
+          3978,
+          3982,
+          3995
+        ]
+      },
+      "both_view_rate_by_label": {
+        "fake": {
+          "hit_count": 20,
+          "source_count": 80,
+          "hit_rate": 0.25,
+          "wilson_95_lower": 0.16806231857542375,
+          "wilson_95_upper": 0.3548467461923397
+        },
+        "real": {
+          "hit_count": 15,
+          "source_count": 80,
+          "hit_rate": 0.1875,
+          "wilson_95_lower": 0.11705310466977323,
+          "wilson_95_upper": 0.28658322628993116
+        }
+      },
+      "any_view_rate_by_label": {
+        "fake": {
+          "hit_count": 33,
+          "source_count": 80,
+          "hit_rate": 0.4125,
+          "wilson_95_lower": 0.3110585761276188,
+          "wilson_95_upper": 0.5219595965410984
+        },
+        "real": {
+          "hit_count": 29,
+          "source_count": 80,
+          "hit_rate": 0.3625,
+          "wilson_95_lower": 0.2657079306444915,
+          "wilson_95_upper": 0.4718920549777783
+        }
+      }
+    },
+    "two_or_more_checks": {
+      "both_views": {
+        "by_label": {
+          "fake": 2,
+          "real": 1
+        },
+        "by_model": {
+          "docci": 1,
+          "flux.2-klein-9b": 2
+        },
+        "row_indices": [
+          3227,
+          3509,
+          3632
+        ]
+      },
+      "original_only": {
+        "by_label": {
+          "fake": 3,
+          "real": 5
+        },
+        "by_model": {
+          "docci": 1,
+          "gpt-image-1.5": 1,
+          "imagenet": 4,
+          "z-image-turbo": 2
+        },
+        "row_indices": [
+          3158,
+          3275,
+          3530,
+          3613,
+          3665,
+          3729,
+          3801,
+          3998
+        ]
+      },
+      "jpeg85_only": {
+        "by_label": {
+          "fake": 2,
+          "real": 2
+        },
+        "by_model": {
+          "docci": 1,
+          "imagenet": 1,
+          "midjourney-7": 1,
+          "z-image-turbo": 1
+        },
+        "row_indices": [
+          3230,
+          3683,
+          3899,
+          3991
+        ]
+      },
+      "neither_view": {
+        "by_label": {
+          "fake": 73,
+          "real": 72
+        },
+        "by_model": {
+          "docci": 37,
+          "flux.2-klein-9b": 18,
+          "gpt-image-1.5": 19,
+          "imagenet": 35,
+          "midjourney-7": 19,
+          "z-image-turbo": 17
+        },
+        "row_indices": [
+          3002,
+          3007,
+          3013,
+          3017,
+          3018,
+          3020,
+          3023,
+          3026,
+          3035,
+          3049,
+          3069,
+          3088,
+          3092,
+          3096,
+          3097,
+          3107,
+          3110,
+          3115,
+          3118,
+          3126,
+          3140,
+          3145,
+          3150,
+          3155,
+          3157,
+          3168,
+          3171,
+          3173,
+          3176,
+          3182,
+          3194,
+          3208,
+          3209,
+          3219,
+          3220,
+          3221,
+          3238,
+          3244,
+          3270,
+          3281,
+          3295,
+          3298,
+          3306,
+          3317,
+          3324,
+          3334,
+          3336,
+          3345,
+          3356,
+          3357,
+          3371,
+          3374,
+          3383,
+          3384,
+          3398,
+          3400,
+          3402,
+          3425,
+          3431,
+          3446,
+          3449,
+          3452,
+          3478,
+          3491,
+          3494,
+          3510,
+          3514,
+          3515,
+          3516,
+          3525,
+          3529,
+          3550,
+          3561,
+          3571,
+          3578,
+          3582,
+          3588,
+          3598,
+          3609,
+          3610,
+          3615,
+          3617,
+          3621,
+          3623,
+          3624,
+          3625,
+          3629,
+          3642,
+          3646,
+          3661,
+          3669,
+          3674,
+          3678,
+          3679,
+          3680,
+          3684,
+          3692,
+          3694,
+          3712,
+          3715,
+          3716,
+          3718,
+          3725,
+          3728,
+          3740,
+          3741,
+          3759,
+          3761,
+          3770,
+          3772,
+          3789,
+          3791,
+          3793,
+          3794,
+          3798,
+          3799,
+          3804,
+          3805,
+          3813,
+          3816,
+          3818,
+          3823,
+          3831,
+          3839,
+          3845,
+          3850,
+          3856,
+          3868,
+          3872,
+          3882,
+          3900,
+          3902,
+          3908,
+          3924,
+          3928,
+          3933,
+          3934,
+          3938,
+          3943,
+          3960,
+          3964,
+          3967,
+          3978,
+          3982,
+          3995
+        ]
+      },
+      "both_view_rate_by_label": {
+        "fake": {
+          "hit_count": 2,
+          "source_count": 80,
+          "hit_rate": 0.025,
+          "wilson_95_lower": 0.006882893202970648,
+          "wilson_95_upper": 0.0866443298557801
+        },
+        "real": {
+          "hit_count": 1,
+          "source_count": 80,
+          "hit_rate": 0.0125,
+          "wilson_95_lower": 0.0022099755204522745,
+          "wilson_95_upper": 0.06746270077668665
+        }
+      },
+      "any_view_rate_by_label": {
+        "fake": {
+          "hit_count": 7,
+          "source_count": 80,
+          "hit_rate": 0.0875,
+          "wilson_95_lower": 0.04303200178205986,
+          "wilson_95_upper": 0.16976795508474996
+        },
+        "real": {
+          "hit_count": 8,
+          "source_count": 80,
+          "hit_rate": 0.1,
+          "wilson_95_lower": 0.05154761556738083,
+          "wilson_95_upper": 0.18510688806104086
+        }
+      }
+    },
+    "nonrepeat_any": {
+      "both_views": {
+        "by_label": {
+          "fake": 6,
+          "real": 9
+        },
+        "by_model": {
+          "docci": 5,
+          "flux.2-klein-9b": 3,
+          "imagenet": 4,
+          "midjourney-7": 1,
+          "z-image-turbo": 2
+        },
+        "row_indices": [
+          3023,
+          3171,
+          3227,
+          3509,
+          3530,
+          3632,
+          3661,
+          3683,
+          3728,
+          3729,
+          3801,
+          3872,
+          3899,
+          3991,
+          3998
+        ]
+      },
+      "original_only": {
+        "by_label": {
+          "fake": 5,
+          "real": 5
+        },
+        "by_model": {
+          "docci": 1,
+          "flux.2-klein-9b": 1,
+          "gpt-image-1.5": 1,
+          "imagenet": 4,
+          "midjourney-7": 3
+        },
+        "row_indices": [
+          3110,
+          3158,
+          3275,
+          3345,
+          3525,
+          3613,
+          3665,
+          3900,
+          3928,
+          3967
+        ]
+      },
+      "jpeg85_only": {
+        "by_label": {
+          "fake": 4,
+          "real": 6
+        },
+        "by_model": {
+          "docci": 2,
+          "flux.2-klein-9b": 2,
+          "gpt-image-1.5": 1,
+          "imagenet": 4,
+          "z-image-turbo": 1
+        },
+        "row_indices": [
+          3097,
+          3155,
+          3230,
+          3295,
+          3384,
+          3515,
+          3588,
+          3741,
+          3791,
+          3805
+        ]
+      },
+      "neither_view": {
+        "by_label": {
+          "fake": 65,
+          "real": 60
+        },
+        "by_model": {
+          "docci": 32,
+          "flux.2-klein-9b": 14,
+          "gpt-image-1.5": 18,
+          "imagenet": 28,
+          "midjourney-7": 16,
+          "z-image-turbo": 17
+        },
+        "row_indices": [
+          3002,
+          3007,
+          3013,
+          3017,
+          3018,
+          3020,
+          3026,
+          3035,
+          3049,
+          3069,
+          3088,
+          3092,
+          3096,
+          3107,
+          3115,
+          3118,
+          3126,
+          3140,
+          3145,
+          3150,
+          3157,
+          3168,
+          3173,
+          3176,
+          3182,
+          3194,
+          3208,
+          3209,
+          3219,
+          3220,
+          3221,
+          3238,
+          3244,
+          3270,
+          3281,
+          3298,
+          3306,
+          3317,
+          3324,
+          3334,
+          3336,
+          3356,
+          3357,
+          3371,
+          3374,
+          3383,
+          3398,
+          3400,
+          3402,
+          3425,
+          3431,
+          3446,
+          3449,
+          3452,
+          3478,
+          3491,
+          3494,
+          3510,
+          3514,
+          3516,
+          3529,
+          3550,
+          3561,
+          3571,
+          3578,
+          3582,
+          3598,
+          3609,
+          3610,
+          3615,
+          3617,
+          3621,
+          3623,
+          3624,
+          3625,
+          3629,
+          3642,
+          3646,
+          3669,
+          3674,
+          3678,
+          3679,
+          3680,
+          3684,
+          3692,
+          3694,
+          3712,
+          3715,
+          3716,
+          3718,
+          3725,
+          3740,
+          3759,
+          3761,
+          3770,
+          3772,
+          3789,
+          3793,
+          3794,
+          3798,
+          3799,
+          3804,
+          3813,
+          3816,
+          3818,
+          3823,
+          3831,
+          3839,
+          3845,
+          3850,
+          3856,
+          3868,
+          3882,
+          3902,
+          3908,
+          3924,
+          3933,
+          3934,
+          3938,
+          3943,
+          3960,
+          3964,
+          3978,
+          3982,
+          3995
+        ]
+      },
+      "both_view_rate_by_label": {
+        "fake": {
+          "hit_count": 6,
+          "source_count": 80,
+          "hit_rate": 0.075,
+          "wilson_95_lower": 0.03482524929300514,
+          "wilson_95_upper": 0.15412016081219287
+        },
+        "real": {
+          "hit_count": 9,
+          "source_count": 80,
+          "hit_rate": 0.1125,
+          "wilson_95_lower": 0.060326869466304764,
+          "wilson_95_upper": 0.20018218092372875
+        }
+      },
+      "any_view_rate_by_label": {
+        "fake": {
+          "hit_count": 15,
+          "source_count": 80,
+          "hit_rate": 0.1875,
+          "wilson_95_lower": 0.11705310466977323,
+          "wilson_95_upper": 0.28658322628993116
+        },
+        "real": {
+          "hit_count": 20,
+          "source_count": 80,
+          "hit_rate": 0.25,
+          "wilson_95_lower": 0.16806231857542375,
+          "wilson_95_upper": 0.3548467461923397
+        }
+      }
+    },
+    "g3_supported": {
+      "both_views": {
+        "by_label": {
+          "fake": 2,
+          "real": 1
+        },
+        "by_model": {
+          "docci": 1,
+          "flux.2-klein-9b": 2
+        },
+        "row_indices": [
+          3227,
+          3509,
+          3632
+        ]
+      },
+      "original_only": {
+        "by_label": {
+          "fake": 3,
+          "real": 5
+        },
+        "by_model": {
+          "docci": 1,
+          "gpt-image-1.5": 1,
+          "imagenet": 4,
+          "z-image-turbo": 2
+        },
+        "row_indices": [
+          3158,
+          3275,
+          3530,
+          3613,
+          3665,
+          3729,
+          3801,
+          3998
+        ]
+      },
+      "jpeg85_only": {
+        "by_label": {
+          "fake": 1,
+          "real": 2
+        },
+        "by_model": {
+          "docci": 1,
+          "imagenet": 1,
+          "z-image-turbo": 1
+        },
+        "row_indices": [
+          3230,
+          3899,
+          3991
+        ]
+      },
+      "neither_view": {
+        "by_label": {
+          "fake": 74,
+          "real": 72
+        },
+        "by_model": {
+          "docci": 37,
+          "flux.2-klein-9b": 18,
+          "gpt-image-1.5": 19,
+          "imagenet": 35,
+          "midjourney-7": 20,
+          "z-image-turbo": 17
+        },
+        "row_indices": [
+          3002,
+          3007,
+          3013,
+          3017,
+          3018,
+          3020,
+          3023,
+          3026,
+          3035,
+          3049,
+          3069,
+          3088,
+          3092,
+          3096,
+          3097,
+          3107,
+          3110,
+          3115,
+          3118,
+          3126,
+          3140,
+          3145,
+          3150,
+          3155,
+          3157,
+          3168,
+          3171,
+          3173,
+          3176,
+          3182,
+          3194,
+          3208,
+          3209,
+          3219,
+          3220,
+          3221,
+          3238,
+          3244,
+          3270,
+          3281,
+          3295,
+          3298,
+          3306,
+          3317,
+          3324,
+          3334,
+          3336,
+          3345,
+          3356,
+          3357,
+          3371,
+          3374,
+          3383,
+          3384,
+          3398,
+          3400,
+          3402,
+          3425,
+          3431,
+          3446,
+          3449,
+          3452,
+          3478,
+          3491,
+          3494,
+          3510,
+          3514,
+          3515,
+          3516,
+          3525,
+          3529,
+          3550,
+          3561,
+          3571,
+          3578,
+          3582,
+          3588,
+          3598,
+          3609,
+          3610,
+          3615,
+          3617,
+          3621,
+          3623,
+          3624,
+          3625,
+          3629,
+          3642,
+          3646,
+          3661,
+          3669,
+          3674,
+          3678,
+          3679,
+          3680,
+          3683,
+          3684,
+          3692,
+          3694,
+          3712,
+          3715,
+          3716,
+          3718,
+          3725,
+          3728,
+          3740,
+          3741,
+          3759,
+          3761,
+          3770,
+          3772,
+          3789,
+          3791,
+          3793,
+          3794,
+          3798,
+          3799,
+          3804,
+          3805,
+          3813,
+          3816,
+          3818,
+          3823,
+          3831,
+          3839,
+          3845,
+          3850,
+          3856,
+          3868,
+          3872,
+          3882,
+          3900,
+          3902,
+          3908,
+          3924,
+          3928,
+          3933,
+          3934,
+          3938,
+          3943,
+          3960,
+          3964,
+          3967,
+          3978,
+          3982,
+          3995
+        ]
+      },
+      "both_view_rate_by_label": {
+        "fake": {
+          "hit_count": 2,
+          "source_count": 80,
+          "hit_rate": 0.025,
+          "wilson_95_lower": 0.006882893202970648,
+          "wilson_95_upper": 0.0866443298557801
+        },
+        "real": {
+          "hit_count": 1,
+          "source_count": 80,
+          "hit_rate": 0.0125,
+          "wilson_95_lower": 0.0022099755204522745,
+          "wilson_95_upper": 0.06746270077668665
+        }
+      },
+      "any_view_rate_by_label": {
+        "fake": {
+          "hit_count": 6,
+          "source_count": 80,
+          "hit_rate": 0.075,
+          "wilson_95_lower": 0.03482524929300514,
+          "wilson_95_upper": 0.15412016081219287
+        },
+        "real": {
+          "hit_count": 8,
+          "source_count": 80,
+          "hit_rate": 0.1,
+          "wilson_95_lower": 0.05154761556738083,
+          "wilson_95_upper": 0.18510688806104086
+        }
+      }
+    }
+  },
+  "resource_observation": {
+    "configured_max_working_set_bytes": 536870912,
+    "observed_peak_working_set_bytes": 525258752,
+    "observation_available": true,
+    "opencv_threads": 1
+  },
+  "origin_scoring_authorized": false,
+  "threshold_selection_allowed": false,
+  "runtime_policy_changed": false,
+  "decision": "comparison_only_requires_new_holdout_before_any_rule_selection",
+  "limitations": [
+    "fixed_rule_results_are_not_ai_probabilities",
+    "the_same_cohort_cannot_select_a_rule_and_confirm_it",
+    "g5_was_not_run_without_a_registered_camera_measurement_batch",
+    "openfake_real_sources_do_not_replace_camera_native_raw_controls"
+  ]
+}

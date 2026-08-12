@@ -1,0 +1,91 @@
+{
+  "schema_version": "demirror-community-two-view-recall-safety-protocol-v1",
+  "date": "2026-08-12",
+  "status": "pre_registered_before_window_3000_3999_catalog_or_detector_scores",
+  "deployment_eligible": false,
+  "candidate_origin": {
+    "screen_schema": "demirror-community-two-view-stability-screen-v1",
+    "screen_sha256": "6c12156fa9bf2a05c2be10f8ede2663db6f0cd5dd447c89c487ed1391dc8973d",
+    "screen_interpretation": "Post-hoc observation only: the candidate preserved all 240 previously observed OpenFake generated hits of the Community-or-Nonescape baseline while reducing FiveK original-view hits from 6/40 to 1/40.",
+    "screen_data_may_not_confirm_this_protocol": true
+  },
+  "dataset": {
+    "name": "ComplexDataLab/OpenFake",
+    "revision": "3fd1109dc3258874243fa31c5bda9ee24260163b",
+    "config": "core",
+    "split": "test",
+    "already_observed_windows": [
+      [
+        0,
+        999
+      ],
+      [
+        1000,
+        1999
+      ],
+      [
+        2000,
+        2999
+      ]
+    ],
+    "recall_safety_window": [
+      3000,
+      3999
+    ],
+    "selection": "Within the untouched fixed row window and every registered stratum, select the lowest SHA-256(revision:row_idx:label:model) values before detector inference.",
+    "generated_strata": {
+      "gpt-image-1.5": 20,
+      "flux.2-klein-9b": 20,
+      "z-image-turbo": 20,
+      "midjourney-7": 20
+    },
+    "real_strata": {
+      "docci": 40,
+      "imagenet": 40
+    },
+    "license_policy": "Non-commercial research only; apply the stricter CC-BY-NC-4.0 Hub metadata where the dataset card prose conflicts.",
+    "failure_rule": "If the revision, any stratum, any selected asset hash, or any selected row overlaps the three observed cohorts, stop before scoring; do not replace a failed or missing stratum after scores are visible."
+  },
+  "registered_thresholds": {
+    "community_limited": 0.5,
+    "nonescape_high": 0.9260923266410828,
+    "threshold_selection_allowed": false
+  },
+  "candidate": {
+    "scope": "Change only the evidentiary availability of a Community limited-threshold hit; Nonescape and every other product channel remain unchanged.",
+    "original_input_rule": "Nonescape(original) >= registered high threshold OR (Community(original) >= registered limited threshold AND Community(internal JPEG-85) >= the same threshold)",
+    "jpeg85_input_rule": "Nonescape(JPEG-85 input) >= registered high threshold OR (Community(JPEG-85 input) >= registered limited threshold AND Community(second JPEG-85 re-encode) >= the same threshold)",
+    "baseline_original": "Community(original) OR Nonescape(original) at the same registered thresholds",
+    "baseline_jpeg85": "Community(JPEG-85 input) OR Nonescape(JPEG-85 input) at the same registered thresholds",
+    "community_profiles_required": [
+      "original",
+      "jpeg85",
+      "jpeg85_twice"
+    ],
+    "nonescape_profiles_required": [
+      "original",
+      "jpeg85"
+    ],
+    "jpeg_reencode": "Use the existing score_openfake_pixel_detector Pillow JPEG quality=85 path once or twice; dimensions are preserved and metadata is not used."
+  },
+  "recall_safety_gates": {
+    "candidate_generated_hits_not_below_baseline_on_original_input": true,
+    "candidate_generated_hits_not_below_baseline_on_jpeg85_input": true,
+    "candidate_generated_hits_not_below_baseline_in_each_generator_slice_and_input_profile": true,
+    "candidate_real_hits_must_not_exceed_baseline": true,
+    "all_five_score_reports_must_have_identical_manifest_and_row_identity": true,
+    "no_threshold_or_weight_refit": true
+  },
+  "decision": {
+    "on_recall_gate_pass": "Eligible only for the separately frozen RAISE camera-native real-benefit gate and a latency/RSS measurement; not eligible for runtime deployment.",
+    "on_recall_gate_fail": "Reject the two-view Community stability candidate without changing the rule, threshold, JPEG quality, or row window.",
+    "independent_real_gate_required": true,
+    "runtime_policy_changed": false
+  },
+  "limitations": [
+    "OpenFake exact training exposure for both detectors remains unknown",
+    "the untouched window contains cached web assets rather than camera-native RAW controls",
+    "a logical subset can lower false positives but may also lose generator-specific Community recall",
+    "passing this protocol does not demonstrate a real-photo population benefit"
+  ]
+}

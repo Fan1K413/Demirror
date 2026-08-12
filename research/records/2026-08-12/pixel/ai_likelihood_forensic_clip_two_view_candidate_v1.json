@@ -1,0 +1,154 @@
+{
+  "schema_version": "demirror-forensic-clip-two-view-candidate-v1",
+  "candidate_name": "forensic-clip-registered-high-two-view",
+  "deployment_eligible": false,
+  "runtime_rule": {
+    "detector": "wkaandemir/ai-image-detector",
+    "registered_threshold": 0.9925177097320557,
+    "views": [
+      "original_decode",
+      "internal_jpeg_reencode_quality_85"
+    ],
+    "decision": "candidate positive only when both view scores meet the registered high-confidence threshold",
+    "combiner": "minimum_view_score"
+  },
+  "screening_protocol": {
+    "baseline": "Community limited threshold OR Nonescape registered high threshold",
+    "source_holdout": "Projective Geometry IDs 426-500 with SHA-256-deduplicated real controls",
+    "candidate_variants_screened": 4,
+    "variants": [
+      "registered_high_single_view",
+      "registered_limited_single_view",
+      "registered_high_two_view",
+      "registered_limited_two_view"
+    ],
+    "selection_warning": "This rule survived a four-variant screen on one historical holdout and therefore requires a newer untouched generator holdout before deployment."
+  },
+  "evaluation": {
+    "original": {
+      "generated_count": 525,
+      "unique_real_count": 150,
+      "baseline_recall": 0.939047619047619,
+      "candidate_recall": 0.9561904761904761,
+      "candidate_recall_wilson_95": [
+        0.935120961178281,
+        0.9706325345256307
+      ],
+      "incremental_true_positive": 9,
+      "baseline_false_positive_rate": 0.13333333333333333,
+      "candidate_false_positive_rate": 0.18,
+      "candidate_false_positive_rate_wilson_95": [
+        0.1267576780776089,
+        0.2492232783179601
+      ],
+      "incremental_false_positive": 7
+    },
+    "jpeg85": {
+      "generated_count": 525,
+      "unique_real_count": 150,
+      "baseline_recall": 0.9142857142857143,
+      "candidate_recall": 0.9333333333333333,
+      "candidate_recall_wilson_95": [
+        0.9086941307392362,
+        0.9516771438855651
+      ],
+      "incremental_true_positive": 10,
+      "baseline_false_positive_rate": 0.12,
+      "candidate_false_positive_rate": 0.16666666666666666,
+      "candidate_false_positive_rate_wilson_95": [
+        0.115514298743043,
+        0.23446586416900808
+      ],
+      "incremental_false_positive": 7
+    }
+  },
+  "openfake_updated_generator_pilot": {
+    "dataset": "ComplexDataLab/OpenFake core/test",
+    "dataset_revision": "3fd1109dc3258874243fa31c5bda9ee24260163b",
+    "selection": "Score-blind deterministic selection from rows 0-999: 20 each from GPT-Image 1.5, FLUX.2-Klein-9B, Z-Image-Turbo, and Midjourney 7; 40 each from DOCCI and ImageNet real sources.",
+    "sample_count": {
+      "generated": 80,
+      "real": 80
+    },
+    "original": {
+      "baseline_recall": 0.4125,
+      "candidate_recall": 0.5125,
+      "incremental_true_positive": 8,
+      "baseline_false_positive_rate": 0.075,
+      "candidate_false_positive_rate": 0.075,
+      "incremental_false_positive": 0
+    },
+    "jpeg85": {
+      "baseline_recall": 0.425,
+      "candidate_recall": 0.5125,
+      "incremental_true_positive": 7,
+      "baseline_false_positive_rate": 0.075,
+      "candidate_false_positive_rate": 0.075,
+      "incremental_false_positive": 0
+    },
+    "registered_two_view_forensic": {
+      "threshold": 0.9925177097320557,
+      "recall": 0.1875,
+      "false_positive_rate": 0.0,
+      "roc_auc": 0.9478125,
+      "post_hoc_diagnostic_only": {
+        "threshold_selected_on_same_pilot": 0.9708707928657532,
+        "recall_at_empirical_fpr_0_10": 0.9125,
+        "interpretation": "Ranking remains strong, but the historical registered threshold is badly shifted. This same-pilot threshold is not eligible for runtime use."
+      }
+    },
+    "pilot_gate_passes": false,
+    "strict_unseen_status": "unknown_training_exposure_for_forensic_clip",
+    "deployment_eligible": false
+  },
+  "openfake_recalibration_confirmation": {
+    "protocol": "models/ai_likelihood_forensic_clip_recalibration_protocol_v1.json",
+    "calibration_window": [
+      1000,
+      1999
+    ],
+    "confirmation_window": [
+      2000,
+      2999
+    ],
+    "frozen_two_view_threshold": 0.9850043654441835,
+    "confirmation_original": {
+      "recall": 0.875,
+      "false_positive_rate": 0.15,
+      "false_positive_rate_wilson_95_upper": 0.24413228561323347
+    },
+    "confirmation_jpeg85": {
+      "recall": 0.875,
+      "false_positive_rate": 0.1625,
+      "false_positive_rate_wilson_95_upper": 0.2584290434069771
+    },
+    "passes": false,
+    "decision": "reject_without_confirmation_retuning",
+    "deployment_eligible": false
+  },
+  "screening_gate": {
+    "recall_improves_on_original_and_jpeg85": true,
+    "false_positive_rate_wilson_upper_at_most_0_25": true,
+    "updated_generator_independent_pilot_completed": true,
+    "updated_generator_pilot_passes": false,
+    "recalibrated_confirmation_passes": false,
+    "unseen_current_generator_evaluation": false,
+    "passes_historical_screen": true,
+    "deployment_eligible": false
+  },
+  "evidence": {
+    "report": "outputs/forensic_clip_fusion_candidate_v1/report.json",
+    "openfake_pilot_report": "outputs/openfake_unseen_pilot_v1/fusion_audit.json",
+    "openfake_confirmation_audit": "models/ai_likelihood_openfake_confirmation_audit_v1.json",
+    "scoring_script": "scripts/audit_forensic_clip_fusion_candidate.py",
+    "base_detector_audit": "models/ai_likelihood_forensic_clip_v1.json"
+  },
+  "limitations": [
+    "The historical generated holdout contains DeepFloyd, Kandinsky, PixArt, and SDXL rather than current closed-source generators.",
+    "The same 150 unique real photographs are reused under multiple generator-labelled rows and are deduplicated only for aggregate FPR.",
+    "The two-view rule doubles forensic CLIP forward passes and needs a separate latency and peak-RSS gate.",
+    "The OpenFake pilot is independent of Demirror threshold selection, but forensic CLIP training used a modern-generator dataset and exact source exposure to every OpenFake sample is not established.",
+    "The registered 0.9925 threshold recovers only 18.75% on the OpenFake pilot despite a 0.9478 two-view AUC; a new threshold requires a separate calibration cohort and untouched confirmation cohort.",
+    "Forensic CLIP remains learned pixel evidence, not provenance proof or a calibrated population probability."
+  ]
+}

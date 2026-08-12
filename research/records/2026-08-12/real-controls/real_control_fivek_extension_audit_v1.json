@@ -1,0 +1,550 @@
+{
+  "schema_version": "demirror-fivek-real-control-extension-audit-v1",
+  "date": "2026-08-12",
+  "dataset": "MIT-Adobe FiveK",
+  "dataset_revision": "c4cc6ef8cc9e519466ac130b977cd4292ffe9405f94d04227d0e2aee38aa5475",
+  "score_manifest_sha256": "6722e5a07bc3ebe4416bacde949e479b4ecfa1079ddf67b2f07a496db09a8321",
+  "source_manifest_sha256": "6f3962d588f8b2b9ae9c319bb455f7988fffd18225b0e978a08ee9bc3ad092b9",
+  "selection_rule": "ascending SHA-256(namespace:eligible filename)",
+  "sample_count": 32,
+  "protocol": {
+    "labels": "camera DNG sources covered by the official Adobe/MIT research license",
+    "views": [
+      "registered metadata-free JPEG-95",
+      "in-memory JPEG-85 re-encode"
+    ],
+    "thresholds": "pre-existing registered product thresholds only",
+    "threshold_selection_allowed": false
+  },
+  "registered_thresholds": {
+    "community": 0.5,
+    "nonescape": 0.9260923266410828,
+    "forensic": 0.9919478297233582,
+    "safe": 0.9,
+    "dda": 0.94
+  },
+  "score_report_evidence": {
+    "community": {
+      "original": {
+        "report_sha256": "73fed66ad858156c5a77909da084b306b2f9a81ccd770f49dbae1bd85730eaf4",
+        "observed_peak_working_set_bytes": 433045504
+      },
+      "jpeg85": {
+        "report_sha256": "e8db5165b5fca74801e674a9a786736d4019cf1bbdc5b98075e7a5b79d947e5d",
+        "observed_peak_working_set_bytes": 434716672
+      }
+    },
+    "nonescape": {
+      "original": {
+        "report_sha256": "a8da7568af206a0e78eb8e6e037b7b70bb8ad435b831d1d84f21f06b1404c2ba",
+        "observed_peak_working_set_bytes": 452288512
+      },
+      "jpeg85": {
+        "report_sha256": "6f3bdc01f95ffd3eb177abffe8ce1dc91cc0ad4213f2436b4566bd5037d6e173",
+        "observed_peak_working_set_bytes": 453931008
+      }
+    },
+    "forensic": {
+      "original": {
+        "report_sha256": "54f842b319144a31183f24f7b16dc414a7d0a1328ee1ebfca97b2599615723d3",
+        "observed_peak_working_set_bytes": 720543744
+      },
+      "jpeg85": {
+        "report_sha256": "b50996a9c2e79790efad3d9ebe09445018782f23fa829e6bd425321dd90456e5",
+        "observed_peak_working_set_bytes": 722358272
+      }
+    },
+    "safe": {
+      "original": {
+        "report_sha256": "ab53215aab17c6e10dfb1d7a14847e18cd5089ebbd142cd9a46a7ee1e5ce971e",
+        "observed_peak_working_set_bytes": 486895616
+      },
+      "jpeg85": {
+        "report_sha256": "05d3d3dc38e0c19e0110f8764b33ba987aac6ac53b93501252e5ea637d43c57e",
+        "observed_peak_working_set_bytes": 488579072
+      }
+    },
+    "dda": {
+      "original": {
+        "report_sha256": "aee57203fff401750aa3d519b13b1c1b8464dbdb3c8be025003fa2e3fad8e56a",
+        "observed_peak_working_set_bytes": 1595781120
+      },
+      "jpeg85": {
+        "report_sha256": "e34a16b088333223e717252e831b5374a86575afc8cc3ce166ed35ca7223c4d1",
+        "observed_peak_working_set_bytes": 1595248640
+      }
+    }
+  },
+  "source_cohort_observation": {
+    "unique_source_cluster_count": 32,
+    "camera_device_counts": {
+      "Canon / Canon EOS 10D": 1,
+      "Canon / Canon EOS 5D": 9,
+      "Canon / Canon EOS 5D Mark II": 2,
+      "Canon / Canon EOS DIGITAL REBEL XSi": 9,
+      "Canon / Canon EOS DIGITAL REBEL XTi": 1,
+      "Canon / Canon EOS-1D Mark II": 3,
+      "NIKON CORPORATION / NIKON D700": 2,
+      "NIKON CORPORATION / NIKON D70s": 4,
+      "SONY / DSLR-A900": 1
+    },
+    "camera_observation_available_count": 32,
+    "quality_observation_count": 32
+  },
+  "profiles": {
+    "original": {
+      "channels": {
+        "community": {
+          "threshold": 0.5,
+          "available_count": 32,
+          "not_applicable_count": 0,
+          "hits": 4,
+          "count": 32,
+          "rate": 0.125,
+          "wilson_95_lower": 0.04970134387480073,
+          "wilson_95_upper": 0.2806830548165022,
+          "available_only_rate": {
+            "hits": 4,
+            "count": 32,
+            "rate": 0.125,
+            "wilson_95_lower": 0.04970134387480073,
+            "wilson_95_upper": 0.2806830548165022
+          },
+          "hit_row_indices": [
+            13,
+            20,
+            29,
+            31
+          ]
+        },
+        "nonescape": {
+          "threshold": 0.9260923266410828,
+          "available_count": 32,
+          "not_applicable_count": 0,
+          "hits": 1,
+          "count": 32,
+          "rate": 0.03125,
+          "wilson_95_lower": 0.005537860164003122,
+          "wilson_95_upper": 0.15744263820012558,
+          "available_only_rate": {
+            "hits": 1,
+            "count": 32,
+            "rate": 0.03125,
+            "wilson_95_lower": 0.005537860164003122,
+            "wilson_95_upper": 0.15744263820012558
+          },
+          "hit_row_indices": [
+            19
+          ]
+        },
+        "forensic": {
+          "threshold": 0.9919478297233582,
+          "available_count": 32,
+          "not_applicable_count": 0,
+          "hits": 0,
+          "count": 32,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.1071791982550706,
+          "available_only_rate": {
+            "hits": 0,
+            "count": 32,
+            "rate": 0.0,
+            "wilson_95_lower": 0.0,
+            "wilson_95_upper": 0.1071791982550706
+          },
+          "hit_row_indices": []
+        },
+        "safe": {
+          "threshold": 0.9,
+          "available_count": 32,
+          "not_applicable_count": 0,
+          "hits": 0,
+          "count": 32,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.1071791982550706,
+          "available_only_rate": {
+            "hits": 0,
+            "count": 32,
+            "rate": 0.0,
+            "wilson_95_lower": 0.0,
+            "wilson_95_upper": 0.1071791982550706
+          },
+          "hit_row_indices": []
+        },
+        "dda": {
+          "threshold": 0.94,
+          "available_count": 32,
+          "not_applicable_count": 0,
+          "hits": 0,
+          "count": 32,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.1071791982550706,
+          "available_only_rate": {
+            "hits": 0,
+            "count": 32,
+            "rate": 0.0,
+            "wilson_95_lower": 0.0,
+            "wilson_95_upper": 0.1071791982550706
+          },
+          "hit_row_indices": []
+        }
+      },
+      "product_or_rule": {
+        "hits": 5,
+        "count": 32,
+        "rate": 0.15625,
+        "wilson_95_lower": 0.0686442028250571,
+        "wilson_95_upper": 0.3175414959753039,
+        "false_positive_rows": [
+          {
+            "row_idx": 13,
+            "asset_sha256": "f0449d1a9cc60b8ddb2d548d9f1ec3c3eedeb1b2836ff9f468f968cf3ce37e50",
+            "components": [
+              "community"
+            ]
+          },
+          {
+            "row_idx": 19,
+            "asset_sha256": "d78d554bcdb3aef8d8a4d70ffc83d7804497aa8e367f36f8797a35fb8c2d367c",
+            "components": [
+              "nonescape"
+            ]
+          },
+          {
+            "row_idx": 20,
+            "asset_sha256": "45f4c09c8b4cbdd2f93a74494e6b1789f8998d6b7e0b630850c8047196fd08c2",
+            "components": [
+              "community"
+            ]
+          },
+          {
+            "row_idx": 29,
+            "asset_sha256": "d9e573e176a834dab53877b48ecd6adb97f85ed51794d4702c0179b2235bd726",
+            "components": [
+              "community"
+            ]
+          },
+          {
+            "row_idx": 31,
+            "asset_sha256": "2648921fc11b6b9a33eac53e410a881e45cc190e6fdbd4a5ec9f77df75ca4423",
+            "components": [
+              "community"
+            ]
+          }
+        ]
+      },
+      "product_or_by_camera_device": {
+        "Canon / Canon EOS 10D": {
+          "hits": 0,
+          "count": 1,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.7934506856227626
+        },
+        "Canon / Canon EOS 5D": {
+          "hits": 2,
+          "count": 9,
+          "rate": 0.2222222222222222,
+          "wilson_95_lower": 0.06322510711784671,
+          "wilson_95_upper": 0.5474110308930111
+        },
+        "Canon / Canon EOS 5D Mark II": {
+          "hits": 0,
+          "count": 2,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.6576197724933469
+        },
+        "Canon / Canon EOS DIGITAL REBEL XSi": {
+          "hits": 1,
+          "count": 9,
+          "rate": 0.1111111111111111,
+          "wilson_95_lower": 0.019890887638544907,
+          "wilson_95_upper": 0.434999705576656
+        },
+        "Canon / Canon EOS DIGITAL REBEL XTi": {
+          "hits": 0,
+          "count": 1,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.7934506856227626
+        },
+        "Canon / Canon EOS-1D Mark II": {
+          "hits": 0,
+          "count": 3,
+          "rate": 0.0,
+          "wilson_95_lower": 5.551115123125783e-17,
+          "wilson_95_upper": 0.5614970317550454
+        },
+        "NIKON CORPORATION / NIKON D700": {
+          "hits": 2,
+          "count": 2,
+          "rate": 1.0,
+          "wilson_95_lower": 0.34238022750665303,
+          "wilson_95_upper": 1.0
+        },
+        "NIKON CORPORATION / NIKON D70s": {
+          "hits": 0,
+          "count": 4,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.4898908364545973
+        },
+        "SONY / DSLR-A900": {
+          "hits": 0,
+          "count": 1,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.7934506856227626
+        }
+      }
+    },
+    "jpeg85": {
+      "channels": {
+        "community": {
+          "threshold": 0.5,
+          "available_count": 32,
+          "not_applicable_count": 0,
+          "hits": 0,
+          "count": 32,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.1071791982550706,
+          "available_only_rate": {
+            "hits": 0,
+            "count": 32,
+            "rate": 0.0,
+            "wilson_95_lower": 0.0,
+            "wilson_95_upper": 0.1071791982550706
+          },
+          "hit_row_indices": []
+        },
+        "nonescape": {
+          "threshold": 0.9260923266410828,
+          "available_count": 32,
+          "not_applicable_count": 0,
+          "hits": 1,
+          "count": 32,
+          "rate": 0.03125,
+          "wilson_95_lower": 0.005537860164003122,
+          "wilson_95_upper": 0.15744263820012558,
+          "available_only_rate": {
+            "hits": 1,
+            "count": 32,
+            "rate": 0.03125,
+            "wilson_95_lower": 0.005537860164003122,
+            "wilson_95_upper": 0.15744263820012558
+          },
+          "hit_row_indices": [
+            19
+          ]
+        },
+        "forensic": {
+          "threshold": 0.9919478297233582,
+          "available_count": 32,
+          "not_applicable_count": 0,
+          "hits": 0,
+          "count": 32,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.1071791982550706,
+          "available_only_rate": {
+            "hits": 0,
+            "count": 32,
+            "rate": 0.0,
+            "wilson_95_lower": 0.0,
+            "wilson_95_upper": 0.1071791982550706
+          },
+          "hit_row_indices": []
+        },
+        "safe": {
+          "threshold": 0.9,
+          "available_count": 32,
+          "not_applicable_count": 0,
+          "hits": 0,
+          "count": 32,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.1071791982550706,
+          "available_only_rate": {
+            "hits": 0,
+            "count": 32,
+            "rate": 0.0,
+            "wilson_95_lower": 0.0,
+            "wilson_95_upper": 0.1071791982550706
+          },
+          "hit_row_indices": []
+        },
+        "dda": {
+          "threshold": 0.94,
+          "available_count": 32,
+          "not_applicable_count": 0,
+          "hits": 0,
+          "count": 32,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.1071791982550706,
+          "available_only_rate": {
+            "hits": 0,
+            "count": 32,
+            "rate": 0.0,
+            "wilson_95_lower": 0.0,
+            "wilson_95_upper": 0.1071791982550706
+          },
+          "hit_row_indices": []
+        }
+      },
+      "product_or_rule": {
+        "hits": 1,
+        "count": 32,
+        "rate": 0.03125,
+        "wilson_95_lower": 0.005537860164003122,
+        "wilson_95_upper": 0.15744263820012558,
+        "false_positive_rows": [
+          {
+            "row_idx": 19,
+            "asset_sha256": "d78d554bcdb3aef8d8a4d70ffc83d7804497aa8e367f36f8797a35fb8c2d367c",
+            "components": [
+              "nonescape"
+            ]
+          }
+        ]
+      },
+      "product_or_by_camera_device": {
+        "Canon / Canon EOS 10D": {
+          "hits": 0,
+          "count": 1,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.7934506856227626
+        },
+        "Canon / Canon EOS 5D": {
+          "hits": 1,
+          "count": 9,
+          "rate": 0.1111111111111111,
+          "wilson_95_lower": 0.019890887638544907,
+          "wilson_95_upper": 0.434999705576656
+        },
+        "Canon / Canon EOS 5D Mark II": {
+          "hits": 0,
+          "count": 2,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.6576197724933469
+        },
+        "Canon / Canon EOS DIGITAL REBEL XSi": {
+          "hits": 0,
+          "count": 9,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.2991450484195441
+        },
+        "Canon / Canon EOS DIGITAL REBEL XTi": {
+          "hits": 0,
+          "count": 1,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.7934506856227626
+        },
+        "Canon / Canon EOS-1D Mark II": {
+          "hits": 0,
+          "count": 3,
+          "rate": 0.0,
+          "wilson_95_lower": 5.551115123125783e-17,
+          "wilson_95_upper": 0.5614970317550454
+        },
+        "NIKON CORPORATION / NIKON D700": {
+          "hits": 0,
+          "count": 2,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.6576197724933469
+        },
+        "NIKON CORPORATION / NIKON D70s": {
+          "hits": 0,
+          "count": 4,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.4898908364545973
+        },
+        "SONY / DSLR-A900": {
+          "hits": 0,
+          "count": 1,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.7934506856227626
+        }
+      }
+    }
+  },
+  "cross_view": {
+    "both_views": [
+      "d78d554bcdb3aef8d8a4d70ffc83d7804497aa8e367f36f8797a35fb8c2d367c"
+    ],
+    "original_only": [
+      "2648921fc11b6b9a33eac53e410a881e45cc190e6fdbd4a5ec9f77df75ca4423",
+      "45f4c09c8b4cbdd2f93a74494e6b1789f8998d6b7e0b630850c8047196fd08c2",
+      "d9e573e176a834dab53877b48ecd6adb97f85ed51794d4702c0179b2235bd726",
+      "f0449d1a9cc60b8ddb2d548d9f1ec3c3eedeb1b2836ff9f468f968cf3ce37e50"
+    ],
+    "jpeg85_only": [],
+    "neither_view": [
+      "1c5cae081e969215bfbe08a505e3c9dcf9248e427ca3e4a47ee7caa93a3a1407",
+      "1cdf0793bb1a627324aa750d211f295d83f769ad5f230eb048514b3c56b1aea7",
+      "352dbc307be6baa22ccbdfc67b9259a8989f844d3da329674105e663e8c539f6",
+      "39deb28f3e7a347645428c180e35890a468efdffa5c52c282f45f2ad1fa40830",
+      "4830116ad27f3e612d6f5b064f4c6c6a7f7bda8183b7237c1650e6a3190c6f77",
+      "54fd286536d0af5d1de0423c130646d47d1c3cec3d1631fbb244680047dacbe4",
+      "5acd5bbcc273db397686fa1a659883b882281c11d495c736e722de1428d09241",
+      "63980aab03f9b66212258ae3f6a6019c556c9097f62151b7cf4fabcaa2af83fe",
+      "6bd7b44b90064b7cdff9e580965e8286d74b5153d0c2add585c77efd66036fd6",
+      "76f9275892c923eb4c60c4067631c52a36bec1bb8bd3fff591a8abdb6c1109a2",
+      "7ce6a99ae8f6a451872a8279cab1b993bc4cb163621f495b25b48ecf2144a5ad",
+      "84f46e425cdb8d3fedaa272e9e58b6c87067ef4bf1713556955275d5701897ca",
+      "8ceab02e31ae6d2323e3963081007a53cf16ff3a74ab725c4cf49240d24bf510",
+      "96a132b09f1cd4a8b3fb544e26ee5a077888de990eae942ab3711f3acf6d0e74",
+      "98d2886546effb30f7b71d14bcbc0a5757a9dbf11f514ac9e1a72c4cac47e7f4",
+      "9e07b76941884982f76e65513d065e51bcb45f9011c313076f7a7af5a5c67305",
+      "a4b47b853e0850898b5022dc9ee47b40b4bd1df058069cd6e5e28ef479629964",
+      "aa07ecb38f095fac8d962ee870981043b716e8f20fe273662a44eb34169278c1",
+      "b6aeb9b445f7b90b5b054b23cb1f1583030d98813d815cb169808ca54950ec1c",
+      "bb23c679baff61c7ce5945057ae1b0bc445ae10fa572be1d1692c9b8dab5b012",
+      "c93486d709e374fd95ed321390dc765592da1e6313f0c513f9ee1d8128d1c184",
+      "d034bb5a8c3b0f5c777f3112045e8ebd737f6470def47e99fbb3948cb5a2834d",
+      "db0b4e84fcdd71e60f22da3d8fdc7d6468f48e901c855729d71f25c308ae0072",
+      "e106ddbfbcec8615171e5b30d651e53048afbbc16508a432064a83b7b0c0d53f",
+      "e8b68c9165b617dc3d4af37bb6424152af6c7d53aabbd319c7163a486de73fc1",
+      "f38f0a6f85e1a4fcbc3d89e6a031b0ca49e7df517c380cf9269f010ad370a378",
+      "fcc8319f475ea21e7e6241161a3725830fde10844cdee893a6194114ada13bda"
+    ],
+    "any_view": {
+      "hits": 5,
+      "count": 32,
+      "rate": 0.15625,
+      "wilson_95_lower": 0.0686442028250571,
+      "wilson_95_upper": 0.3175414959753039
+    }
+  },
+  "decision": {
+    "policy_change": false,
+    "result": "diagnostic_real_source_expansion_only",
+    "next_step": "expand independent camera-native sources before estimating deployment false-positive rate"
+  },
+  "limitations": [
+    "one_source_dataset_is_insufficient_for_threshold_selection_or_a_population_false_positive_claim",
+    "the_pilot_is_one_licensed_dataset_and_not_a_camera_population_sample",
+    "jpeg85_is_a_derived_view_of_each_source_and_not_an_independent_sample",
+    "no_runtime_threshold_was_selected_or_changed_from_these_labels"
+  ],
+  "pre_registration_evidence": {
+    "protocol_canonical_sha256": "6d6312338ad1b4790511f70655b06dbc5b36685ad20fd40d596ebcf4ec85bcc4",
+    "diagnostic_manifest_sha256": "522960afa78b354f61967f9fb6be339677e3e1f60a3e2a4c635c033666126548",
+    "selected_stems_verified": 32,
+    "diagnostic_asset_overlap": 0,
+    "diagnostic_source_cluster_overlap": 0,
+    "thresholds_match_registered_audits": true
+  }
+}

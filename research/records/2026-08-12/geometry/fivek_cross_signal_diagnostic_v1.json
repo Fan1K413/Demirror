@@ -1,0 +1,204 @@
+{
+  "schema_version": "demirror-fivek-cross-signal-diagnostic-v1",
+  "date": "2026-08-12",
+  "pixel_report_sha256": "cf8d812bb0e32d68037bc748b8ae7f3e72635843e7d0cb1962742f8860b9edf4",
+  "geometry_report_sha256": "41e7475d76644d69279468db00356aae7913e2fb1451388a36dc15e9b71dbed8",
+  "score_manifest_sha256": "6722e5a07bc3ebe4416bacde949e479b4ecfa1079ddf67b2f07a496db09a8321",
+  "source_manifest_sha256": "6f3962d588f8b2b9ae9c319bb455f7988fffd18225b0e978a08ee9bc3ad092b9",
+  "source_count": 32,
+  "profiles": {
+    "original": {
+      "pixel_product_hits": [
+        "2648921fc11b6b9a33eac53e410a881e45cc190e6fdbd4a5ec9f77df75ca4423",
+        "45f4c09c8b4cbdd2f93a74494e6b1789f8998d6b7e0b630850c8047196fd08c2",
+        "d78d554bcdb3aef8d8a4d70ffc83d7804497aa8e367f36f8797a35fb8c2d367c",
+        "d9e573e176a834dab53877b48ecd6adb97f85ed51794d4702c0179b2235bd726",
+        "f0449d1a9cc60b8ddb2d548d9f1ec3c3eedeb1b2836ff9f468f968cf3ce37e50"
+      ],
+      "geometry_review_candidates": [
+        "352dbc307be6baa22ccbdfc67b9259a8989f844d3da329674105e663e8c539f6",
+        "39deb28f3e7a347645428c180e35890a468efdffa5c52c282f45f2ad1fa40830",
+        "7ce6a99ae8f6a451872a8279cab1b993bc4cb163621f495b25b48ecf2144a5ad",
+        "96a132b09f1cd4a8b3fb544e26ee5a077888de990eae942ab3711f3acf6d0e74",
+        "b6aeb9b445f7b90b5b054b23cb1f1583030d98813d815cb169808ca54950ec1c",
+        "c93486d709e374fd95ed321390dc765592da1e6313f0c513f9ee1d8128d1c184",
+        "d034bb5a8c3b0f5c777f3112045e8ebd737f6470def47e99fbb3948cb5a2834d",
+        "e106ddbfbcec8615171e5b30d651e53048afbbc16508a432064a83b7b0c0d53f"
+      ],
+      "overlap": [],
+      "overlap_details": [],
+      "pixel_only": [
+        "2648921fc11b6b9a33eac53e410a881e45cc190e6fdbd4a5ec9f77df75ca4423",
+        "45f4c09c8b4cbdd2f93a74494e6b1789f8998d6b7e0b630850c8047196fd08c2",
+        "d78d554bcdb3aef8d8a4d70ffc83d7804497aa8e367f36f8797a35fb8c2d367c",
+        "d9e573e176a834dab53877b48ecd6adb97f85ed51794d4702c0179b2235bd726",
+        "f0449d1a9cc60b8ddb2d548d9f1ec3c3eedeb1b2836ff9f468f968cf3ce37e50"
+      ],
+      "geometry_only": [
+        "352dbc307be6baa22ccbdfc67b9259a8989f844d3da329674105e663e8c539f6",
+        "39deb28f3e7a347645428c180e35890a468efdffa5c52c282f45f2ad1fa40830",
+        "7ce6a99ae8f6a451872a8279cab1b993bc4cb163621f495b25b48ecf2144a5ad",
+        "96a132b09f1cd4a8b3fb544e26ee5a077888de990eae942ab3711f3acf6d0e74",
+        "b6aeb9b445f7b90b5b054b23cb1f1583030d98813d815cb169808ca54950ec1c",
+        "c93486d709e374fd95ed321390dc765592da1e6313f0c513f9ee1d8128d1c184",
+        "d034bb5a8c3b0f5c777f3112045e8ebd737f6470def47e99fbb3948cb5a2834d",
+        "e106ddbfbcec8615171e5b30d651e53048afbbc16508a432064a83b7b0c0d53f"
+      ],
+      "neither": [
+        "1c5cae081e969215bfbe08a505e3c9dcf9248e427ca3e4a47ee7caa93a3a1407",
+        "1cdf0793bb1a627324aa750d211f295d83f769ad5f230eb048514b3c56b1aea7",
+        "4830116ad27f3e612d6f5b064f4c6c6a7f7bda8183b7237c1650e6a3190c6f77",
+        "54fd286536d0af5d1de0423c130646d47d1c3cec3d1631fbb244680047dacbe4",
+        "5acd5bbcc273db397686fa1a659883b882281c11d495c736e722de1428d09241",
+        "63980aab03f9b66212258ae3f6a6019c556c9097f62151b7cf4fabcaa2af83fe",
+        "6bd7b44b90064b7cdff9e580965e8286d74b5153d0c2add585c77efd66036fd6",
+        "76f9275892c923eb4c60c4067631c52a36bec1bb8bd3fff591a8abdb6c1109a2",
+        "84f46e425cdb8d3fedaa272e9e58b6c87067ef4bf1713556955275d5701897ca",
+        "8ceab02e31ae6d2323e3963081007a53cf16ff3a74ab725c4cf49240d24bf510",
+        "98d2886546effb30f7b71d14bcbc0a5757a9dbf11f514ac9e1a72c4cac47e7f4",
+        "9e07b76941884982f76e65513d065e51bcb45f9011c313076f7a7af5a5c67305",
+        "a4b47b853e0850898b5022dc9ee47b40b4bd1df058069cd6e5e28ef479629964",
+        "aa07ecb38f095fac8d962ee870981043b716e8f20fe273662a44eb34169278c1",
+        "bb23c679baff61c7ce5945057ae1b0bc445ae10fa572be1d1692c9b8dab5b012",
+        "db0b4e84fcdd71e60f22da3d8fdc7d6468f48e901c855729d71f25c308ae0072",
+        "e8b68c9165b617dc3d4af37bb6424152af6c7d53aabbd319c7163a486de73fc1",
+        "f38f0a6f85e1a4fcbc3d89e6a031b0ca49e7df517c380cf9269f010ad370a378",
+        "fcc8319f475ea21e7e6241161a3725830fde10844cdee893a6194114ada13bda"
+      ],
+      "counts": {
+        "pixel_product_hits": 5,
+        "geometry_review_candidates": 8,
+        "overlap": 0,
+        "pixel_only": 5,
+        "geometry_only": 8,
+        "neither": 19
+      },
+      "pixel_hit_corroboration_rate": 0.0,
+      "counterfactual_unregistered_or_review_burden": {
+        "count": 13,
+        "source_count": 32,
+        "rate": 0.40625,
+        "wilson_95_lower": 0.2551963484266544,
+        "wilson_95_upper": 0.5773997512461713
+      }
+    },
+    "jpeg85": {
+      "pixel_product_hits": [
+        "d78d554bcdb3aef8d8a4d70ffc83d7804497aa8e367f36f8797a35fb8c2d367c"
+      ],
+      "geometry_review_candidates": [
+        "352dbc307be6baa22ccbdfc67b9259a8989f844d3da329674105e663e8c539f6",
+        "7ce6a99ae8f6a451872a8279cab1b993bc4cb163621f495b25b48ecf2144a5ad",
+        "84f46e425cdb8d3fedaa272e9e58b6c87067ef4bf1713556955275d5701897ca",
+        "96a132b09f1cd4a8b3fb544e26ee5a077888de990eae942ab3711f3acf6d0e74",
+        "b6aeb9b445f7b90b5b054b23cb1f1583030d98813d815cb169808ca54950ec1c",
+        "c93486d709e374fd95ed321390dc765592da1e6313f0c513f9ee1d8128d1c184",
+        "d034bb5a8c3b0f5c777f3112045e8ebd737f6470def47e99fbb3948cb5a2834d",
+        "d78d554bcdb3aef8d8a4d70ffc83d7804497aa8e367f36f8797a35fb8c2d367c",
+        "d9e573e176a834dab53877b48ecd6adb97f85ed51794d4702c0179b2235bd726",
+        "e106ddbfbcec8615171e5b30d651e53048afbbc16508a432064a83b7b0c0d53f"
+      ],
+      "overlap": [
+        "d78d554bcdb3aef8d8a4d70ffc83d7804497aa8e367f36f8797a35fb8c2d367c"
+      ],
+      "overlap_details": [
+        {
+          "asset_sha256": "d78d554bcdb3aef8d8a4d70ffc83d7804497aa8e367f36f8797a35fb8c2d367c",
+          "pixel_row_idx": 19,
+          "pixel_components": [
+            "nonescape"
+          ],
+          "geometry_row_idx": 19,
+          "geometry_checks": [
+            "G4"
+          ]
+        }
+      ],
+      "pixel_only": [],
+      "geometry_only": [
+        "352dbc307be6baa22ccbdfc67b9259a8989f844d3da329674105e663e8c539f6",
+        "7ce6a99ae8f6a451872a8279cab1b993bc4cb163621f495b25b48ecf2144a5ad",
+        "84f46e425cdb8d3fedaa272e9e58b6c87067ef4bf1713556955275d5701897ca",
+        "96a132b09f1cd4a8b3fb544e26ee5a077888de990eae942ab3711f3acf6d0e74",
+        "b6aeb9b445f7b90b5b054b23cb1f1583030d98813d815cb169808ca54950ec1c",
+        "c93486d709e374fd95ed321390dc765592da1e6313f0c513f9ee1d8128d1c184",
+        "d034bb5a8c3b0f5c777f3112045e8ebd737f6470def47e99fbb3948cb5a2834d",
+        "d9e573e176a834dab53877b48ecd6adb97f85ed51794d4702c0179b2235bd726",
+        "e106ddbfbcec8615171e5b30d651e53048afbbc16508a432064a83b7b0c0d53f"
+      ],
+      "neither": [
+        "1c5cae081e969215bfbe08a505e3c9dcf9248e427ca3e4a47ee7caa93a3a1407",
+        "1cdf0793bb1a627324aa750d211f295d83f769ad5f230eb048514b3c56b1aea7",
+        "2648921fc11b6b9a33eac53e410a881e45cc190e6fdbd4a5ec9f77df75ca4423",
+        "39deb28f3e7a347645428c180e35890a468efdffa5c52c282f45f2ad1fa40830",
+        "45f4c09c8b4cbdd2f93a74494e6b1789f8998d6b7e0b630850c8047196fd08c2",
+        "4830116ad27f3e612d6f5b064f4c6c6a7f7bda8183b7237c1650e6a3190c6f77",
+        "54fd286536d0af5d1de0423c130646d47d1c3cec3d1631fbb244680047dacbe4",
+        "5acd5bbcc273db397686fa1a659883b882281c11d495c736e722de1428d09241",
+        "63980aab03f9b66212258ae3f6a6019c556c9097f62151b7cf4fabcaa2af83fe",
+        "6bd7b44b90064b7cdff9e580965e8286d74b5153d0c2add585c77efd66036fd6",
+        "76f9275892c923eb4c60c4067631c52a36bec1bb8bd3fff591a8abdb6c1109a2",
+        "8ceab02e31ae6d2323e3963081007a53cf16ff3a74ab725c4cf49240d24bf510",
+        "98d2886546effb30f7b71d14bcbc0a5757a9dbf11f514ac9e1a72c4cac47e7f4",
+        "9e07b76941884982f76e65513d065e51bcb45f9011c313076f7a7af5a5c67305",
+        "a4b47b853e0850898b5022dc9ee47b40b4bd1df058069cd6e5e28ef479629964",
+        "aa07ecb38f095fac8d962ee870981043b716e8f20fe273662a44eb34169278c1",
+        "bb23c679baff61c7ce5945057ae1b0bc445ae10fa572be1d1692c9b8dab5b012",
+        "db0b4e84fcdd71e60f22da3d8fdc7d6468f48e901c855729d71f25c308ae0072",
+        "e8b68c9165b617dc3d4af37bb6424152af6c7d53aabbd319c7163a486de73fc1",
+        "f0449d1a9cc60b8ddb2d548d9f1ec3c3eedeb1b2836ff9f468f968cf3ce37e50",
+        "f38f0a6f85e1a4fcbc3d89e6a031b0ca49e7df517c380cf9269f010ad370a378",
+        "fcc8319f475ea21e7e6241161a3725830fde10844cdee893a6194114ada13bda"
+      ],
+      "counts": {
+        "pixel_product_hits": 1,
+        "geometry_review_candidates": 10,
+        "overlap": 1,
+        "pixel_only": 0,
+        "geometry_only": 9,
+        "neither": 22
+      },
+      "pixel_hit_corroboration_rate": 1.0,
+      "counterfactual_unregistered_or_review_burden": {
+        "count": 10,
+        "source_count": 32,
+        "rate": 0.3125,
+        "wilson_95_lower": 0.17952541633609734,
+        "wilson_95_upper": 0.4856667830095541
+      }
+    }
+  },
+  "cross_view_stability": {
+    "pixel_product_both_views": [
+      "d78d554bcdb3aef8d8a4d70ffc83d7804497aa8e367f36f8797a35fb8c2d367c"
+    ],
+    "geometry_candidate_both_views": [
+      "352dbc307be6baa22ccbdfc67b9259a8989f844d3da329674105e663e8c539f6",
+      "7ce6a99ae8f6a451872a8279cab1b993bc4cb163621f495b25b48ecf2144a5ad",
+      "96a132b09f1cd4a8b3fb544e26ee5a077888de990eae942ab3711f3acf6d0e74",
+      "b6aeb9b445f7b90b5b054b23cb1f1583030d98813d815cb169808ca54950ec1c",
+      "c93486d709e374fd95ed321390dc765592da1e6313f0c513f9ee1d8128d1c184",
+      "d034bb5a8c3b0f5c777f3112045e8ebd737f6470def47e99fbb3948cb5a2834d",
+      "e106ddbfbcec8615171e5b30d651e53048afbbc16508a432064a83b7b0c0d53f"
+    ],
+    "stable_overlap": [],
+    "counts": {
+      "pixel_product_both_views": 1,
+      "geometry_candidate_both_views": 7,
+      "stable_overlap": 0
+    }
+  },
+  "interpretation": {
+    "result": "geometry_review_candidates_did_not_corroborate_original_view_pixel_product_hits",
+    "geometry_runtime_scoring_change": false,
+    "threshold_selection_allowed": false,
+    "counterfactual_or_is_not_a_proposed_product_rule": true
+  },
+  "limitations": [
+    "post_hoc_descriptive_overlap_only",
+    "geometry_review_candidates_are_not_ai_labels_or_false_positives",
+    "one_source_dataset_does_not_estimate_population_dependence",
+    "jpeg85_is_not_an_independent_source_sample",
+    "no_threshold_or_runtime_score_was_selected_from_this_report"
+  ]
+}

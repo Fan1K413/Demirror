@@ -1,0 +1,258 @@
+{
+  "schema_version": "demirror-fivek-real-control-audit-v1",
+  "date": "2026-08-12",
+  "dataset": "MIT-Adobe FiveK",
+  "dataset_revision": "c4cc6ef8cc9e519466ac130b977cd4292ffe9405f94d04227d0e2aee38aa5475",
+  "score_manifest_sha256": "522960afa78b354f61967f9fb6be339677e3e1f60a3e2a4c635c033666126548",
+  "source_manifest_sha256": "744982a00303e4e62fb7635879ca73734f3e179c086bc8f101f0a69f0159fb58",
+  "selection_rule": "ascending SHA-256(namespace:eligible filename)",
+  "sample_count": 8,
+  "protocol": {
+    "labels": "camera DNG sources covered by the official Adobe/MIT research license",
+    "views": [
+      "registered metadata-free JPEG-95",
+      "in-memory JPEG-85 re-encode"
+    ],
+    "thresholds": "pre-existing registered product thresholds only",
+    "threshold_selection_allowed": false
+  },
+  "registered_thresholds": {
+    "community": 0.5,
+    "nonescape": 0.9260923266410828,
+    "forensic": 0.9919478297233582,
+    "safe": 0.9,
+    "dda": 0.94
+  },
+  "score_report_evidence": {
+    "community": {
+      "original": {
+        "report_sha256": "94cfe677fb947de8f36da7248212960059b2756ea798cf2079c20fd0fd9d3c70",
+        "observed_peak_working_set_bytes": 433053696
+      },
+      "jpeg85": {
+        "report_sha256": "7f8fa56fd45b4daf9c7832fb660cb5fea0855cc5b105ad668ce8780bef2dde5e",
+        "observed_peak_working_set_bytes": 415285248
+      }
+    },
+    "nonescape": {
+      "original": {
+        "report_sha256": "889219cb5c745d8e1e5a7222a77921b51d41285be70b875578298cdaa2db85af",
+        "observed_peak_working_set_bytes": 445276160
+      },
+      "jpeg85": {
+        "report_sha256": "d1d91ea8d7c57db433dd6b83f7240057640322db8a077cb947d9f84a1d40debc",
+        "observed_peak_working_set_bytes": 446898176
+      }
+    },
+    "forensic": {
+      "original": {
+        "report_sha256": "acd23f4923bb898be88d18163bcb2b675c2c6613f33910087f2cc0ed7d960bf3",
+        "observed_peak_working_set_bytes": 719958016
+      },
+      "jpeg85": {
+        "report_sha256": "2d4b8745f26aa38059e8cca2f87c5b65821055706c11039301a5956d10d16ead",
+        "observed_peak_working_set_bytes": 721637376
+      }
+    },
+    "safe": {
+      "original": {
+        "report_sha256": "9f2abf27c3230bd1121acd4d113a2261e3c2c97f4572ecd0ce9d9c6388e48ee7",
+        "observed_peak_working_set_bytes": 488570880
+      },
+      "jpeg85": {
+        "report_sha256": "d93832a4938c19d47235a3941af22f581a40d9a025796e7d7b40c43e5dac2ab1",
+        "observed_peak_working_set_bytes": 439083008
+      }
+    },
+    "dda": {
+      "original": {
+        "report_sha256": "e72126cd837f8e2f73b6d3907d002bf4ee4f991a7d68720662384f9187605947",
+        "observed_peak_working_set_bytes": 1596026880
+      },
+      "jpeg85": {
+        "report_sha256": "7eac389fa1b42abe37ca070e0217c66c0cb3b91400ad00d3bd5cde2ea309ae7d",
+        "observed_peak_working_set_bytes": 1596600320
+      }
+    }
+  },
+  "profiles": {
+    "original": {
+      "channels": {
+        "community": {
+          "threshold": 0.5,
+          "available_count": 8,
+          "not_applicable_count": 0,
+          "hits": 1,
+          "count": 8,
+          "rate": 0.125,
+          "wilson_95_lower": 0.02241749145005667,
+          "wilson_95_upper": 0.4708881822128535,
+          "hit_row_indices": [
+            7
+          ]
+        },
+        "nonescape": {
+          "threshold": 0.9260923266410828,
+          "available_count": 8,
+          "not_applicable_count": 0,
+          "hits": 0,
+          "count": 8,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.32440756488388023,
+          "hit_row_indices": []
+        },
+        "forensic": {
+          "threshold": 0.9919478297233582,
+          "available_count": 8,
+          "not_applicable_count": 0,
+          "hits": 0,
+          "count": 8,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.32440756488388023,
+          "hit_row_indices": []
+        },
+        "safe": {
+          "threshold": 0.9,
+          "available_count": 8,
+          "not_applicable_count": 0,
+          "hits": 0,
+          "count": 8,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.32440756488388023,
+          "hit_row_indices": []
+        },
+        "dda": {
+          "threshold": 0.94,
+          "available_count": 8,
+          "not_applicable_count": 0,
+          "hits": 0,
+          "count": 8,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.32440756488388023,
+          "hit_row_indices": []
+        }
+      },
+      "product_or_rule": {
+        "hits": 1,
+        "count": 8,
+        "rate": 0.125,
+        "wilson_95_lower": 0.02241749145005667,
+        "wilson_95_upper": 0.4708881822128535,
+        "false_positive_rows": [
+          {
+            "row_idx": 7,
+            "asset_sha256": "546807b38d9c6029ed9678074d6d29a11ee024413ef7e2225ab00c6c276a011d",
+            "components": [
+              "community"
+            ]
+          }
+        ]
+      }
+    },
+    "jpeg85": {
+      "channels": {
+        "community": {
+          "threshold": 0.5,
+          "available_count": 8,
+          "not_applicable_count": 0,
+          "hits": 0,
+          "count": 8,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.32440756488388023,
+          "hit_row_indices": []
+        },
+        "nonescape": {
+          "threshold": 0.9260923266410828,
+          "available_count": 8,
+          "not_applicable_count": 0,
+          "hits": 0,
+          "count": 8,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.32440756488388023,
+          "hit_row_indices": []
+        },
+        "forensic": {
+          "threshold": 0.9919478297233582,
+          "available_count": 8,
+          "not_applicable_count": 0,
+          "hits": 0,
+          "count": 8,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.32440756488388023,
+          "hit_row_indices": []
+        },
+        "safe": {
+          "threshold": 0.9,
+          "available_count": 8,
+          "not_applicable_count": 0,
+          "hits": 0,
+          "count": 8,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.32440756488388023,
+          "hit_row_indices": []
+        },
+        "dda": {
+          "threshold": 0.94,
+          "available_count": 8,
+          "not_applicable_count": 0,
+          "hits": 0,
+          "count": 8,
+          "rate": 0.0,
+          "wilson_95_lower": 0.0,
+          "wilson_95_upper": 0.32440756488388023,
+          "hit_row_indices": []
+        }
+      },
+      "product_or_rule": {
+        "hits": 0,
+        "count": 8,
+        "rate": 0.0,
+        "wilson_95_lower": 0.0,
+        "wilson_95_upper": 0.32440756488388023,
+        "false_positive_rows": []
+      }
+    }
+  },
+  "cross_view": {
+    "both_views": [],
+    "original_only": [
+      "546807b38d9c6029ed9678074d6d29a11ee024413ef7e2225ab00c6c276a011d"
+    ],
+    "jpeg85_only": [],
+    "neither_view": [
+      "14aaa7080af6f4092770ee9e0b1077184186179a4c3ede6b5ef9f6b5758960e0",
+      "154d50d8a7c0cdc68e33f28309917154486fae3768fa9c1d5f08ff2f69b58bc7",
+      "3f53c970a90b2c85957cc7c847d7a7c4ecdb8a6978b2ed4897c9bbfb23a60f96",
+      "51c87ac9627d8ac7cfc5f25f013762f11f6e014576726ff687dd35403ee7e1ca",
+      "69b1bd1f1dbb6f62344453d1b2e503074f41d1c0c59fc7c56328d0272a4fd0c2",
+      "8947b9b3becc85c144be0d9b76945e5139a3ba591c8cb50066d3de213e76f633",
+      "f5f06037f819e605449dbf7c922b5539f06d9ce75404e4b5b201fb69281a33e6"
+    ],
+    "any_view": {
+      "hits": 1,
+      "count": 8,
+      "rate": 0.125,
+      "wilson_95_lower": 0.02241749145005667,
+      "wilson_95_upper": 0.4708881822128535
+    }
+  },
+  "decision": {
+    "policy_change": false,
+    "result": "diagnostic_real_source_expansion_only",
+    "next_step": "expand independent camera-native sources before estimating deployment false-positive rate"
+  },
+  "limitations": [
+    "eight_sources_are_insufficient_for_threshold_selection_or_a_low_false_positive_claim",
+    "the_pilot_is_one_licensed_dataset_and_not_a_camera_population_sample",
+    "jpeg85_is_a_derived_view_of_each_source_and_not_an_independent_sample",
+    "no_runtime_threshold_was_selected_or_changed_from_these_labels"
+  ]
+}

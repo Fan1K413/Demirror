@@ -1,0 +1,114 @@
+{
+  "schema_version": "demirror-real-control-source-screen-v1",
+  "date": "2026-08-12",
+  "purpose": "Screen camera-photo and post-processing control sources before any new detector or fusion candidate is selected.",
+  "project_use": "noncommercial_research",
+  "runtime_policy_changed": false,
+  "sources": [
+    {
+      "name": "RAISE",
+      "official_page": "https://loki.disi.unitn.it/RAISE/index.php",
+      "official_download_page": "https://loki.disi.unitn.it/RAISE/download.html",
+      "observed_scope": "8156 high-resolution camera-native RAW images from three cameras, with scene/category metadata; full download about 350 GB and named subsets/custom selection are available.",
+      "license_observation": "Official download and guide pages restrict use to non-commercial research and educational purposes and require citation.",
+      "decision": "eligible_for_small_source_control_after_explicit_subset_manifest",
+      "constraints": [
+        "Do not download the 350 GB full archive.",
+        "Preserve the official metadata and source RAW hash.",
+        "Three cameras are insufficient as the only real-control source."
+      ]
+    },
+    {
+      "name": "MIT-Adobe FiveK",
+      "official_page": "https://data.csail.mit.edu/graphics/fivek/",
+      "official_joint_license": "https://data.csail.mit.edu/graphics/fivek/legal/LicenseAdobeMIT.txt",
+      "official_joint_file_list": "https://data.csail.mit.edu/graphics/fivek/legal/filesAdobeMIT.txt",
+      "observed_scope": "5000 SLR photographs in DNG with semantic scene/light metadata and five expert TIFF renditions; the full archive is about 50 GB and individual files are available.",
+      "license_observation": "The Adobe-MIT research license permits use, copying, modification and distribution solely for research without commercial advantage, with copyright and license retention; it applies only to the listed files.",
+      "decision": "eligible_for_small_source_control_from_license_list_only",
+      "constraints": [
+        "Select only filenames present in the matching official license list.",
+        "Store the applicable license alongside the manifest.",
+        "Treat RAW development and expert TIFF renditions as transforms of one source cluster, never independent controls.",
+        "Do not download the 50 GB full archive."
+      ]
+    },
+    {
+      "name": "HDR+ Burst Photography Dataset",
+      "official_page": "https://www.hdrplusdata.org/dataset.html",
+      "official_paper": "https://research.google/pubs/burst-photography-for-high-dynamic-range-and-low-light-imaging-on-mobile-cameras/",
+      "observed_scope": "3640 mobile-camera bursts with raw DNG frames; the official curated subset contains 153 bursts and is about 37 GiB, with anonymous per-object download from the public Google Cloud bucket.",
+      "license_observation": "The official page links CC BY-SA 4.0 and requests citation and good-taste use because some subjects are the authors' friends and family.",
+      "decision": "eligible_for_hash_selected_mobile_raw_control_from_curated_subset",
+      "constraints": [
+        "Do not download the 37 GiB curated subset or 765 GiB full collection.",
+        "Treat every frame and rendered result from one burst as one source cluster.",
+        "Freeze one payload_N000.dng object per selected burst before detector scoring.",
+        "Catalog only Google Cloud object metadata plus bounded classic-TIFF header and IFD ranges; accept complete or partial DNG identity only when present tags map uniquely and consistently to one registered official device, and record all-three-absent identity without guessing a device.",
+        "Retain attribution, license link, transformation notice and ShareAlike terms for distributed adaptations.",
+        "The 2014-2016 Nexus and first-generation Pixel devices are not a current-phone population sample."
+      ]
+    },
+    {
+      "name": "Forchheim Image Database",
+      "official_project_page": "https://www.cs1.tf.fau.de/research/multimedia-security/image-video-forensics/",
+      "official_database": "https://faui1-files.cs.fau.de/public/mmsec/datasets/fodb/",
+      "official_paper": "https://arxiv.org/abs/2011.02241",
+      "observed_scope": "More than 23000 JPEG images: 143 scenes captured by 27 smartphone cameras, each with one camera-native image and five social-network copies.",
+      "license_observation": "No explicit image-use license was visible on the accessible official project description or paper during this screen.",
+      "decision": "hold_until_image_license_is_verified",
+      "constraints": [
+        "Public downloadability is not treated as a reuse license.",
+        "Do not substitute an unverified third-party repack."
+      ]
+    },
+    {
+      "name": "DPED",
+      "official_project_page": "https://aiff22.github.io/",
+      "official_code": "https://github.com/aiff22/DPED",
+      "observed_scope": "More than 22000 synchronously captured photos from three smartphones and one Canon 70D; a 125 MB sample and a 54 GB original-photo archive are linked.",
+      "license_observation": "The accessible official project page and repository describe downloads and citation but do not state a dataset image license.",
+      "decision": "hold_until_image_license_is_verified",
+      "constraints": [
+        "A source-code license, if later found, must not be assumed to license the photographs.",
+        "Do not download the 54 GB archive for a source screen."
+      ]
+    },
+    {
+      "name": "Dresden Image Database",
+      "official_paper": "https://doi.org/10.1080/15567281.2010.531500",
+      "observed_scope": "The paper describes original JPEGs from multiple camera devices/models and scientific availability; the historical official download endpoint was not available in this screen.",
+      "license_observation": "A third-party repack presents conflicting CC0 and restrictive copyright text, so it is not accepted as authoritative.",
+      "decision": "hold_until_official_files_and_terms_are_recovered",
+      "constraints": [
+        "Do not inherit a third-party hosting label when it conflicts with embedded terms."
+      ]
+    }
+  ],
+  "recommended_next_cohort": {
+    "status": "fivek_and_hdrplus_controls_completed_raise_pending_user_access",
+    "minimum_unique_sources": 120,
+    "source_clusters": [
+      "40 MIT-Adobe FiveK AdobeMIT-licensed DNG sources across camera/scene/light strata",
+      "40 RAISE camera-native RAW sources across all three cameras and seven scene tags",
+      "40 HDR+ curated mobile-camera bursts, one payload_N000.dng per burst, under CC BY-SA 4.0"
+    ],
+    "required_variants_per_source": [
+      "deterministic sRGB development or camera-native JPEG",
+      "JPEG-85",
+      "metadata-stripped PNG screenshot-equivalent rasterization",
+      "one documented social-platform copy when an official paired source permits it"
+    ],
+    "split_rule": "All variants of one source remain in one split; camera device, scene, and near-duplicate clusters must not cross calibration and final evaluation.",
+    "selection_rule": "Freeze filenames and source hashes before reading detector scores.",
+    "stopping_rule": "Do not train or retune a fusion rule until at least three independent real-source families and the transform variants are present."
+  },
+  "limitations": [
+    "This is a source and license screen, not legal advice.",
+    "One official 6.36 MB HDR+ DNG was downloaded for the initial feasibility probe. Catalog work then read only bounded TIFF header/IFD ranges before the deterministic forty-burst selection was frozen.",
+    "HDR+ catalog protocols v1-v4 preserve score-blind failures for fixed-prefix IFD placement, consumer-name aliases, all-absent identity tags and uniquely mappable partial identity tags; v5 closed all 153 bursts as 123 registered, 18 registered-partial and 12 identity-unavailable records.",
+    "The score-blind selector froze 40 bursts totalling 765,999,090 source bytes, and the separately registered source-preparation protocol binds the acquisition, catalog and selection hashes before complete DNG access; none of these stages authorizes runtime changes.",
+    "All forty HDR+ DNGs and metadata-free JPEG-95 views were subsequently hash-verified. The frozen five-channel audit found 2/40 original-view and 1/40 JPEG-85 product-OR hits, with no stable cross-view hit; the report forbids threshold or runtime changes.",
+    "Availability and terms must be rechecked at acquisition time."
+  ]
+}

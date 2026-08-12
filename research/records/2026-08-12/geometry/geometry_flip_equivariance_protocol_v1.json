@@ -1,0 +1,101 @@
+{
+  "schema_version": "demirror-geometry-flip-equivariance-protocol-v1",
+  "date_registered": "2026-08-12",
+  "status": "pre_registered_before_equivariance_measurement",
+  "purpose": "Test whether a source-neutral horizontal-flip consistency measurement from PerspectiveFields transfers from PixArt calibration images to held-out SDXL images.",
+  "hypothesis": "Generated images may produce less stable inferred perspective geometry under an exactly known horizontal reflection than real images; larger discrepancies are the predeclared candidate direction.",
+  "upstream": {
+    "implementation": "PerspectiveFields Paramnet-360Cities-edina-uncentered",
+    "checkpoint": "weights/perspectivefields-paramnet-360cities-edina-uncentered.pth",
+    "checkpoint_sha256": "5220df6d9d89380d490bb9a3e4a162a8a5ca8eeb8610510173410076719fca67",
+    "coordinate_evidence": {
+      "utils_py_sha256": "6215c0d64e7c38ed319c504d3a5094f534f1ee7f25ba8431207a309822b16842",
+      "panocam_py_sha256": "c2097b01f9106272628b03d655229dd3e7ff739910feff59d785ef38ae0b4673",
+      "gravity_head_py_sha256": "66a5ea1ec819634db6090ffb2966409b5309ff949df3222b1988d5c4d44cad55",
+      "latitude_head_py_sha256": "2e8ab411556e9f9331bd1e1e6e38b51cf17b9c032187f0e3e4ef28705a1bbff9"
+    }
+  },
+  "cohorts": {
+    "calibration": {
+      "generator": "PixArt",
+      "identifier_window": [351, 425],
+      "scenes": ["indoor", "outdoor"],
+      "expected_per_scene_and_label": 75,
+      "expected_total": 300,
+      "archive_sha256": {
+        "Recent_Pixart_Indoor.zip": "195fbc3b65ff027ccb47341e945d02977b42f58078749cae2a29a05f69401ca4",
+        "Recent_Pixart_Outdoor.zip": "4376d35b11d3fb3ae04aed07672af3a47b91e162b3c494a90669b53682d4c061"
+      }
+    },
+    "test": {
+      "generator": "SDXL",
+      "identifier_window": [426, 500],
+      "scenes": ["indoor", "outdoor"],
+      "expected_per_scene_and_label": 75,
+      "expected_total": 300,
+      "archive_sha256": {
+        "Recent_SDXL_Indoor.zip": "bb4e5864c99bdd6e302da05f8466dfe27e83d868d065fc8728ee1ad7c20c328f",
+        "Recent_SDXL_Outdoor.zip": "fdfe39406e41faaa6530d4d30481aaa1c4ea78a7d5b4595391a9c5f370f8b67c"
+      }
+    }
+  },
+  "fixed_transform": {
+    "image": "cv2 horizontal flip",
+    "latitude": "reverse the width axis; scalar value unchanged",
+    "gravity": "reverse the width axis and negate channel zero (image-plane x); channel one (y) unchanged",
+    "pred_roll": "sign reversal",
+    "pred_pitch": "unchanged",
+    "pred_general_vfov": "unchanged",
+    "pred_rel_cx": "sign reversal",
+    "pred_rel_cy": "unchanged"
+  },
+  "features": [
+    "latitude_abs_mean_deg",
+    "latitude_abs_p50_deg",
+    "latitude_abs_p90_deg",
+    "gravity_angle_mean_deg",
+    "gravity_angle_p50_deg",
+    "gravity_angle_p90_deg",
+    "roll_reflection_error_deg",
+    "pitch_reflection_error_deg",
+    "vfov_reflection_error_deg",
+    "principal_x_reflection_error",
+    "principal_y_reflection_error"
+  ],
+  "fixed_model": {
+    "estimator": "StandardScaler followed by scikit-learn LogisticRegression",
+    "fit_split": "PixArt calibration only",
+    "class_weight": "balanced",
+    "C": 1.0,
+    "max_iter": 2000,
+    "random_state": 20260812,
+    "candidate_direction": "larger fitted probability means more generated-like equivariance discrepancy",
+    "threshold": "on PixArt only, maximize generated recall subject to empirical real false-positive rate <= 0.25; break ties by the higher threshold",
+    "test_policy": "apply coefficients, scaler and threshold unchanged to SDXL"
+  },
+  "resource_policy": {
+    "device": "CPU",
+    "torch_threads": 1,
+    "workers": 1,
+    "shard_size": 25,
+    "maximum_worker_working_set_mib": 3072,
+    "failure": "terminate only the isolated shard, preserve completed shards, and do not produce an acceptance decision"
+  },
+  "screening_gate": {
+    "meaning": "permission for a new independent replication only; never direct product integration",
+    "requirements": {
+      "sdxl_overall_roc_auc_minimum": 0.70,
+      "sdxl_true_positive_rate_at_frozen_threshold_minimum": 0.50,
+      "sdxl_false_positive_rate_at_frozen_threshold_maximum": 0.25,
+      "sdxl_indoor_roc_auc_minimum": 0.60,
+      "sdxl_outdoor_roc_auc_minimum": 0.60
+    }
+  },
+  "restrictions": {
+    "source_labels_passed_to_measurement": false,
+    "sdxl_used_for_feature_or_threshold_selection": false,
+    "runtime_or_origin_score_change_authorized": false,
+    "best_single_feature_selection_on_sdxl_allowed": false,
+    "interpretation": "equivariance discrepancy is a model-stability measurement, not proof of AI generation"
+  }
+}
