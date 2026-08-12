@@ -1,0 +1,49 @@
+{
+  "schema_version": "demirror-sidbench-replay-environment-v1",
+  "created_at": "2026-08-19",
+  "status": "registered_for_future_replay",
+  "scope": "CPU-only replay environment for the frozen SIDBench PatchCraft/RPTC and NPR elimination screen; not a product runtime dependency.",
+  "historical_execution_attestation": "The original audit did not record Python, torch, or torchvision versions. This addendum registers a supported replay environment without claiming that the historical process captured those versions.",
+  "python": {
+    "implementation": "cpython",
+    "version": "3.10.6"
+  },
+  "packages": {
+    "torch": "2.13.0+cpu",
+    "torchvision": "0.28.0+cpu"
+  },
+  "installation": {
+    "base_lock": "requirements.lock",
+    "overlay_lock": "requirements-research-sidbench.lock",
+    "cpu_wheel_index": "https://download.pytorch.org/whl/cpu"
+  },
+  "frozen_bindings": [
+    {
+      "path": "requirements.lock",
+      "sha256": "19e63f4e1ca276cb6b3fe0002c1a09eda8205f80868313e30c2d0a6ddc47def4"
+    },
+    {
+      "path": "requirements-research-sidbench.lock",
+      "sha256": "fdc0ddc3051d094228383d5305cbb4061591eda4b31658d1e8b2413e0c2c293e"
+    },
+    {
+      "path": "scripts/screen_sidbench_candidates.py",
+      "sha256": "e36a8d049e41ea562c66ef54ca99edece5dcbfb17ef3be1c3dce707ec7ff697d"
+    },
+    {
+      "path": "research/records/2026-08-12/pixel/sidbench_patchcraft_npr_screen_protocol_v1.json",
+      "sha256": "b328c6e2044ba23560facb06f840f9a2b0dbbe50d5de495674929b1f1af91a74"
+    },
+    {
+      "path": "research/records/2026-08-12/pixel/sidbench_patchcraft_npr_screen_audit_v1.json",
+      "sha256": "980be2edc391a642dc8bd90fe1d4448155e159e0252c1d7fc6277d4d4ab34e72"
+    }
+  ],
+  "replay_policy": {
+    "verify_environment_before_scoring": true,
+    "device": "cpu",
+    "automatic_model_download": false,
+    "runtime_policy_changed": false,
+    "deployment_eligible": false
+  }
+}

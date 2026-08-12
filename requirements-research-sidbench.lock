@@ -1,0 +1,8 @@
+# SIDBench PatchCraft/NPR CPU replay overlay, registered on 2026-08-19.
+# Install after requirements.lock with CPython 3.10.6:
+#   .venv-sidbench\Scripts\python -m pip install -r requirements-research-sidbench.lock
+# The +cpu builds are resolved from PyTorch's official CPU wheel index.
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+torch==2.13.0+cpu
+torchvision==0.28.0+cpu

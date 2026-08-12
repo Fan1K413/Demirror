@@ -7,7 +7,14 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 import pytest
-import torch
+
+
+torch = pytest.importorskip(
+    "torch", reason="SIDBench research tests require requirements-research-sidbench.lock"
+)
+pytest.importorskip(
+    "torchvision", reason="SIDBench research tests require requirements-research-sidbench.lock"
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]

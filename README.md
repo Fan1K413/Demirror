@@ -160,6 +160,39 @@ DeepLSD 不是 P0 默认依赖。若在配置中明确指定 deeplsd 但本地�
 
     .venv\Scripts\python -m pytest
 
+未安装研究叠加依赖时，SIDBench 专用测试会明确跳过，不影响基础产品测试环境。
+
+## SIDBench 离线候选复现环境
+
+PatchCraft/RPTC 与 NPR 的 SIDBench 筛选只用于离线研究，不属于网页或基础安装。
+冻结评估器已经被既有报告按 SHA-256 绑定，因此不在原文件中追加环境逻辑；其 CPU
+复现环境由独立叠加锁文件和环境记录约束。参考环境固定为 CPython 3.10.6、
+`torch==2.13.0+cpu` 与 `torchvision==0.28.0+cpu`，CPU wheel 来自 PyTorch 官方索引：
+
+    py -3.10 -m venv .venv-sidbench
+    .venv-sidbench\Scripts\python -m pip install --upgrade pip
+    .venv-sidbench\Scripts\python -m pip install -r requirements.lock
+    .venv-sidbench\Scripts\python -m pip install -r requirements-research-sidbench.lock
+    .venv-sidbench\Scripts\python -m pip install -e ".[dev]"
+    .venv-sidbench\Scripts\python scripts\verify_sidbench_research_environment.py
+
+校验器会同时检查 Python、PyTorch、TorchVision、两份依赖锁，以及冻结评估器、协议和
+最终审计的 SHA-256；任一项不一致都会在模型加载前失败。它不会下载上游代码、权重或数据。
+在已按协议准备 SIDBench、NPR 源码、checkpoint 和登记数据后，完整评分与汇总命令为：
+
+    $python = ".venv-sidbench\Scripts\python"
+    $protocol = "research\records\2026-08-12\pixel\sidbench_patchcraft_npr_screen_protocol_v1.json"
+    $sidbench = "outputs\research\sidbench_candidate_v1"
+    $npr = "outputs\research\npr_upstream_candidate_v1"
+    $result = "outputs\research\sidbench_patchcraft_npr_replay_v1"
+    & $python scripts\screen_sidbench_candidates.py score --candidate patchcraft_rptc --repo-root . --protocol $protocol --sidbench-root $sidbench --npr-upstream-root $npr --output "$result\patchcraft_rptc.json"
+    & $python scripts\screen_sidbench_candidates.py score --candidate npr --repo-root . --protocol $protocol --sidbench-root $sidbench --npr-upstream-root $npr --output "$result\npr.json"
+    & $python scripts\screen_sidbench_candidates.py summarize --repo-root . --protocol $protocol --patchcraft-report "$result\patchcraft_rptc.json" --npr-report "$result\npr.json" --output "$result\audit.json"
+
+环境补充记录位于
+`research/records/2026-08-12/pixel/sidbench_patchcraft_npr_environment_v1.json`。原始审计
+没有保存包版本，所以该记录是后续重放的固定环境，不追溯声称历史进程已记录这些版本。
+
 ## P0 验证流程
 
 P0 的“稳定”只表示几何测量链和拒判边界经过验证，绝不表示具备通用 AI
