@@ -1,0 +1,99 @@
+{
+  "schema_version": "demirror-geometry-flip-equivariance-audit-summary-v1",
+  "date": "2026-08-12",
+  "protocol_sha256": "3d9b38bad19b6c51a98af6286a59cbe1ffcfd2e1d5063701f59c814ee226811b",
+  "implementation": {
+    "measurement_path": "src/image_trust/geometry_ai/equivariance.py",
+    "measurement_sha256": "b5ec0f463b8d73d4ded268b716321bb6bc2f52b27a76f383f4929e6a15429f72",
+    "audit_path": "scripts/audit_geometry_flip_equivariance.py",
+    "audit_sha256": "c2a9ed2263fdcc745279c957e204ca68c4552e350168fb0e7366e54552a983e5"
+  },
+  "sample_closure": {
+    "completed_shards": 24,
+    "total_shards": 24,
+    "rows": 600,
+    "unique_source_sha256": 600,
+    "calibration_rows": 300,
+    "test_rows": 300,
+    "real_rows": 300,
+    "generated_rows": 300,
+    "invalid_shard_or_metric_rows": 0
+  },
+  "calibration": {
+    "generator": "PixArt",
+    "sample_count": 300,
+    "roc_auc": 0.6229777777777779,
+    "selected_threshold": 0.5754625072435072,
+    "true_positive_count": 54,
+    "generated_count": 150,
+    "true_positive_rate": 0.36,
+    "false_positive_count": 37,
+    "real_count": 150,
+    "false_positive_rate": 0.24666666666666667,
+    "indoor_roc_auc": 0.6874666666666667,
+    "outdoor_roc_auc": 0.5594666666666668
+  },
+  "held_out_test": {
+    "generator": "SDXL",
+    "sample_count": 300,
+    "roc_auc": 0.5090222222222223,
+    "true_positive_count": 41,
+    "generated_count": 150,
+    "true_positive_rate": 0.2733333333333333,
+    "false_positive_count": 41,
+    "real_count": 150,
+    "false_positive_rate": 0.2733333333333333,
+    "indoor": {
+      "roc_auc": 0.5409777777777778,
+      "true_positive_rate": 0.22666666666666666,
+      "false_positive_rate": 0.28
+    },
+    "outdoor": {
+      "roc_auc": 0.4750222222222222,
+      "true_positive_rate": 0.32,
+      "false_positive_rate": 0.26666666666666666
+    }
+  },
+  "screening_gate": {
+    "requirements": {
+      "sdxl_overall_roc_auc_minimum": 0.7,
+      "sdxl_true_positive_rate_at_frozen_threshold_minimum": 0.5,
+      "sdxl_false_positive_rate_at_frozen_threshold_maximum": 0.25,
+      "sdxl_indoor_roc_auc_minimum": 0.6,
+      "sdxl_outdoor_roc_auc_minimum": 0.6
+    },
+    "checks": {
+      "sdxl_overall_roc_auc": false,
+      "sdxl_true_positive_rate_at_frozen_threshold": false,
+      "sdxl_false_positive_rate_at_frozen_threshold": false,
+      "sdxl_indoor_roc_auc": false,
+      "sdxl_outdoor_roc_auc": false
+    },
+    "passed": false
+  },
+  "resource": {
+    "maximum_sampled_worker_working_set_bytes": 1675087872,
+    "registered_maximum_worker_working_set_bytes": 3221225472,
+    "first_test_shard_elapsed_seconds": 179.195475,
+    "remaining_test_shards_elapsed_seconds": 2045.6025744999997,
+    "worker_count": 1,
+    "torch_threads": 1,
+    "shard_size": 25
+  },
+  "local_artifact_receipts": {
+    "report_json_sha256": "13b443ab061b36b1e8032f7ccd44277602dc8f865f47fb6bb3b7074176ce6620",
+    "diagnostic_model_json_sha256": "945b08c44533cc79fe0a23f65aa4ba8018f174abac9bffe1f93b8abf54617be4",
+    "scores_jsonl_sha256": "60f4b9448f5c8ede5aefe6a4649fee0ac05ed9adabd2175d2a1f43421025525c"
+  },
+  "decision": "rejected_for_current_origin_path",
+  "deployment_eligible": false,
+  "runtime_policy_changed": false,
+  "threshold_or_feature_refit_allowed": false,
+  "interpretation": "Horizontal-flip Perspective Fields equivariance did not transfer from PixArt calibration to the held-out SDXL cohort. It is not a usable AI-origin signal under the registered protocol.",
+  "limitations": [
+    "The diagnostic model was fitted on PixArt and evaluated once on SDXL.",
+    "Perspective Fields consistency can reflect model domain shift rather than image-source physics.",
+    "The rejected result cannot be repaired by selecting SDXL features, changing the threshold, or replacing samples.",
+    "No runtime, web, geometry-review, or origin-score change is authorized by this audit."
+  ]
+}
