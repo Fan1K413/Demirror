@@ -1,0 +1,50 @@
+{
+  "ai_assisted_annotation_files_opened": false,
+  "baseline_audit_sha256": "ce3c79144bb6ee047c16511b7118308fa4b835b1b456af40170787cc12530c82",
+  "continuation_protocol_sha256": "3c2956e12a999792d31555eb9e65889bfa134f4ea2c07919f20515a7bfbeed81",
+  "gates": {
+    "all_frozen_component_hashes_match": true,
+    "all_nonhuman_implementation_files_present": true,
+    "baseline_audit_matches_protocol": true,
+    "baseline_engineering_gates_passed": true,
+    "baseline_origin_scoring_remained_disabled": true,
+    "baseline_result_closure_matches_protocol": true,
+    "baseline_source_key_remained_closed": true,
+    "blind_manifest_matches_protocol": true,
+    "blind_packet_count_matches_protocol": true,
+    "continuation_origin_scoring_remains_disabled": true,
+    "continuation_protocol_registered": true,
+    "continuation_protocol_schema_matches": true,
+    "continuation_web_integration_remains_disabled": true,
+    "reviewer_id_closure_matches_protocol": true
+  },
+  "human_annotation_files_opened": false,
+  "implementation_sha256": {
+    "scripts/audit_geometry_surface_continuation_readiness.py": "a5f69ebf5aa953ae05d1c499768b460cc90e8b2b4a6d6b9829d140b4e134c4da",
+    "scripts/audit_geometry_surface_human_comparison.py": "7490191331e2d03ca44712d801bf94857f91daa377d242ae769f2027c23989b0",
+    "scripts/extract_geometry_human_quality_receipt.py": "2708eaa349ba70595442ef7f0b01be5e82716c91e350ff04e30a463aee3b14ea",
+    "scripts/run_geometry_surface_conditioned_replay.py": "dd5c0a7baf3a3bbe0a3991a8c40a320001bf66553db258f0ff18842c782f7828",
+    "src/image_trust/geometry_ai/__init__.py": "360908463471b45772be16e7e30549c05fc881e4d41a780beb33fb2c4660cac1",
+    "src/image_trust/geometry_ai/surface_comparison.py": "4397e35154b923ef6fcd7f7e867c5003f910e9a13f6c9f8ad89ca2678187ed9b",
+    "src/image_trust/geometry_ai/surface_conditioned.py": "b78935e5ff5c7279104b98475eede25d4b4efd580b02f1fe70cebcefdc7fded3",
+    "tests/test_geometry_surface_comparison.py": "5fcc17138226f2b1bca3375d09cf4ba441a3ebc01287c3ca4eb828c17221e2fd",
+    "tests/test_geometry_surface_conditioned.py": "d3b78d1cbe2eb2e77f30023637420ec33f69db1223546289a2c3a6259b818c2d",
+    "tests/test_geometry_surface_continuation_tools.py": "7e7f61cdaffea588c5df5c4c02341df4fab5675340d5a8a4f8d4593ef593516c"
+  },
+  "next_steps_after_human_input": [
+    "run the existing hidden-duplicate human review quality audit",
+    "extract the source-neutral quality receipt",
+    "run the frozen deterministic-versus-human surface comparison",
+    "run surface-conditioned G1-G4 only if every comparison gate passes"
+  ],
+  "origin_scoring_authorized": false,
+  "packet_count": 36,
+  "passed": true,
+  "posthoc_source_key_opened": false,
+  "remaining_external_input": "independently completed human relation annotations and their passing source-neutral quality receipt",
+  "review_manifest_sha256": "88f3b2e80a729b1953aa65d89b36f29232774986947b1996e1485f1b6ec22ed3",
+  "schema_version": "geometry-surface-continuation-readiness-v1",
+  "source_labels_used": false,
+  "status": "ready_waiting_for_independent_human_annotations",
+  "web_integration_authorized": false
+}

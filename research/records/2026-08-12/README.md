@@ -1,6 +1,6 @@
 # 2026-08-12 研究记录清单
 
-本目录只保留能够支撑阶段结论的 20 份机器可读记录。筛选标准是：最终审计优先；保留
+本目录只保留能够支撑阶段结论的 24 份机器可读记录。筛选标准是：最终审计优先；保留
 复现最终审计所必需的预注册协议；保留会影响资源边界理解的关键失败收据；不保留已被
 最终结果取代的重复候选屏、连续采集协议版本和中间选择表。
 
@@ -23,6 +23,10 @@
 - `geometry_semantic_relation_pilot_protocol_v1.json`：32 个唯一源图加 4 个隐藏重复的语义表面关系盲审协议，当前不含人工结果。
 - `geometry_semantic_relation_agent_assisted_protocol_v1.json`：三组来源盲化 AI 辅助预标注的角色、独立性、输入哈希与合并门禁；结果不是人工真值，也不授权来源计分。
 - `geometry_semantic_relation_agent_assisted_audit_v1.json`：36 项 AI 辅助盲审的来源中立最终闭包、人工优先复核队列与不计分决策。
+- `geometry_deterministic_surface_baseline_protocol_v1.json`：在实现前冻结的粗表面候选、双侧采样、线段邻接和线族拆分参数；不读取预标注答案，不授权来源计分或网页接入。
+- `geometry_deterministic_surface_baseline_audit_v1.json`：36 个来源盲化 packet 的双次确定性、产物闭包、实现哈希和资源统计；只授权进入独立人工关系对比。
+- `geometry_surface_continuation_protocol_v1.json`：在读取独立人工答案前冻结基线—人工比较指标、门禁和通过后才可运行的表面条件 G1–G4 离线重放规则。
+- `geometry_surface_continuation_readiness_v1.json`：不读取人工标注、AI 辅助标注或来源密钥的非人工工程就绪审计；全部门禁通过，当前只等待独立人工标注与来源中立质量回执。
 
 ## Real controls
 

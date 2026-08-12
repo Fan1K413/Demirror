@@ -1,0 +1,121 @@
+{
+  "schema_version": "demirror-geometry-surface-continuation-protocol-v1",
+  "date_registered": "2026-08-12",
+  "status": "registered_before_human_comparison_and_surface_conditioned_replay_implementation",
+  "registration_parent_commit": "dfdd0775f4870e5aebc7937100384fde19313b77",
+  "tracked_text_hash_policy": "Normalize UTF-8 CRLF and CR line endings to LF before SHA-256. Generated baseline result hashes remain raw artifact-byte hashes.",
+  "purpose": "Finish every source-neutral engineering step that can be prepared before independent human relation annotations are available: compare the frozen deterministic surface baseline with completed human surface relations, then authorize an offline surface-conditioned G1-G4 replay only if the frozen comparison gates pass.",
+  "frozen_inputs": {
+    "blind_root": "outputs/geometry_semantic_relation_pilot_v1/blind",
+    "review_manifest_sha256": "88f3b2e80a729b1953aa65d89b36f29232774986947b1996e1485f1b6ec22ed3",
+    "reviewer_id_closure_sha256": "419663d8782646d15f0503e93e98365b13060a6ec75b1bf9ab409ede2f921d97",
+    "packet_count": 36,
+    "semantic_relation_pilot_protocol_sha256": "58ef3c0a1ca1bc50ee306379725ebf462df564a2755dcba4831a2025c1833b7d",
+    "deterministic_surface_protocol_sha256": "5b47f4c740e0b75717acb9e7e55b0c7b3c67bad7df8542c8a99054ced4b931b8",
+    "deterministic_surface_audit_sha256": "ce3c79144bb6ee047c16511b7118308fa4b835b1b456af40170787cc12530c82",
+    "deterministic_result_hash_closure_sha256": "69fe85234a0709e4d941f5ea8bcdb47547d3b40e9a7113ba422b7ba2a143b965",
+    "relation_annotation_contract_sha256": "5ad561244bf4a61a4d9c14ad338ca4e33f348a76a4a4a24cfc23b7702020c40b",
+    "relation_semantic_closure_sha256": "67b4dd2c8b312023c4fdbcb9c2cbf56ed8936919d9f9ca6fb13eacfb2f88768b",
+    "g1_g4_measurement_sha256": "5dc48fca0c8e8f1941223b039fe34e8fb02cd3d426b6835c7c9fdf3d9b008bd6"
+  },
+  "blindness": {
+    "comparison_allowed_inputs": [
+      "blind manifest reviewer IDs and declared packet or annotation paths",
+      "validated blind review packets",
+      "independently completed or unassessable human relation annotations",
+      "frozen deterministic surface baseline result for the same reviewer ID",
+      "source-neutral human-review quality receipt"
+    ],
+    "forbidden_inputs": [
+      "posthoc source key or hidden-duplicate mapping",
+      "declared source, archive, generator or real-versus-generated label",
+      "C2PA, EXIF, watermark, pixel detector, camera or AI score",
+      "AI-assisted relation annotations",
+      "any threshold selected after reading the human annotations"
+    ],
+    "quality_receipt_policy": "A separate extractor may reduce the completed posthoc pilot audit to aggregate review-quality gates. The comparison process may read only that source-neutral receipt and must never read the posthoc audit or key.",
+    "current_execution_policy": "Until the user completes the independent annotations, readiness auditing must not open any annotation, posthoc or source file."
+  },
+  "human_quality_receipt": {
+    "schema_version": "geometry-human-relation-quality-receipt-v1",
+    "required_fields": [
+      "input_audit_sha256",
+      "packet_count",
+      "unique_source_count",
+      "completed_unique_count",
+      "hidden_duplicate_group_count",
+      "completed_duplicate_pair_count",
+      "family_decision_agreement",
+      "surface_line_pair_agreement",
+      "gates",
+      "passed"
+    ],
+    "forbidden_fields": [
+      "posthoc_source_summary",
+      "declared_source_slice",
+      "label",
+      "archive",
+      "generator"
+    ],
+    "comparison_requirement": "passed must be true and every copied quality gate must be true"
+  },
+  "comparison_population": {
+    "packet_requirement": "All 36 annotations must be terminal as completed or unassessable before any metric is published.",
+    "completed_packets": "Validate packet references and semantic closure; include completed packets in metrics.",
+    "unassessable_packets": "Retain in status counts and exclude from metric denominators.",
+    "family_reference_positive": "split_across_surfaces",
+    "family_reference_negative": [
+      "coherent_within_surface",
+      "geometry_inconsistent_within_surface"
+    ],
+    "family_excluded": "unassessable",
+    "baseline_positive": "split_candidate",
+    "baseline_negative": "single_surface_candidate",
+    "baseline_abstention": "insufficient_support"
+  },
+  "pair_metric_definition": {
+    "scope": "Each reviewed family is one macro unit. Remove human outlier lines, then enumerate unordered active-member pairs.",
+    "human_same_surface": "The two lines share at least one human surface referenced by that family review.",
+    "baseline_same_surface": "The two lines share at least one deterministic subfamily surface for that original family.",
+    "baseline_pair_abstention": "At least one active line is absent from every deterministic subfamily for that family.",
+    "overmerge_error": "Human says different surface while the deterministic baseline says same surface.",
+    "oversplit_error": "Human says same surface while the deterministic baseline says different surface.",
+    "aggregation": "Report micro confusion counts and the mean of per-family rates. Eligibility uses macro per-family rates so large families cannot dominate."
+  },
+  "comparison_gates": {
+    "human_quality_receipt_passed": true,
+    "terminal_annotation_ratio_minimum": 1.0,
+    "completed_packet_count_minimum": 24,
+    "assessable_family_count_minimum": 48,
+    "comparable_family_fraction_minimum": 0.75,
+    "active_line_assignment_fraction_minimum": 0.70,
+    "macro_same_surface_pair_retention_minimum": 0.70,
+    "macro_different_surface_pair_separation_minimum": 0.70,
+    "split_family_recall_minimum": 0.60,
+    "non_split_family_specificity_minimum": 0.70
+  },
+  "surface_conditioned_replay": {
+    "authorization": "Run only when the comparison report is complete, all frozen comparison gates pass, and its decision is eligible_for_surface_conditioned_g1_g4_replay_only.",
+    "packet_inputs": [
+      "anonymous packet image",
+      "packet-declared geometry_measurement_v2.json",
+      "frozen deterministic surface baseline result",
+      "source-neutral comparison authorization"
+    ],
+    "region_rule": "Convert every deterministic coarse surface candidate box and member lines into one source-neutral structure scope.",
+    "family_rule": "For every deterministic surface subfamily, copy only the frozen original geometry-v2 family model fields and replace its member support with the subfamily members. Preserve global scope only for original global families; local families use the deterministic surface scope.",
+    "check_rule": "Call the frozen consistency_v2 G1-G4 implementation without changing thresholds. G5 is excluded from this replay.",
+    "output_rule": "Publish per-packet source-neutral G1-G4 diagnostics and aggregate availability or finding counts only. Do not produce AI probability, source score, web card or threshold change.",
+    "failure_rule": "Missing authorization, identity or hash drift, path escape, posthoc path, measurement mismatch or non-terminal human comparison fails before any replay artifact is written."
+  },
+  "decision_rules": {
+    "waiting_for_human": "All implementation and readiness checks may finish, but no comparison metric or surface-conditioned replay result may be fabricated or inferred.",
+    "comparison_gate_success": "Authorize only the frozen offline surface-conditioned G1-G4 replay on the same blind packet set.",
+    "comparison_gate_failure": "Keep the baseline as a review visualization. Do not tune it on this human set; any new thresholds require a new preregistration and a new blinded cohort.",
+    "replay_completion": "Replay output remains source-neutral diagnostic evidence and does not authorize source scoring or web integration.",
+    "origin_claim": "Forbidden.",
+    "score_or_web_change": "Forbidden."
+  },
+  "origin_scoring_authorized": false,
+  "web_integration_authorized": false
+}

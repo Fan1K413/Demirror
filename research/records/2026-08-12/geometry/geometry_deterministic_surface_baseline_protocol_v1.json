@@ -1,0 +1,102 @@
+{
+  "schema_version": "demirror-geometry-deterministic-surface-baseline-protocol-v1",
+  "date_registered": "2026-08-12",
+  "status": "registered_before_deterministic_baseline_implementation",
+  "registration_parent_commit": "0ae488d5eac76f09b189f1adcb6510cbff451a9e",
+  "purpose": "Implement a source-neutral deterministic coarse-surface baseline that partitions existing geometry-v2 family members before any comparison with review annotations or image-source labels.",
+  "input": {
+    "blind_root": "outputs/geometry_semantic_relation_pilot_v1/blind",
+    "review_manifest_sha256": "6be1f25ec41601a4489f1ebcb0c09260aceeffd6fac45db47093c236b52c7320",
+    "packet_count": 36,
+    "allowed_fields": [
+      "anonymous RGB image declared by the review packet",
+      "normalized detected lines and cross-scale stability",
+      "source-neutral geometry-v2 region proposals",
+      "source-neutral geometry-v2 family proposals"
+    ],
+    "forbidden_inputs": [
+      "blind annotation templates",
+      "AI-assisted or human relation annotations",
+      "posthoc directory or source key",
+      "C2PA, EXIF, watermark, pixel-detector or camera results",
+      "real-versus-generated or generator labels"
+    ]
+  },
+  "resource_boundary": {
+    "maximum_packet_lines": 512,
+    "observed_blind_packet_line_count_minimum": 151,
+    "observed_blind_packet_line_count_maximum": 449,
+    "pairwise_work_scope": "Only lines sharing one appearance component are compared; at most two appearance-component memberships are retained per line.",
+    "failure_policy": "Image-size mismatch, path escape or posthoc path fails before artifacts are published. Packets above the line cap return not_applicable and are never partially scored."
+  },
+  "fixed_configuration": {
+    "appearance_grid_rows": 16,
+    "appearance_grid_columns": 16,
+    "appearance_neighbor_mode": 4,
+    "appearance_component_color_distance_max": 0.11,
+    "appearance_component_minimum_cells": 2,
+    "minimum_cross_scale_stability": 0.55,
+    "line_side_sample_positions": [0.15, 0.35, 0.5, 0.65, 0.85],
+    "line_side_offset_fraction": 0.015625,
+    "line_side_vote_minimum": 2,
+    "maximum_appearance_memberships_per_line": 2,
+    "line_midpoint_distance_max": 0.30,
+    "line_endpoint_distance_max": 0.10,
+    "connected_endpoint_distance_max": 0.045,
+    "line_axis_deviation_degrees_max": 30.0,
+    "line_appearance_distance_max": 0.20,
+    "line_affinity_minimum": 0.58,
+    "line_affinity_weights": {
+      "midpoint": 0.24,
+      "endpoint": 0.24,
+      "axis_relation": 0.14,
+      "appearance": 0.18,
+      "shared_region": 0.10,
+      "cross_scale_stability": 0.10
+    },
+    "minimum_surface_support_lines": 2,
+    "minimum_usable_subfamily_members": 2,
+    "diagnostic_line_link_limit": 4096
+  },
+  "algorithm_order": [
+    "Convert the anonymous RGB image to normalized CIE Lab and compute one mean descriptor per fixed grid cell.",
+    "Join four-neighbor cells only when their normalized Lab distance is within the frozen threshold; discard components below the cell floor.",
+    "For each stable line, sample both sides at five frozen positions and retain the two best appearance components meeting the vote floor.",
+    "Within each appearance component, join lines using the frozen spatial, endpoint, axis-relation, local-appearance, region and stability affinity.",
+    "Emit connected line components with at least two members as coarse surface candidates; do not assign semantic surface kinds.",
+    "Partition each existing family by candidate-surface membership, retaining shared-boundary lines in more than one subfamily and recording every unassigned member explicitly."
+  ],
+  "output_contract": {
+    "schema_version": "geometry-deterministic-surface-baseline-v1",
+    "required_artifacts": [
+      "deterministic_surface_baseline.json",
+      "deterministic_surface_candidates_overlay.png",
+      "original_vs_deterministic_family_partitions.png",
+      "deterministic_surface_baseline_artifacts.json"
+    ],
+    "source_labels_used": false,
+    "origin_scoring_authorized": false,
+    "web_integration_authorized": false
+  },
+  "engineering_gates": [
+    "all 36 blind packets complete without reading an annotation or posthoc file",
+    "every original family member is present in at least one deterministic subfamily or in the explicit unassigned set",
+    "repeated runs produce byte-identical JSON payloads",
+    "all declared artifacts exist and no temporary files remain",
+    "runtime and output volume stay within the local single-image boundary"
+  ],
+  "deferred_evaluation": [
+    "comparison with independently completed human blind annotations",
+    "hidden-duplicate stability",
+    "same-surface over-splitting and cross-surface overmerge metrics",
+    "JPEG, screenshot and crop robustness",
+    "source-isolated incremental origin value"
+  ],
+  "decision_rules": {
+    "engineering_gate_failure": "Fix implementation defects without opening review answers or source keys; do not tune thresholds against failed examples.",
+    "engineering_gate_success": "Permit only source-blind diagnostic inspection and later comparison against independent human annotations.",
+    "origin_claim": "Forbidden from this baseline.",
+    "score_or_web_change": "Forbidden."
+  },
+  "origin_scoring_authorized": false
+}

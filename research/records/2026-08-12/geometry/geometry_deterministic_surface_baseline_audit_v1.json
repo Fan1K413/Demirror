@@ -1,0 +1,643 @@
+{
+  "aggregate": {
+    "accepted_line_link_count": 26167,
+    "appearance_component_count": 59,
+    "family_partition_count": 288,
+    "line_count": 11221,
+    "partition_status_counts": {
+      "single_surface_candidate": 225,
+      "split_candidate": 63
+    },
+    "runtime_ms_max": 383.402,
+    "runtime_ms_p50": 193.229,
+    "runtime_ms_p95": 336.753,
+    "surface_candidate_count": 105
+  },
+  "annotation_files_read": false,
+  "blind_manifest_sha256": "6be1f25ec41601a4489f1ebcb0c09260aceeffd6fac45db47093c236b52c7320",
+  "decision": "eligible_for_independent_human_relation_comparison",
+  "expected_packet_count": 36,
+  "gates": {
+    "all_artifacts_complete_without_temporaries": true,
+    "all_manifest_packets_processed_once": true,
+    "all_results_available_within_resource_cap": true,
+    "all_results_byte_deterministic": true,
+    "annotations_and_posthoc_not_read": true,
+    "origin_scoring_remained_disabled": true,
+    "registered_protocol_matches": true
+  },
+  "human_review_required_for_quality_metrics": true,
+  "implementation_sha256": {
+    "scripts/audit_geometry_surface_baseline.py": "66a6f2a8bc70a0a189de71b768e4c690b7af7ded91b6ec3c570cee95344af797",
+    "scripts/run_geometry_surface_baseline.py": "93c2e9e7f195aef7d107f5f238d2ad08f5d1130c51fd149b7665c339ca59d218",
+    "src/image_trust/geometry_ai/__init__.py": "81d8c401e040da975ddb6b537e8b4a05ae3655a53310f17063eab6ca8ecd84fb",
+    "src/image_trust/geometry_ai/deterministic_surfaces.py": "26ae99640292f3e5848a6ef1a245f96c6a727270e1f8f2106e49fa5f2c030a6a",
+    "tests/test_geometry_deterministic_surfaces.py": "f90de0d0d3be3cd24603560c4bb977cedd01682979c4cdb0318ff3beaaa11a11",
+    "tests/test_geometry_surface_baseline_audit.py": "3cd1354c81ed2a189074ac8a4f4577904ce68530d0ee0aa6c726bab9269d6942"
+  },
+  "origin_scoring_authorized": false,
+  "passed": true,
+  "processed_packet_count": 36,
+  "protocol_errors": [],
+  "protocol_sha256": "5b47f4c740e0b75717acb9e7e55b0c7b3c67bad7df8542c8a99054ced4b931b8",
+  "records": [
+    {
+      "accepted_line_link_count": 666,
+      "appearance_component_count": 4,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 290,
+      "partition_status_counts": {
+        "split_candidate": 8
+      },
+      "result_sha256": "82ac5b8996b00cb7bef152475e3c8767a946abcf576b484fe974d7bbf1dc9e8f",
+      "reviewer_id": "grr-6e2c73bb0795",
+      "runtime_ms": 178.521,
+      "status": "available",
+      "surface_candidate_count": 5
+    },
+    {
+      "accepted_line_link_count": 452,
+      "appearance_component_count": 3,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 384,
+      "partition_status_counts": {
+        "single_surface_candidate": 4,
+        "split_candidate": 4
+      },
+      "result_sha256": "21cf551bf6d66c213c0360c079ea5816fb0cfc1ed45d02c4a88607c9c997af51",
+      "reviewer_id": "grr-bb1a2467a840",
+      "runtime_ms": 118.783,
+      "status": "available",
+      "surface_candidate_count": 8
+    },
+    {
+      "accepted_line_link_count": 578,
+      "appearance_component_count": 1,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 203,
+      "partition_status_counts": {
+        "single_surface_candidate": 4,
+        "split_candidate": 4
+      },
+      "result_sha256": "0f3de3ba31b077259f882ff45e1580201d640ed9c3f87e612e2ad0f92e94e8fc",
+      "reviewer_id": "grr-2aba0c063fc0",
+      "runtime_ms": 77.876,
+      "status": "available",
+      "surface_candidate_count": 4
+    },
+    {
+      "accepted_line_link_count": 851,
+      "appearance_component_count": 1,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 361,
+      "partition_status_counts": {
+        "single_surface_candidate": 4,
+        "split_candidate": 4
+      },
+      "result_sha256": "63436d368179ef5970c85b0d546afe68a4c3c2c878b11cdb8a061a0fee818cfc",
+      "reviewer_id": "grr-b04b6672e300",
+      "runtime_ms": 150.666,
+      "status": "available",
+      "surface_candidate_count": 4
+    },
+    {
+      "accepted_line_link_count": 757,
+      "appearance_component_count": 1,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 321,
+      "partition_status_counts": {
+        "single_surface_candidate": 8
+      },
+      "result_sha256": "7990b233e8e33f97333d76ac91423b3e928417be38ed07246cf51badb9cf1924",
+      "reviewer_id": "grr-74b0c0dd4952",
+      "runtime_ms": 148.733,
+      "status": "available",
+      "surface_candidate_count": 2
+    },
+    {
+      "accepted_line_link_count": 400,
+      "appearance_component_count": 1,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 241,
+      "partition_status_counts": {
+        "single_surface_candidate": 8
+      },
+      "result_sha256": "e22f88b3026c1eccf970fd6cde87f681bd003dcbd905dc674488267cdd9d6aad",
+      "reviewer_id": "grr-a2c28b6b0df9",
+      "runtime_ms": 118.138,
+      "status": "available",
+      "surface_candidate_count": 6
+    },
+    {
+      "accepted_line_link_count": 1104,
+      "appearance_component_count": 2,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 371,
+      "partition_status_counts": {
+        "single_surface_candidate": 8
+      },
+      "result_sha256": "cee6f43e5b41753338c16bdb45b0634ed9726b5e89bf2c7fa313c1fc5b24ddf8",
+      "reviewer_id": "grr-c3dded41786e",
+      "runtime_ms": 304.769,
+      "status": "available",
+      "surface_candidate_count": 1
+    },
+    {
+      "accepted_line_link_count": 688,
+      "appearance_component_count": 2,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 220,
+      "partition_status_counts": {
+        "single_surface_candidate": 4,
+        "split_candidate": 4
+      },
+      "result_sha256": "16073c9a966b0616c15322d1b6e3725662561668b7afddedef4087b427c4e47e",
+      "reviewer_id": "grr-0c4e9bf1fb0e",
+      "runtime_ms": 175.639,
+      "status": "available",
+      "surface_candidate_count": 2
+    },
+    {
+      "accepted_line_link_count": 712,
+      "appearance_component_count": 1,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 271,
+      "partition_status_counts": {
+        "single_surface_candidate": 8
+      },
+      "result_sha256": "e0a2c6d9fa80d7d35fe24209043e2bc9139092206166c23f21fc3da6c9ce962b",
+      "reviewer_id": "grr-98ad487eb68b",
+      "runtime_ms": 201.239,
+      "status": "available",
+      "surface_candidate_count": 2
+    },
+    {
+      "accepted_line_link_count": 678,
+      "appearance_component_count": 1,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 289,
+      "partition_status_counts": {
+        "single_surface_candidate": 8
+      },
+      "result_sha256": "12cc923fa19ee6b68607f231737bc5f9bbb995cb7a6930df64f0231d989cd6f0",
+      "reviewer_id": "grr-227d164e18fb",
+      "runtime_ms": 204.751,
+      "status": "available",
+      "surface_candidate_count": 1
+    },
+    {
+      "accepted_line_link_count": 429,
+      "appearance_component_count": 1,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 231,
+      "partition_status_counts": {
+        "single_surface_candidate": 8
+      },
+      "result_sha256": "e3dcf7be0fce9dc12c50984b18a46eb350afaa4e530576104b717a31b633ff75",
+      "reviewer_id": "grr-6a9d097e8306",
+      "runtime_ms": 150.17,
+      "status": "available",
+      "surface_candidate_count": 4
+    },
+    {
+      "accepted_line_link_count": 884,
+      "appearance_component_count": 1,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 430,
+      "partition_status_counts": {
+        "single_surface_candidate": 6,
+        "split_candidate": 2
+      },
+      "result_sha256": "16f8286c2949ba9dc9b9d6aa81ea331393c968fd2fba60f861c7a545b068a791",
+      "reviewer_id": "grr-ab3e1e1b3429",
+      "runtime_ms": 297.206,
+      "status": "available",
+      "surface_candidate_count": 2
+    },
+    {
+      "accepted_line_link_count": 713,
+      "appearance_component_count": 3,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 269,
+      "partition_status_counts": {
+        "single_surface_candidate": 8
+      },
+      "result_sha256": "c57fcf511fb84f602f5895b4ce11ca71bd06c9b15284f246a77ca458ec8ab55e",
+      "reviewer_id": "grr-7295df27e532",
+      "runtime_ms": 189.639,
+      "status": "available",
+      "surface_candidate_count": 3
+    },
+    {
+      "accepted_line_link_count": 792,
+      "appearance_component_count": 2,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 282,
+      "partition_status_counts": {
+        "single_surface_candidate": 6,
+        "split_candidate": 2
+      },
+      "result_sha256": "868ac2aa3dcfd4cba0c5623c58dbfa8d1e8ade2c01453c973973f555b61259bc",
+      "reviewer_id": "grr-7ab243f367d8",
+      "runtime_ms": 184.472,
+      "status": "available",
+      "surface_candidate_count": 2
+    },
+    {
+      "accepted_line_link_count": 284,
+      "appearance_component_count": 2,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 196,
+      "partition_status_counts": {
+        "single_surface_candidate": 5,
+        "split_candidate": 3
+      },
+      "result_sha256": "87e626c44a5ff515833c269ef0dbb33bddb5cde87822dc0e856ea19d862d0579",
+      "reviewer_id": "grr-fcfa4545d488",
+      "runtime_ms": 94.272,
+      "status": "available",
+      "surface_candidate_count": 4
+    },
+    {
+      "accepted_line_link_count": 1024,
+      "appearance_component_count": 1,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 445,
+      "partition_status_counts": {
+        "single_surface_candidate": 8
+      },
+      "result_sha256": "c76a65b86e1aa17935e2197abf48a695c6f9d5b2a7f7edae77d50a013f0f0b59",
+      "reviewer_id": "grr-0ca6586274f5",
+      "runtime_ms": 383.402,
+      "status": "available",
+      "surface_candidate_count": 2
+    },
+    {
+      "accepted_line_link_count": 1138,
+      "appearance_component_count": 6,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 449,
+      "partition_status_counts": {
+        "single_surface_candidate": 2,
+        "split_candidate": 6
+      },
+      "result_sha256": "1bc4df064d192b04b99b40f1dd423c4bd4fb2b38307f06ed95714caa7066e949",
+      "reviewer_id": "grr-9c3a9c365257",
+      "runtime_ms": 341.541,
+      "status": "available",
+      "surface_candidate_count": 5
+    },
+    {
+      "accepted_line_link_count": 322,
+      "appearance_component_count": 2,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 151,
+      "partition_status_counts": {
+        "split_candidate": 8
+      },
+      "result_sha256": "85f870a3f25642fb6bafb96b2982528f137ca6e8fe1103602a5968b47234ab8b",
+      "reviewer_id": "grr-56a8d33a9715",
+      "runtime_ms": 81.814,
+      "status": "available",
+      "surface_candidate_count": 3
+    },
+    {
+      "accepted_line_link_count": 707,
+      "appearance_component_count": 2,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 234,
+      "partition_status_counts": {
+        "single_surface_candidate": 8
+      },
+      "result_sha256": "5206cb8480c5a1465f7eb3fc89957cd6bc13fe04c79bc3856a56abf4e20b8a0d",
+      "reviewer_id": "grr-232de905853c",
+      "runtime_ms": 179.323,
+      "status": "available",
+      "surface_candidate_count": 2
+    },
+    {
+      "accepted_line_link_count": 1004,
+      "appearance_component_count": 2,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 378,
+      "partition_status_counts": {
+        "single_surface_candidate": 3,
+        "split_candidate": 5
+      },
+      "result_sha256": "b790e4c7f7b1f6e91b1b58ccb526d07e0ac8833e9d37ae5b4eaa565b113d5f6c",
+      "reviewer_id": "grr-d46b94aa8233",
+      "runtime_ms": 310.672,
+      "status": "available",
+      "surface_candidate_count": 2
+    },
+    {
+      "accepted_line_link_count": 757,
+      "appearance_component_count": 1,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 321,
+      "partition_status_counts": {
+        "single_surface_candidate": 8
+      },
+      "result_sha256": "325680b150b76e2ae0d9c08796ade2773a162a8303bcdea1e1264a332374ec7a",
+      "reviewer_id": "grr-f5eb6a008a8c",
+      "runtime_ms": 222.794,
+      "status": "available",
+      "surface_candidate_count": 2
+    },
+    {
+      "accepted_line_link_count": 1142,
+      "appearance_component_count": 1,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 346,
+      "partition_status_counts": {
+        "single_surface_candidate": 8
+      },
+      "result_sha256": "334b859d744a882d10c30ed4d334e5d351427e64f74f6371e152473acd3dfef4",
+      "reviewer_id": "grr-949d5adeda56",
+      "runtime_ms": 310.074,
+      "status": "available",
+      "surface_candidate_count": 1
+    },
+    {
+      "accepted_line_link_count": 525,
+      "appearance_component_count": 2,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 269,
+      "partition_status_counts": {
+        "single_surface_candidate": 7,
+        "split_candidate": 1
+      },
+      "result_sha256": "e9959740357d6db7e5e77d9d314f9919183bc2881b0c52b6b176329cbbfe8ff5",
+      "reviewer_id": "grr-fbce085cfd3c",
+      "runtime_ms": 179.745,
+      "status": "available",
+      "surface_candidate_count": 2
+    },
+    {
+      "accepted_line_link_count": 534,
+      "appearance_component_count": 1,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 313,
+      "partition_status_counts": {
+        "single_surface_candidate": 8
+      },
+      "result_sha256": "ae55d24809f2138efe035c549c670715e37083af91a4aba14ba852a21ad7bc9d",
+      "reviewer_id": "grr-8e3ac3925ef7",
+      "runtime_ms": 201.144,
+      "status": "available",
+      "surface_candidate_count": 4
+    },
+    {
+      "accepted_line_link_count": 435,
+      "appearance_component_count": 1,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 334,
+      "partition_status_counts": {
+        "single_surface_candidate": 6,
+        "split_candidate": 2
+      },
+      "result_sha256": "25d330b89d3264c25563402a846d6acd8ba8483b563237a8de0e04c5589c7183",
+      "reviewer_id": "grr-dc955be40930",
+      "runtime_ms": 182.347,
+      "status": "available",
+      "surface_candidate_count": 5
+    },
+    {
+      "accepted_line_link_count": 867,
+      "appearance_component_count": 1,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 312,
+      "partition_status_counts": {
+        "single_surface_candidate": 7,
+        "split_candidate": 1
+      },
+      "result_sha256": "bf4ab4cc49b4b6f14c942830e2d1329c3acb18ac9b4d3ce4d5829ce461a2aac8",
+      "reviewer_id": "grr-21b4a7e84fa7",
+      "runtime_ms": 245.968,
+      "status": "available",
+      "surface_candidate_count": 2
+    },
+    {
+      "accepted_line_link_count": 400,
+      "appearance_component_count": 1,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 241,
+      "partition_status_counts": {
+        "single_surface_candidate": 8
+      },
+      "result_sha256": "25190836540c657d36cce3009334fa0fbec5d6c09222ac4e70ba6f1065f27175",
+      "reviewer_id": "grr-e1d5766643a2",
+      "runtime_ms": 126.168,
+      "status": "available",
+      "surface_candidate_count": 6
+    },
+    {
+      "accepted_line_link_count": 597,
+      "appearance_component_count": 1,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 309,
+      "partition_status_counts": {
+        "single_surface_candidate": 8
+      },
+      "result_sha256": "befc1e062c3705e59541ec2b7d091a1f3e637da535d4cf0bed867773f05f17d4",
+      "reviewer_id": "grr-c097f87c33d6",
+      "runtime_ms": 185.971,
+      "status": "available",
+      "surface_candidate_count": 4
+    },
+    {
+      "accepted_line_link_count": 915,
+      "appearance_component_count": 1,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 404,
+      "partition_status_counts": {
+        "single_surface_candidate": 4,
+        "split_candidate": 4
+      },
+      "result_sha256": "f79b01a33d09becd2b49f1e7caaf9e2ce955c7fa942199febb183370f387210e",
+      "reviewer_id": "grr-2d2a7ad3f419",
+      "runtime_ms": 289.597,
+      "status": "available",
+      "surface_candidate_count": 2
+    },
+    {
+      "accepted_line_link_count": 713,
+      "appearance_component_count": 3,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 269,
+      "partition_status_counts": {
+        "single_surface_candidate": 8
+      },
+      "result_sha256": "ce4b8def22b5150b7143084b6764a920d34becbdeddb2ec6b387866b7f0965f6",
+      "reviewer_id": "grr-bec47965a881",
+      "runtime_ms": 196.819,
+      "status": "available",
+      "surface_candidate_count": 3
+    },
+    {
+      "accepted_line_link_count": 859,
+      "appearance_component_count": 1,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 327,
+      "partition_status_counts": {
+        "single_surface_candidate": 8
+      },
+      "result_sha256": "a0efa2e34ccc3dcf7b4464b4abf39174f27c6bf8e53fa68eb522dcc162a8b234",
+      "reviewer_id": "grr-bd5662bc5d56",
+      "runtime_ms": 241.907,
+      "status": "available",
+      "surface_candidate_count": 1
+    },
+    {
+      "accepted_line_link_count": 996,
+      "appearance_component_count": 2,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 355,
+      "partition_status_counts": {
+        "single_surface_candidate": 6,
+        "split_candidate": 2
+      },
+      "result_sha256": "bd4b49e390d8fd060f82b26c63839ab7c3beb46b8644824b56614ba6227ecf5f",
+      "reviewer_id": "grr-009e72fb44bf",
+      "runtime_ms": 322.523,
+      "status": "available",
+      "surface_candidate_count": 2
+    },
+    {
+      "accepted_line_link_count": 916,
+      "appearance_component_count": 1,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 409,
+      "partition_status_counts": {
+        "single_surface_candidate": 6,
+        "split_candidate": 2
+      },
+      "result_sha256": "71b0403709f74ecac251e4861dee56ac32f7a421685f84369ab6eee915407d67",
+      "reviewer_id": "grr-ca2496d8b7bb",
+      "runtime_ms": 335.157,
+      "status": "available",
+      "surface_candidate_count": 2
+    },
+    {
+      "accepted_line_link_count": 516,
+      "appearance_component_count": 1,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 293,
+      "partition_status_counts": {
+        "single_surface_candidate": 8
+      },
+      "result_sha256": "ae5e6ea515a443c834127c6d9835c1ff5b0b548938af791b584d1e78d23a0c7d",
+      "reviewer_id": "grr-cdbdcf7316f7",
+      "runtime_ms": 156.598,
+      "status": "available",
+      "surface_candidate_count": 2
+    },
+    {
+      "accepted_line_link_count": 867,
+      "appearance_component_count": 1,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 312,
+      "partition_status_counts": {
+        "single_surface_candidate": 7,
+        "split_candidate": 1
+      },
+      "result_sha256": "77c1e9b1db340bc1a0fb8fe41cfaf7c98d183e34a0186a8fd24e6165a0efe57b",
+      "reviewer_id": "grr-0ef16f4dfd37",
+      "runtime_ms": 277.634,
+      "status": "available",
+      "surface_candidate_count": 2
+    },
+    {
+      "accepted_line_link_count": 945,
+      "appearance_component_count": 1,
+      "artifacts_complete": true,
+      "deterministic_json": true,
+      "family_partition_count": 8,
+      "line_count": 391,
+      "partition_status_counts": {
+        "single_surface_candidate": 8
+      },
+      "result_sha256": "345904d3b142f016cbc83bd7d3ab6d8363f6550f3eee47c83b1e19ad96cd11d7",
+      "reviewer_id": "grr-93754df2d0d3",
+      "runtime_ms": 314.791,
+      "status": "available",
+      "surface_candidate_count": 1
+    }
+  ],
+  "schema_version": "geometry-deterministic-surface-baseline-audit-v1",
+  "source_key_opened": false,
+  "source_labels_used": false,
+  "status": "complete",
+  "validation_errors": [],
+  "web_integration_authorized": false
+}
