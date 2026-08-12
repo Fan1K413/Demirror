@@ -1,0 +1,154 @@
+{
+  "schema_version": "demirror-sidbench-candidate-screen-protocol-v1",
+  "created_at": "2026-08-12",
+  "purpose": "Score-blind elimination screen for two small offline pixel-forensic candidates; this protocol cannot modify product scoring or thresholds.",
+  "deployment_eligible": false,
+  "runtime_policy_changed": false,
+  "upstream": {
+    "framework": "SIDBench",
+    "repository": "https://github.com/mever-team/sidbench",
+    "revision": "b33f51c7c25868a69cb7ba7d1fdc582e243acbf0",
+    "framework_license": "Apache-2.0",
+    "weight_license": "mixed-upstream-licenses",
+    "weight_license_gate": "fail_closed_until_each_upstream_checkpoint_license_is_resolved",
+    "source_files": {
+      "dataset/process.py": "ac0a052a89aa54a379cbc28e10cf84d78dad8ad4f784944750a69eeac5626ce9",
+      "models/RPTC.py": "24ab36fc4bb7f5f141768be78b5b4bcd02cf9dcd45e1a0e789685ee2bf71b0c7",
+      "models/NPR.py": "91a68c6c682fa173c701314d15c848e6c871e909c49fa9911ddd3f9bacd12116",
+      "networks/resnet_npr.py": "0f545f6569f71153a858b15e4e6c4156eb9c3b20b19cb988afa8b53b89b031d5",
+      "evaluate.py": "359360cd76b143e09392d3721ae414e0a807bdf3cf309f9b6453d54662654a8f",
+      "utils/evaluation_utils.py": "be8dca8bc95dd401acd8edb2d328621dd9f3704b0fba0ab503dfd1ff2053f3ca"
+    },
+    "npr_repository": "https://github.com/chuangchuangtan/NPR-DeepfakeDetection",
+    "npr_revision": "781ced3f7ca2cdc69ec9dd4ef27e8d0b3c07752a",
+    "npr_source_files": {
+      "test.py": "c5f3b4dd1a97c51fb2422331c9dbdadd70c365deea370ca3eba1e373f19d7b5c",
+      "validate.py": "2d8f06d17fde87d7bb2858ddaa47a1a9320738b898040f24b285986a0ae4e36c",
+      "networks/resnet.py": "b0101f67eeece66bbf65add6fbbfdc12811b77910091fa3b12ffea5fb58c14df",
+      "data/datasets.py": "f547bd61f4af02ac819fc44a7bd870a892efe17bcbb37e5e3ea27220d014c329"
+    }
+  },
+  "candidates": {
+    "patchcraft_rptc": {
+      "paper": "PatchCraft: Exploring Texture Patch for Efficient AI-generated Image Detection",
+      "checkpoint_relative_path": "outputs/research/sidbench_weights/rptc/RPTC.pth",
+      "checkpoint_md5": "271ec9c97551ab2ce19e1d8bb6545059",
+      "checkpoint_sha256": "c1c9612cc47215d7c4cbdc5ddff52a4312519d697fd0830ce478f63f58e733fd",
+      "checkpoint_size_bytes": 512674,
+      "operation_point": 0.5,
+      "preprocessing": "SIDBench RPTC 224px poor/rich texture mosaics, patchNum=3, 192 random 28px crops per image",
+      "seeds": [
+        17,
+        43,
+        101
+      ],
+      "primary_seed": 17
+    },
+    "npr": {
+      "paper": "Rethinking the Up-Sampling Operations in CNN-based Generative Network for Generalizable Deepfake Detection",
+      "checkpoint_relative_path": "outputs/research/sidbench_weights/npr/NPR.pth",
+      "checkpoint_md5": "35d0f34154358af6b38157154b443f53",
+      "checkpoint_sha256": "3939297e9399e0b992f87211610769d87d899de50d56da0204d6cbda2d483a53",
+      "checkpoint_size_bytes": 17393733,
+      "operation_point": 0.5,
+      "preprocessing": "SIDBench 224px center crop and ImageNet normalization; NPR residual is computed inside the released model",
+      "checkpoint_adapter": "Extract checkpoint['model'], require every key to start with module., remove exactly that prefix, then strict-load all 146 tensors. This repairs a statically verified upstream/SIDBench packaging mismatch; it does not use labels or scores.",
+      "seeds": [
+        42
+      ],
+      "primary_seed": 42
+    }
+  },
+  "data": {
+    "order": [
+      "openfake_confirmation",
+      "fivek_extension",
+      "hdrplus_real_control"
+    ],
+    "cohorts": {
+      "openfake_confirmation": {
+        "manifest": "data/openfake_recalibration_confirmation_v1/manifest.json",
+        "manifest_sha256": "e48fb7fa12aa444d8f627abef3d7f9040e103da7a08238a26458f84e0e84665c",
+        "count": 160,
+        "generated_count": 80,
+        "real_count": 80,
+        "role": "new-generator recall and web-image real control; no threshold selection"
+      },
+      "fivek_extension": {
+        "manifest": "data/fivek_real_control_extension_v1/score_manifest.json",
+        "manifest_sha256": "6722e5a07bc3ebe4416bacde949e479b4ecfa1079ddf67b2f07a496db09a8321",
+        "count": 32,
+        "generated_count": 0,
+        "real_count": 32,
+        "role": "independent camera-DNG-derived real control"
+      },
+      "hdrplus_real_control": {
+        "manifest": "data/hdrplus_real_control_v1/score_manifest.json",
+        "manifest_sha256": "9c765533f131b7a25b835f9e6a01f5659de04d779bdced97a0987d64195e1c72",
+        "count": 40,
+        "generated_count": 0,
+        "real_count": 40,
+        "role": "independent mobile-camera-RAW real control"
+      }
+    },
+    "total_unique_images": 232,
+    "input_profiles": [
+      "original_decode",
+      "jpeg_reencode_quality=85"
+    ],
+    "selection": "Use every frozen manifest record in manifest order. No sample may be removed after scoring."
+  },
+  "registered_baseline": {
+    "scope": "OpenFake confirmation cohort only",
+    "rule": "community_score >= 0.5 OR nonescape_score >= 0.9260923266410828",
+    "reports": {
+      "community_original": {
+        "path": "outputs/openfake_recalibration_confirmation_v1/community_original.json",
+        "sha256": "ea52388d3a435d03e6c6e47202079429a493a9f06b65389a1dbb3e39aeaf541f"
+      },
+      "community_jpeg85": {
+        "path": "outputs/openfake_recalibration_confirmation_v1/community_jpeg85.json",
+        "sha256": "496d870de647f53326be8c20bb2ed92182113a276b51cffd07dc9f58dae6f16b"
+      },
+      "nonescape_original": {
+        "path": "outputs/openfake_recalibration_confirmation_v1/nonescape_original.json",
+        "sha256": "5bf298be497ccc9d8d910793801acf4c1b6c606ccc26c9f4718c57750b6754bd"
+      },
+      "nonescape_jpeg85": {
+        "path": "outputs/openfake_recalibration_confirmation_v1/nonescape_jpeg85.json",
+        "sha256": "87cef42b02d375ca7332c12d0a1b448dd27553f25508fc3c9e177f98ef8c64d1"
+      }
+    }
+  },
+  "execution": {
+    "device": "cpu",
+    "cpu_threads": 2,
+    "model_isolation": "one short-lived Python process per candidate",
+    "image_batch_size": 1,
+    "maximum_peak_working_set_mib": 750,
+    "maximum_p95_seconds_per_scored_view": 2.0,
+    "fail_on_nonfinite_score": true,
+    "fail_on_input_hash_mismatch": true,
+    "strict_checkpoint_load_required": true
+  },
+  "elimination_gate": {
+    "applies_to_each_original_and_jpeg85_profile": true,
+    "openfake_generated_recall_wilson_95_lower_minimum": 0.55,
+    "each_generator_point_recall_minimum": 0.45,
+    "pooled_real_false_positive_rate_wilson_95_upper_maximum": 0.25,
+    "openfake_additional_generated_hits_over_registered_baseline_minimum": 8,
+    "jpeg85_generated_recall_drop_maximum": 0.10,
+    "jpeg85_pooled_real_false_positive_rate_increase_maximum": 0.05,
+    "original_jpeg85_binary_agreement_minimum": 0.85,
+    "patchcraft_cross_seed_binary_agreement_minimum": 0.95,
+    "patchcraft_cross_seed_score_range_p95_maximum": 0.15,
+    "all_resource_limits_must_pass": true,
+    "threshold_tuning_allowed": false
+  },
+  "decision_policy": {
+    "any_gate_failure": "reject_candidate_for_product_integration",
+    "all_gates_pass": "eligible_only_for_license_resolution_and_a_larger_source-isolated_blind_gate",
+    "deployment_always_blocked_in_this_screen": true,
+    "website_and_origin_scoring_must_remain_unchanged": true
+  }
+}
