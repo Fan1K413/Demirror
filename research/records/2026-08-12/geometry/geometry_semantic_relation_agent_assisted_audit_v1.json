@@ -1,0 +1,121 @@
+{
+  "agent_annotation_closure_sha256": "f1b4e53103700634c376733179b9d97b7206622f4720fe02ddfd76a0b51789fb",
+  "annotation_semantics": "AI-assisted blind preannotation; not human ground truth",
+  "annotation_status_counts": {
+    "completed": 30,
+    "unassessable": 6
+  },
+  "blind_manifest_sha256": "6be1f25ec41601a4489f1ebcb0c09260aceeffd6fac45db47093c236b52c7320",
+  "decision": "eligible_for_relation_graph_proposal_and_later_human_review",
+  "duplicate_reviewer_ids": [],
+  "expected_packet_count": 36,
+  "extra_reviewer_ids": [],
+  "gates": {
+    "all_36_annotations_present_once": true,
+    "all_annotations_contract_valid": true,
+    "all_annotations_frozen": true,
+    "human_templates_unchanged": true,
+    "registered_input_closure_matches": true,
+    "source_key_remained_closed": true
+  },
+  "human_review_required_for_ground_truth": true,
+  "human_template_hash_closure_sha256": "bf8a272f29da0cd9778850ca517e23fa56b61d29c0df982701831c2779f8e960",
+  "missing_reviewer_ids": [],
+  "origin_scoring_authorized": false,
+  "passed": true,
+  "priority_human_review": [
+    {
+      "reasons": ["family_unassessable"],
+      "reviewer_id": "grr-009e72fb44bf"
+    },
+    {
+      "reasons": ["family_unassessable"],
+      "reviewer_id": "grr-0c4e9bf1fb0e"
+    },
+    {
+      "reasons": ["family_unassessable", "packet_unassessable"],
+      "reviewer_id": "grr-227d164e18fb"
+    },
+    {
+      "reasons": ["family_outliers_recorded", "family_unassessable"],
+      "reviewer_id": "grr-2aba0c063fc0"
+    },
+    {
+      "reasons": ["family_outliers_recorded", "family_unassessable"],
+      "reviewer_id": "grr-6a9d097e8306"
+    },
+    {
+      "reasons": ["family_unassessable", "packet_unassessable"],
+      "reviewer_id": "grr-6e2c73bb0795"
+    },
+    {
+      "reasons": ["family_unassessable", "packet_unassessable"],
+      "reviewer_id": "grr-74b0c0dd4952"
+    },
+    {
+      "reasons": ["family_outliers_recorded", "family_unassessable"],
+      "reviewer_id": "grr-98ad487eb68b"
+    },
+    {
+      "reasons": ["family_outliers_recorded", "family_unassessable"],
+      "reviewer_id": "grr-a2c28b6b0df9"
+    },
+    {
+      "reasons": ["family_unassessable", "packet_unassessable"],
+      "reviewer_id": "grr-ab3e1e1b3429"
+    },
+    {
+      "reasons": ["family_unassessable"],
+      "reviewer_id": "grr-b04b6672e300"
+    },
+    {
+      "reasons": ["family_unassessable", "packet_unassessable"],
+      "reviewer_id": "grr-bb1a2467a840"
+    },
+    {
+      "reasons": ["family_unassessable"],
+      "reviewer_id": "grr-c097f87c33d6"
+    },
+    {
+      "reasons": ["family_unassessable", "packet_unassessable"],
+      "reviewer_id": "grr-c3dded41786e"
+    },
+    {
+      "reasons": ["family_outliers_recorded", "uncertain_surface_visibility"],
+      "reviewer_id": "grr-cdbdcf7316f7"
+    },
+    {
+      "reasons": ["family_outliers_recorded"],
+      "reviewer_id": "grr-dc955be40930"
+    },
+    {
+      "reasons": ["family_unassessable", "uncertain_surface_visibility"],
+      "reviewer_id": "grr-e1d5766643a2"
+    },
+    {
+      "reasons": ["family_outliers_recorded", "family_unassessable"],
+      "reviewer_id": "grr-f5eb6a008a8c"
+    },
+    {
+      "reasons": ["family_unassessable"],
+      "reviewer_id": "grr-fbce085cfd3c"
+    }
+  ],
+  "protocol_canonical_sha256": "cab7dad2889d4d0d629252086a7588a2a2bc3bf1b43cb5a40d0c81527aff1a9b",
+  "protocol_sha256": "bb3cd7c12c7378370a6bb19e0557380dea0e5eb9242378a473b6d3356bcfcdf1",
+  "protocol_verified": true,
+  "registration_errors": [],
+  "schema_version": "geometry-semantic-relation-agent-annotation-audit-v1",
+  "semantic_annotation_closure_sha256": "25296e3bf98cbb6c83b94e03198afae718563b7365d3d2370297837d29f255ea",
+  "source_key_opened": false,
+  "status": "complete",
+  "surface_count": 129,
+  "template_drift_reviewer_ids": [],
+  "validated_annotation_count": 36,
+  "validation_errors": [],
+  "verdict_counts": {
+    "coherent_within_surface": 19,
+    "split_across_surfaces": 180,
+    "unassessable": 89
+  }
+}

@@ -24,7 +24,7 @@ from image_trust.provenance.c2pa import inspect_c2pa_asset, write_c2pa_record
 from image_trust.provenance.config import load_c2pa_config
 from image_trust.schemas import RunStatus
 from image_trust.utils.config import load_config
-from image_trust.web.server import serve_local_demo
+from image_trust.web.server import GEOMETRY_REVIEW_PREFIX, serve_local_demo
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -144,6 +144,12 @@ def build_parser() -> argparse.ArgumentParser:
         default=Path(".demirror_web_jobs"),
         help="Ignored local directory for uploads, job state, and evidence artifacts.",
     )
+    serve.add_argument(
+        "--blind-root",
+        type=Path,
+        default=Path("outputs/geometry_semantic_relation_pilot_v1/blind"),
+        help="Blind geometry-review directory mounted below /geometry-review/ when present.",
+    )
     return parser
 
 
@@ -230,8 +236,19 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 0
     if args.command == "serve":
-        server = serve_local_demo(Path.cwd(), args.jobs_root, args.host, args.port)
+        server = serve_local_demo(
+            Path.cwd(),
+            args.jobs_root,
+            args.host,
+            args.port,
+            relation_review_root=args.blind_root,
+        )
         print(f"Demirror local demo: http://{args.host}:{args.port}")
+        if server.relation_review_store is not None:  # type: ignore[attr-defined]
+            print(
+                "Demirror geometry relation review: "
+                f"http://{args.host}:{args.port}{GEOMETRY_REVIEW_PREFIX}/"
+            )
         try:
             server.serve_forever()
         except KeyboardInterrupt:

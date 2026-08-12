@@ -3,13 +3,19 @@
 from __future__ import annotations
 
 import cgi
+import ipaddress
 import json
 import mimetypes
 from pathlib import Path
+from socketserver import ThreadingMixIn
 from typing import Callable
 from urllib.parse import unquote
 from wsgiref.simple_server import WSGIServer, make_server
 
+from image_trust.geometry_ai.review_server import (
+    GeometryRelationReviewStore,
+    create_relation_review_app,
+)
 from image_trust.web.jobs import (
     MAX_UPLOAD_BYTES,
     LocalJobStore,
@@ -24,18 +30,35 @@ from image_trust.watermark.remote import (
 
 
 STATIC_ROOT = Path(__file__).with_name("static")
+GEOMETRY_REVIEW_PREFIX = "/geometry-review"
+LOOPBACK_HOSTS = {"127.0.0.1", "::1", "localhost"}
+
+
+class ThreadingWSGIServer(ThreadingMixIn, WSGIServer):
+    """Keep one slow browser request from blocking every local route."""
+
+    daemon_threads = True
 
 
 def create_app(
     store: LocalJobStore,
     static_root: Path = STATIC_ROOT,
     remote_settings: RemoteVerificationSettings | None = None,
+    relation_review_app: Callable | None = None,
 ) -> Callable:
     """Return a small WSGI application with upload, poll, cancel, and artifact routes."""
 
     def app(environ, start_response):
         method = environ.get("REQUEST_METHOD", "GET").upper()
         path = unquote(environ.get("PATH_INFO", "/"))
+        if path == GEOMETRY_REVIEW_PREFIX:
+            if relation_review_app is None:
+                return _json(start_response, "404 Not Found", {"error": "not_found"})
+            return _redirect(start_response, f"{GEOMETRY_REVIEW_PREFIX}/")
+        if path.startswith(f"{GEOMETRY_REVIEW_PREFIX}/"):
+            if relation_review_app is None:
+                return _json(start_response, "404 Not Found", {"error": "not_found"})
+            return _mount_relation_review(environ, start_response, relation_review_app)
         if method == "GET" and path == "/api/capabilities":
             return _json(
                 start_response,
@@ -60,18 +83,71 @@ def serve_local_demo(
     jobs_root: Path,
     host: str = "127.0.0.1",
     port: int = 8765,
+    relation_review_root: Path | None = None,
 ) -> WSGIServer:
     """Construct, but do not start, a local-only server for CLI use and tests."""
 
+    if not _is_loopback_host(host):
+        raise ValueError("Demirror local server accepts loopback hosts only")
     remote_settings = load_remote_verification_settings(project_root)
     store = LocalJobStore(
         jobs_root,
         build_local_runner(project_root, remote_settings),
         worker_project_root=project_root,
     )
-    server = make_server(host, port, create_app(store, remote_settings=remote_settings))
+    review_store = None
+    review_app = None
+    if relation_review_root is not None:
+        resolved_review_root = relation_review_root
+        if not resolved_review_root.is_absolute():
+            resolved_review_root = project_root / resolved_review_root
+        if (resolved_review_root / "review_manifest.jsonl").is_file():
+            review_store = GeometryRelationReviewStore(resolved_review_root)
+            review_app = create_relation_review_app(review_store)
+    server = make_server(
+        host,
+        port,
+        create_app(
+            store,
+            remote_settings=remote_settings,
+            relation_review_app=review_app,
+        ),
+        server_class=ThreadingWSGIServer,
+    )
     server.job_store = store  # type: ignore[attr-defined]
+    server.relation_review_store = review_store  # type: ignore[attr-defined]
     return server
+
+
+def _mount_relation_review(environ, start_response, relation_review_app: Callable):
+    child_environ = dict(environ)
+    child_environ["SCRIPT_NAME"] = (
+        str(environ.get("SCRIPT_NAME", "")) + GEOMETRY_REVIEW_PREFIX
+    )
+    path = str(environ.get("PATH_INFO", "/"))
+    child_environ["PATH_INFO"] = path[len(GEOMETRY_REVIEW_PREFIX) :] or "/"
+    return relation_review_app(child_environ, start_response)
+
+
+def _redirect(start_response, location: str):
+    start_response(
+        "308 Permanent Redirect",
+        [
+            ("Location", location),
+            ("Content-Length", "0"),
+            ("Cache-Control", "no-store"),
+        ],
+    )
+    return [b""]
+
+
+def _is_loopback_host(host: str) -> bool:
+    if host.lower() in LOOPBACK_HOSTS:
+        return True
+    try:
+        return ipaddress.ip_address(host).is_loopback
+    except ValueError:
+        return False
 
 
 def _create_job(environ, start_response, store: LocalJobStore):

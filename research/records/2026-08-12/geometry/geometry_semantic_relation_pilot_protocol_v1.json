@@ -1,0 +1,96 @@
+{
+  "schema_version": "demirror-geometry-semantic-relation-pilot-protocol-v1",
+  "date_registered": "2026-08-12",
+  "status": "pre_registered_before_blind_packet_measurement",
+  "purpose": "Test whether source-blind human surface attribution can distinguish geometry-v2 family overmerge from a genuine within-surface geometric conflict before any semantic relation graph is implemented.",
+  "cohort": {
+    "registry": "data/p0_geometry_anomaly_v1/cross_generator_review_registry.jsonl",
+    "registry_sha256": "fadef348743cc2c3e681aa1413fa61549b51f60fc70eb939604c2249ae53be0a",
+    "selection_algorithm": "Within each archive_name and declared label stratum, rank unique sample_id values by SHA-256 of the fixed seed, stratum and sample_id; take the first four. Geometry output is not available to selection.",
+    "selection_seed": "demirror-geometry-semantic-relation-pilot-2026-08-12-v1",
+    "selected_source_set_sha256": "bc1b7d9879b2efa206f9485977173dee3c394c8f994b5d483dd5e92168d14292",
+    "stratum_count": 8,
+    "per_stratum": 4,
+    "unique_source_count": 32,
+    "hidden_duplicate_count": 4,
+    "packet_count": 36,
+    "source_hash_overlap": "forbidden",
+    "geometry_conditioned_selection": false
+  },
+  "implementation_sha256": {
+    "scripts/audit_geometry_relation_review_pilot.py": "9cef88dd4349d02b9529345c0ade8b4017365471366966590258ab07577df4c0",
+    "scripts/build_geometry_relation_review_pilot.py": "d72c1101d58d5b5e8e141f72ed14181850aa49514336a1132c1169bf88a36af9",
+    "src/image_trust/geometry_ai/consistency_v2.py": "5dc48fca0c8e8f1941223b039fe34e8fb02cd3d426b6835c7c9fdf3d9b008bd6",
+    "src/image_trust/geometry_ai/measurement_overlays.py": "cd70b32f8efcfcbeb1bb461e640a321eeac88e1161878d948999b205c99678cb",
+    "src/image_trust/geometry_ai/measurement_types.py": "b814287c10043a220531e8d947ec1e40629529fa60007be59c3a49ebe79e1537",
+    "src/image_trust/geometry_ai/measurement_v2.py": "0284a573b814c2f417aad8ec3e5a9533abc1f0cdef52760819ca3cfad158e8cf",
+    "src/image_trust/geometry_ai/relation_annotations.py": "5ad561244bf4a61a4d9c14ad338ca4e33f348a76a4a4a24cfc23b7702020c40b"
+  },
+  "blindness": {
+    "packet_image": "EXIF-oriented RGB decoded and re-saved as anonymous PNG without source metadata or original filename",
+    "forbidden_packet_fields": [
+      "sample_id",
+      "relative_path",
+      "declared_source_slice",
+      "archive_name",
+      "generator_family",
+      "label_name"
+    ],
+    "blind_manifest_fields": [
+      "reviewer_id",
+      "packet",
+      "annotation"
+    ],
+    "posthoc_key_policy": "The audit must not open the posthoc source key until all 36 annotations are frozen as completed or unassessable.",
+    "duplicate_visibility": "Hidden duplicate identities and source groups are absent from blind packets and the blind manifest.",
+    "review_prohibition": "The reviewer must not infer or record real, AI, generator or archive identity."
+  },
+  "annotation_contract": {
+    "first_step": "Mark visible semantic surfaces such as facade, roof, road, floor, ceiling, repeated window or door array, railing, or another object surface.",
+    "surface_geometry": "Each surface has a normalized polygon and the detected line IDs that visibly belong to it.",
+    "proposed_family_verdicts": [
+      "coherent_within_surface",
+      "split_across_surfaces",
+      "geometry_inconsistent_within_surface",
+      "unassessable"
+    ],
+    "proposal_budget": "At most four stable global families and four stable local families per packet. Families referenced by G1-G4 findings rank first by maximum finding severity; remaining controls rank by member count, bootstrap stability and inlier ratio. No source field participates.",
+    "critical_distinction": {
+      "split_across_surfaces": "The algorithm joined different visible surfaces because their image directions were similar. This is grouping error and never source evidence.",
+      "geometry_inconsistent_within_surface": "Lines assigned to one visible surface cannot satisfy the reviewed relation. This is only a candidate for later source-isolated study."
+    },
+    "additional_relation_types": [
+      "parallel_family",
+      "common_vanishing_direction",
+      "repeated_spacing",
+      "edge_continuation"
+    ],
+    "excluded_shortcuts": [
+      "direction-only family identity",
+      "image-level anomaly count",
+      "source label used as geometry truth",
+      "AI probability entered by reviewer"
+    ]
+  },
+  "quality_gates": {
+    "completed_unique_ratio_minimum": 0.75,
+    "completed_hidden_duplicate_pairs_minimum": 3,
+    "family_decision_agreement_minimum": 0.8,
+    "surface_line_pair_agreement_minimum": 0.8,
+    "agreement_definition": "Family agreement compares fixed proposal verdicts. Surface agreement compares whether common detected-line pairs were assigned to at least one shared surface and is invariant to surface names."
+  },
+  "posthoc_reports": [
+    "annotation completion and unassessable counts",
+    "hidden duplicate family-verdict and surface line-pair agreement",
+    "algorithm overmerge prevalence kept separate from within-surface conflict prevalence",
+    "descriptive within-surface conflict and overmerge rates by declared label and archive with Wilson 95 percent intervals"
+  ],
+  "decision_rules": {
+    "quality_gate_failure": "Revise annotation instructions or surface contract and repeat a new blinded pilot; do not inspect labels to tune geometry rules.",
+    "quality_gate_success": "Permit only a larger blinded annotation round and a relation-graph implementation proposal.",
+    "source_signal_claim": "Forbidden from this pilot regardless of posthoc rates.",
+    "runtime_or_web_change": "Forbidden.",
+    "threshold_or_model_fitting": "Forbidden."
+  },
+  "origin_scoring_authorized": false
+}

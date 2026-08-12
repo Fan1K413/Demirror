@@ -6,7 +6,7 @@ from pathlib import Path
 from threading import Event
 
 from image_trust.web.jobs import LocalJobStore, WebJobOutcome, WebJobStatus
-from image_trust.web.server import create_app
+from image_trust.web.server import ThreadingWSGIServer, create_app, serve_local_demo
 from image_trust.watermark.remote import RemoteVerificationSettings
 
 
@@ -119,6 +119,65 @@ def test_wsgi_server_rejects_declared_oversized_upload(tmp_path) -> None:
         assert json.loads(body) == {"error": "upload_too_large"}
     finally:
         store.close()
+
+
+def test_wsgi_server_mounts_geometry_review_below_a_subpath(tmp_path) -> None:
+    static_root = tmp_path / "static"
+    static_root.mkdir()
+    (static_root / "index.html").write_text("Demirror", encoding="utf-8")
+    store = LocalJobStore(
+        tmp_path / "jobs",
+        lambda *_: WebJobOutcome(status=WebJobStatus.COMPLETED),
+    )
+
+    def relation_review_app(environ, start_response):
+        body = (
+            f"{environ.get('SCRIPT_NAME', '')}|{environ.get('PATH_INFO', '')}"
+        ).encode("utf-8")
+        start_response(
+            "200 OK",
+            [("Content-Type", "text/plain"), ("Content-Length", str(len(body)))],
+        )
+        return [body]
+
+    app = create_app(
+        store,
+        static_root,
+        relation_review_app=relation_review_app,
+    )
+    try:
+        redirect = _request(app, "GET", "/geometry-review")
+        mounted = _request(app, "GET", "/geometry-review/api/state")
+
+        assert redirect["status"] == "308 Permanent Redirect"
+        assert redirect["headers"]["Location"] == "/geometry-review/"
+        assert mounted["status"] == "200 OK"
+        assert mounted["body"] == b"/geometry-review|/api/state"
+        assert _request(app, "GET", "/")["body"] == b"Demirror"
+    finally:
+        store.close()
+
+
+def test_local_server_refuses_non_loopback_bind_before_creating_jobs(tmp_path) -> None:
+    try:
+        serve_local_demo(tmp_path, tmp_path / "jobs", host="0.0.0.0")
+    except ValueError as error:
+        assert "loopback" in str(error)
+    else:
+        raise AssertionError("public bind was accepted")
+
+    assert not (tmp_path / "jobs").exists()
+
+
+def test_local_server_uses_threaded_wsgi_for_browser_requests(tmp_path) -> None:
+    project_root = Path(__file__).resolve().parents[1]
+    server = serve_local_demo(project_root, tmp_path / "jobs", port=0)
+    try:
+        assert isinstance(server, ThreadingWSGIServer)
+        assert server.daemon_threads is True
+    finally:
+        server.job_store.close()
+        server.server_close()
 
 
 def test_wsgi_capabilities_hide_key_and_upload_requires_explicit_opt_in(tmp_path) -> None:

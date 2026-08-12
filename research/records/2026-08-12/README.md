@@ -1,6 +1,6 @@
 # 2026-08-12 研究记录清单
 
-本目录只保留能够支撑阶段结论的 18 份机器可读记录。筛选标准是：最终审计优先；保留
+本目录只保留能够支撑阶段结论的 20 份机器可读记录。筛选标准是：最终审计优先；保留
 复现最终审计所必需的预注册协议；保留会影响资源边界理解的关键失败收据；不保留已被
 最终结果取代的重复候选屏、连续采集协议版本和中间选择表。
 
@@ -19,7 +19,10 @@
 - `geometry_v2_fivek_extension_protocol_v1.json` 与对应 audit：FiveK G1–G4 复核负担；
 - `geometry_v2_openfake_comparison_protocol_v1.json` 与对应 audit：生成／实拍对照；
 - `fivek_cross_signal_diagnostic_v1.json`：像素与几何集合交叉诊断；
-- `geometry_flip_equivariance_protocol_v1.json`：尚未完成的水平翻转等变性协议。
+- `geometry_flip_equivariance_protocol_v1.json` 与对应 audit：已被 SDXL 留出门禁拒绝的水平翻转等变性路线；
+- `geometry_semantic_relation_pilot_protocol_v1.json`：32 个唯一源图加 4 个隐藏重复的语义表面关系盲审协议，当前不含人工结果。
+- `geometry_semantic_relation_agent_assisted_protocol_v1.json`：三组来源盲化 AI 辅助预标注的角色、独立性、输入哈希与合并门禁；结果不是人工真值，也不授权来源计分。
+- `geometry_semantic_relation_agent_assisted_audit_v1.json`：36 项 AI 辅助盲审的来源中立最终闭包、人工优先复核队列与不计分决策。
 
 ## Real controls
 

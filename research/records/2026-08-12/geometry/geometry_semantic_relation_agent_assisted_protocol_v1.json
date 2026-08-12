@@ -1,0 +1,77 @@
+{
+  "schema_version": "demirror-geometry-semantic-relation-agent-assisted-protocol-v1",
+  "date_registered": "2026-08-12",
+  "status": "registered_before_agent_annotation_merge_or_source_key_access",
+  "purpose": "Use source-blind AI-assisted preannotation to advance the semantic-surface relation study while preserving the untouched human-review templates for a later independent manual review.",
+  "input": {
+    "blind_root": "outputs/geometry_semantic_relation_pilot_v1/blind",
+    "review_manifest_sha256": "6be1f25ec41601a4489f1ebcb0c09260aceeffd6fac45db47093c236b52c7320",
+    "original_annotation_template_hash_closure_sha256": "bf8a272f29da0cd9778850ca517e23fa56b61d29c0df982701831c2779f8e960",
+    "packet_count": 36,
+    "original_annotation_templates_must_remain_unchanged": true
+  },
+  "roles": [
+    {
+      "role": "agent_review_01_12_recovery",
+      "manifest_positions": [1, 12],
+      "output_subdirectory": "part_01_12_recovery",
+      "recovery_note": "The first reviewer process stopped responding after one draft; that draft was preserved outside the merge root and a fresh source-blind reviewer restarted all twelve packets."
+    },
+    {
+      "role": "agent_review_13_24",
+      "manifest_positions": [13, 24],
+      "output_subdirectory": "part_13_24"
+    },
+    {
+      "role": "agent_review_25_36",
+      "manifest_positions": [25, 36],
+      "output_subdirectory": "part_25_36"
+    }
+  ],
+  "blindness": {
+    "allowed": [
+      "blind/review_manifest.jsonl",
+      "blind/packets/<reviewer_id>/review_packet.json",
+      "blind/packets/<reviewer_id>/image.png",
+      "blind/packets/<reviewer_id>/*_overlay.png",
+      "blind/packets/<reviewer_id>/family_details/*.png",
+      "source-neutral annotation contract code"
+    ],
+    "forbidden": [
+      "posthoc directory or source key",
+      "source label or generator identity",
+      "original path or original image hash",
+      "pixel, provenance, watermark, camera or origin scores",
+      "inference or recording of real-versus-generated identity"
+    ],
+    "source_key_opening_authorized": false
+  },
+  "review_independence": {
+    "each_packet_must_be_reviewed_from_its_own_assets": true,
+    "copying_or_harmonizing_answers_between_visually_similar_packets": "forbidden",
+    "recording_a_suspected_duplicate_mapping": "forbidden",
+    "reason": "Hidden duplicate agreement is meaningful only when repeated packets are judged independently."
+  },
+  "output": {
+    "root": "outputs/geometry_semantic_relation_pilot_v1/agent_annotations/v1",
+    "must_not_overwrite": "blind/packets/*/annotation.json",
+    "annotation_schema": "geometry-semantic-relation-annotation-v1",
+    "label": "AI-assisted blind preannotation, not human ground truth",
+    "human_review_preserved": true
+  },
+  "merge_gates": [
+    "all 36 reviewer IDs occur exactly once",
+    "every annotation validates against its blind review packet",
+    "every decided family maps each non-outlier member to one of its referenced semantic surfaces and every referenced surface contains a family member",
+    "all original human template SHA-256 values remain unchanged",
+    "no source or posthoc fields occur in agent annotation payloads"
+  ],
+  "decision_rules": {
+    "agent_annotation_success": "May inform a relation-graph engineering proposal and a later human disagreement queue only.",
+    "agent_annotation_failure": "Preserve outputs as diagnostic drafts; do not repair them with source labels.",
+    "human_ground_truth_claim": "Forbidden until an independent human review is completed.",
+    "origin_scoring_or_threshold_change": "Forbidden from this round.",
+    "posthoc_source_analysis": "Deferred; the source key stays closed in this phase."
+  },
+  "origin_scoring_authorized": false
+}

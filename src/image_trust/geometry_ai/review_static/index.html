@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Demirror · 几何关系盲审</title>
+    <link rel="stylesheet" href="static/styles.css">
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="brand-block">
+        <span class="brand">Demirror</span>
+        <span class="section-name">几何关系盲审</span>
+      </div>
+      <div class="header-progress" aria-live="polite">
+        <span id="progress-copy">正在读取任务…</span>
+        <span class="progress-track" aria-hidden="true"><span id="progress-bar"></span></span>
+      </div>
+      <span class="privacy-mark"><i></i>仅本机 · 来源隐藏</span>
+    </header>
+
+    <main class="review-layout" id="app" aria-busy="true">
+      <aside class="task-panel panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">任务</p>
+            <h1 id="task-heading">尚未载入</h1>
+          </div>
+          <span id="task-status" class="status-pill status-pending">待审</span>
+        </div>
+
+        <div class="task-navigation">
+          <button id="previous-task" class="button button-secondary" type="button">上一项</button>
+          <select id="task-select" aria-label="选择匿名任务"></select>
+          <button id="next-task" class="button button-secondary" type="button">下一项</button>
+        </div>
+        <button id="next-pending" class="text-button" type="button">前往下一项未完成任务</button>
+
+        <div class="task-metrics">
+          <div><span>表面</span><strong id="surface-count">0</strong></div>
+          <div><span>线族</span><strong id="family-progress">0 / 0</strong></div>
+        </div>
+
+        <details class="instruction-block">
+          <summary>标注顺序与边界</summary>
+          <ol id="instructions"></ol>
+        </details>
+
+        <div class="blind-note">
+          <strong>不要判断图片来源</strong>
+          <p>这里只记录可见表面与几何关系。方向相近但属于不同表面的线必须拆开。</p>
+        </div>
+      </aside>
+
+      <section class="image-panel panel">
+        <div class="image-toolbar">
+          <label>
+            <span>查看图层</span>
+            <select id="asset-select"></select>
+          </label>
+          <label class="toggle-label">
+            <input id="show-lines" type="checkbox" checked>
+            <span>显示可点选线段</span>
+          </label>
+          <span id="interaction-mode" class="mode-copy">选择一个表面后可分配线段</span>
+        </div>
+
+        <div class="image-stage" id="image-stage">
+          <div class="image-stack">
+            <img id="background-image" alt="匿名待审图片或几何叠图">
+            <canvas id="annotation-canvas" tabindex="0" aria-label="表面多边形与线段标注画布"></canvas>
+          </div>
+          <div id="image-loading" class="image-loading">正在载入图像…</div>
+        </div>
+
+        <div class="surface-tools">
+          <div class="tool-fields">
+            <label>
+              <span>表面类型</span>
+              <select id="surface-kind">
+                <option value="facade">立面</option>
+                <option value="roof">屋面</option>
+                <option value="road">道路</option>
+                <option value="floor">地面／地板</option>
+                <option value="ceiling">天花</option>
+                <option value="window_or_door_array">门窗阵列</option>
+                <option value="fence_or_railing">围栏／栏杆</option>
+                <option value="object_surface">物体表面</option>
+                <option value="other">其它</option>
+                <option value="uncertain">不确定</option>
+              </select>
+            </label>
+            <label>
+              <span>可见程度</span>
+              <select id="surface-visibility">
+                <option value="clear">清晰</option>
+                <option value="partial">部分遮挡</option>
+                <option value="uncertain">不确定</option>
+              </select>
+            </label>
+            <label class="note-field">
+              <span>表面备注</span>
+              <input id="surface-note" type="text" maxlength="240" placeholder="可选">
+            </label>
+          </div>
+          <div class="tool-actions">
+            <button id="new-surface" class="button button-primary" type="button">画新表面</button>
+            <button id="close-surface" class="button button-primary" type="button" disabled>闭合表面</button>
+            <button id="cancel-drawing" class="button button-secondary" type="button" disabled>取消绘制</button>
+            <button id="line-mode" class="button button-secondary" type="button" disabled>点选线段</button>
+          </div>
+        </div>
+
+        <p class="canvas-help" id="canvas-help">先画出同一屋面、立面、道路或物体表面。至少点击三个顶点后闭合。</p>
+      </section>
+
+      <aside class="editor-panel panel">
+        <section class="editor-section">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">步骤 1</p>
+              <h2>可见表面</h2>
+            </div>
+            <button id="delete-surface" class="text-button danger" type="button" disabled>删除所选</button>
+          </div>
+          <div id="surface-list" class="surface-list empty-copy">尚未标出表面</div>
+          <div id="selected-lines" class="selected-lines"></div>
+        </section>
+
+        <section class="editor-section family-section">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">步骤 2</p>
+              <h2>线族关系</h2>
+            </div>
+            <span id="family-count" class="muted-copy">0 项</span>
+          </div>
+          <p class="section-help">先选择表面，再用线号按钮或画布把成员线分配给它。</p>
+          <div id="family-list" class="family-list"></div>
+        </section>
+
+        <section class="editor-section save-section">
+          <label>
+            <span>整张图片无法判断的原因</span>
+            <textarea id="assessability-reason" rows="2" maxlength="500" placeholder="仅在标记为无法判断时填写"></textarea>
+          </label>
+          <label>
+            <span>本项备注</span>
+            <textarea id="review-note" rows="2" maxlength="500" placeholder="可选"></textarea>
+          </label>
+          <div class="save-actions">
+            <button id="save-draft" class="button button-secondary" type="button">保存草稿</button>
+            <button id="mark-unassessable" class="button button-secondary" type="button">标记无法判断</button>
+            <button id="complete-review" class="button button-primary" type="button">完成本项</button>
+          </div>
+          <p id="save-message" class="save-message" role="status" aria-live="polite"></p>
+        </section>
+      </aside>
+    </main>
+
+    <div id="fatal-error" class="fatal-error" hidden>
+      <h2>标注页面未能启动</h2>
+      <p id="fatal-error-copy"></p>
+    </div>
+
+    <script src="static/app.js" defer></script>
+  </body>
+</html>
