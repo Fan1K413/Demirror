@@ -1,0 +1,53 @@
+{
+  "schema_version": "demirror-community-propagation-audit-protocol-v1",
+  "created_at": "2026-08-19",
+  "purpose": "Evaluate the already registered Community Forensics thresholds across frozen propagation views. Scores are produced without label-dependent branching and labels are used only after scoring for fixed-threshold aggregation.",
+  "source_manifest": {
+    "path": "data/openfake_recalibration_confirmation_v1/manifest.json",
+    "sha256": "e48fb7fa12aa444d8f627abef3d7f9040e103da7a08238a26458f84e0e84665c",
+    "record_count": 160
+  },
+  "variant_manifest": {
+    "path": "outputs/research/propagation_variants_openfake_confirmation_v1/manifest.json",
+    "sha256": "d3e19c931552e7e7362b9b82c3ccd6006982cd13270c9451548f4c561d89ca9c",
+    "record_count": 640
+  },
+  "profiles": [
+    "original_decode",
+    "jpeg_reencode_quality=85",
+    "webp_reencode_quality=85",
+    "resize_longest=1024_restore_png",
+    "screenshot_raster_png_longest=1600"
+  ],
+  "model": {
+    "root": "weights/community-forensics-224",
+    "weights_sha256": "a6cc439d5a6d2dfadd60c77d27a2838ad55b34e601ecd30f46ad97266d6ac4e0",
+    "config_sha256": "9826208c73a17bb20c85d6624aa16b4a118508d89ff2c86d71e4b553474ff702",
+    "audit_path": "models/ai_likelihood_community_forensics_v1.json"
+  },
+  "implementation": {
+    "batch_support_path": "scripts/evaluate_community_forensics.py",
+    "batch_support_sha256": "cec234e0a48476ba195e0049c504cbfcc045bae0e6f244b65d87bfc24c802832",
+    "runtime_adapter_path": "src/image_trust/ai_likelihood/community_forensics.py",
+    "runtime_adapter_sha256": "c110ee8966176e0791a5ce94fa9b1c0e62cabe5574c4c8cba55a1849ec25eae7",
+    "equivalence_requirement": "Before interpreting this audit, an existing isolated worker must match the batch support score on a fixed registered artifact within 0.000001.",
+    "equivalence_probe": {
+      "source_asset_sha256": "14acd8d390f3612c5aa9d495b81b871f5f5676b0870a055d35ec0c53df11b85e",
+      "profile": "screenshot_raster_png_longest=1600",
+      "absolute_difference_maximum": 0.000001
+    }
+  },
+  "execution": {
+    "device": "cpu",
+    "cpu_threads": 2,
+    "batch_size": 8,
+    "detector_processes_in_parallel": 1,
+    "checkpoint_after_each_batch": true
+  },
+  "policy": {
+    "deployment_eligible": false,
+    "runtime_policy_changed": false,
+    "threshold_selection_allowed": false,
+    "score_rows_must_not_contain_labels": true
+  }
+}

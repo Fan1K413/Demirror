@@ -1,0 +1,56 @@
+{
+  "schema_version": "demirror-safe-propagation-audit-protocol-v2",
+  "created_at": "2026-08-19",
+  "supersedes": "research/records/2026-08-19/pixel/safe_propagation_audit_protocol_v1.json",
+  "purpose": "Evaluate the already registered SAFE high threshold across frozen propagation views. Scores are produced without label-dependent branching and labels are used only after scoring for fixed-threshold aggregation.",
+  "source_manifest": {
+    "path": "data/openfake_recalibration_confirmation_v1/manifest.json",
+    "sha256": "e48fb7fa12aa444d8f627abef3d7f9040e103da7a08238a26458f84e0e84665c",
+    "record_count": 160
+  },
+  "variant_manifest": {
+    "path": "outputs/research/propagation_variants_openfake_confirmation_v1/manifest.json",
+    "sha256": "d3e19c931552e7e7362b9b82c3ccd6006982cd13270c9451548f4c561d89ca9c",
+    "record_count": 640
+  },
+  "profiles": [
+    "original_decode",
+    "jpeg_reencode_quality=85",
+    "webp_reencode_quality=85",
+    "resize_longest=1024_restore_png",
+    "screenshot_raster_png_longest=1600"
+  ],
+  "model": {
+    "checkpoint_path": "weights/aigibench-safe/SAFE-main/checkpoint-best.pth",
+    "checkpoint_sha256": "e168c6e6e4c3fa8f381fbebdb1a8299b3a3ad59ee7e8e697ba46a73752d4ffda",
+    "audit_path": "models/ai_likelihood_safe_v1.json"
+  },
+  "implementation": {
+    "audit_script_path": "scripts/audit_safe_propagation_variants.py",
+    "audit_script_sha256": "a39f010cba2fe041ca82102cc945e355209458ba960ae8d6c616f2e6ab5e604e",
+    "runtime_adapter_path": "src/image_trust/ai_likelihood/safe.py",
+    "runtime_adapter_sha256": "6f6c30c58fccdeb013b3c27da13ca5903d64bf888b76c4ccfd32d37b9097b5c7",
+    "equivalence_requirement": "Before interpreting this audit, the existing isolated worker must match the batch support score on a fixed registered artifact within 0.000001.",
+    "equivalence_probe": {
+      "source_asset_sha256": "14acd8d390f3612c5aa9d495b81b871f5f5676b0870a055d35ec0c53df11b85e",
+      "profile": "screenshot_raster_png_longest=1600",
+      "absolute_difference_maximum": 0.000001
+    }
+  },
+  "execution": {
+    "device": "cpu",
+    "cpu_threads": 4,
+    "batch_size": 2,
+    "detector_processes_in_parallel": 1,
+    "checkpoint_after_each_batch": true
+  },
+  "policy": {
+    "deployment_eligible": false,
+    "runtime_policy_changed": false,
+    "threshold_selection_allowed": false,
+    "score_rows_must_not_contain_labels": true,
+    "smallest_dimension_below_256": "Record status=unavailable and reason=safe_input_too_small; do not upsample, assign a score, or include the view in a high-threshold denominator.",
+    "static_webp_high_eligible": false,
+    "reencoded_high_eligible": false
+  }
+}

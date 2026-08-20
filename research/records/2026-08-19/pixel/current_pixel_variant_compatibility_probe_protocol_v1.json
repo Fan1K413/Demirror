@@ -1,0 +1,31 @@
+{
+  "schema_version": "demirror-current-pixel-variant-compatibility-probe-protocol-v1",
+  "created_at": "2026-08-19",
+  "purpose": "Check whether each existing isolated five-channel pixel worker can process one fixed screenshot-style propagation artifact. This is label-blind and cannot estimate accuracy or select a threshold.",
+  "source_manifest": {
+    "path": "data/openfake_recalibration_confirmation_v1/manifest.json",
+    "sha256": "e48fb7fa12aa444d8f627abef3d7f9040e103da7a08238a26458f84e0e84665c"
+  },
+  "variant_manifest": {
+    "path": "outputs/research/propagation_variants_openfake_confirmation_v1/manifest.json",
+    "sha256": "d3e19c931552e7e7362b9b82c3ccd6006982cd13270c9451548f4c561d89ca9c"
+  },
+  "selection": {
+    "manifest_index": 0,
+    "asset_sha256": "14acd8d390f3612c5aa9d495b81b871f5f5676b0870a055d35ec0c53df11b85e",
+    "profile": "screenshot_raster_png_longest=1600"
+  },
+  "detectors": [
+    "dda",
+    "safe",
+    "forensic_clip",
+    "community_forensics",
+    "nonescape_mini"
+  ],
+  "policy": {
+    "deployment_eligible": false,
+    "runtime_policy_changed": false,
+    "threshold_selection_allowed": false,
+    "label_dependent_branching": "forbidden"
+  }
+}

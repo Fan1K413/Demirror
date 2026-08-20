@@ -1,0 +1,138 @@
+{
+  "deployment_eligible": false,
+  "protocol_sha256": "adb873e45e2c63bbb48e413a1e292456a1d4168fb486c2a7928cfa78f2da3062",
+  "purpose": "Frozen threshold propagation audit only; no threshold, product score, dependency or web-policy change is authorized.",
+  "runtime_equivalence": {
+    "absolute_difference": 0.0,
+    "batch_score": 0.3192428946495056,
+    "isolated_score": 0.3192428946495056,
+    "maximum": 1e-06,
+    "profile": "screenshot_raster_png_longest=1600",
+    "source_asset_sha256": "14acd8d390f3612c5aa9d495b81b871f5f5676b0870a055d35ec0c53df11b85e"
+  },
+  "runtime_policy_changed": false,
+  "schema_version": "demirror-forensic-clip-propagation-audit-v1",
+  "score_checkpoint_sha256": "f4428b978abe611eefd0e2487d8ed790c50f9d435fa5053608a2ef1ea4025bb3",
+  "summary": {
+    "high_confidence_threshold": 0.9925177097320557,
+    "limited_review_threshold": 0.9919478297233582,
+    "profile_metrics": {
+      "jpeg_reencode_quality=85": {
+        "generated_high_threshold": {
+          "hits": 16,
+          "rate": 0.2,
+          "total": 80
+        },
+        "generated_limited_threshold": {
+          "hits": 28,
+          "rate": 0.35,
+          "total": 80
+        },
+        "product_high_eligible": true,
+        "real_high_threshold": {
+          "hits": 0,
+          "rate": 0.0,
+          "total": 80
+        },
+        "real_limited_threshold": {
+          "hits": 0,
+          "rate": 0.0,
+          "total": 80
+        }
+      },
+      "original_decode": {
+        "generated_high_threshold": {
+          "hits": 15,
+          "rate": 0.1875,
+          "total": 80
+        },
+        "generated_limited_threshold": {
+          "hits": 26,
+          "rate": 0.325,
+          "total": 80
+        },
+        "product_high_eligible": true,
+        "real_high_threshold": {
+          "hits": 0,
+          "rate": 0.0,
+          "total": 80
+        },
+        "real_limited_threshold": {
+          "hits": 0,
+          "rate": 0.0,
+          "total": 80
+        }
+      },
+      "resize_longest=1024_restore_png": {
+        "generated_high_threshold": {
+          "hits": 16,
+          "rate": 0.2,
+          "total": 80
+        },
+        "generated_limited_threshold": {
+          "hits": 27,
+          "rate": 0.3375,
+          "total": 80
+        },
+        "product_high_eligible": true,
+        "real_high_threshold": {
+          "hits": 0,
+          "rate": 0.0,
+          "total": 80
+        },
+        "real_limited_threshold": {
+          "hits": 0,
+          "rate": 0.0,
+          "total": 80
+        }
+      },
+      "screenshot_raster_png_longest=1600": {
+        "generated_high_threshold": {
+          "hits": 15,
+          "rate": 0.1875,
+          "total": 80
+        },
+        "generated_limited_threshold": {
+          "hits": 26,
+          "rate": 0.325,
+          "total": 80
+        },
+        "product_high_eligible": true,
+        "real_high_threshold": {
+          "hits": 0,
+          "rate": 0.0,
+          "total": 80
+        },
+        "real_limited_threshold": {
+          "hits": 0,
+          "rate": 0.0,
+          "total": 80
+        }
+      },
+      "webp_reencode_quality=85": {
+        "generated_high_threshold": {
+          "hits": 18,
+          "rate": 0.225,
+          "total": 80
+        },
+        "generated_limited_threshold": {
+          "hits": 28,
+          "rate": 0.35,
+          "total": 80
+        },
+        "product_high_eligible": false,
+        "real_high_threshold": {
+          "hits": 0,
+          "rate": 0.0,
+          "total": 80
+        },
+        "real_limited_threshold": {
+          "hits": 0,
+          "rate": 0.0,
+          "total": 80
+        }
+      }
+    }
+  },
+  "view_count": 800
+}

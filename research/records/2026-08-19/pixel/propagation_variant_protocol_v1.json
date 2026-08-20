@@ -1,0 +1,28 @@
+{
+  "schema_version": "demirror-propagation-variant-protocol-v1",
+  "created_at": "2026-08-19",
+  "purpose": "Freeze metadata-free JPEG, WebP, resize-and-restore, and screenshot-raster variants for offline candidate robustness evaluation. Materialization does not load detectors, read labels for a decision, select thresholds, change product dependencies, or alter web/origin policy.",
+  "source_manifest": {
+    "path": "data/openfake_recalibration_confirmation_v1/manifest.json",
+    "sha256": "e48fb7fa12aa444d8f627abef3d7f9040e103da7a08238a26458f84e0e84665c",
+    "record_count": 160,
+    "source_cluster_rule": "All derived records retain their source asset SHA-256 and must remain in the same evaluation split as that source."
+  },
+  "profiles": [
+    "jpeg_reencode_quality=85",
+    "webp_reencode_quality=85",
+    "resize_longest=1024_restore_png",
+    "screenshot_raster_png_longest=1600"
+  ],
+  "output_policy": {
+    "output_root": "outputs/research/propagation_variants_openfake_confirmation_v1",
+    "metadata": "All artifacts must decode as RGB and contain no EXIF, ICC profile, or XMP payload.",
+    "overwrite": "forbidden; a later rerun requires a new protocol/version or a separately archived failed attempt"
+  },
+  "policy": {
+    "deployment_eligible": false,
+    "runtime_policy_changed": false,
+    "threshold_selection_allowed": false,
+    "score_or_label_dependent_actions": "forbidden"
+  }
+}

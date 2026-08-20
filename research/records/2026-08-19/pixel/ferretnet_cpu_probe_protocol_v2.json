@@ -1,0 +1,66 @@
+{
+  "schema_version": "demirror-ferretnet-cpu-probe-protocol-v2",
+  "created_at": "2026-08-19",
+  "supersedes_for_resource_probe_only": "research/records/2026-08-19/pixel/ferretnet_cpu_probe_protocol_v1.json",
+  "reason_for_revision": "The v1 probe result rows exposed label-bearing relative paths such as fake/... and real/.... The scorer did not read labels to make a decision, and its resource observations remain valid, but v2 removes those paths from public probe output before reconfirming the resource result.",
+  "purpose": "Label-blind resource and deterministic-forward probe for FerretNet. This protocol cannot alter product scoring, thresholds, dependencies, or web behaviour.",
+  "deployment_eligible": false,
+  "runtime_policy_changed": false,
+  "upstream": {
+    "repository": "https://github.com/xigua7105/FerretNet",
+    "revision": "e92796c1a2fb07ccc57ecd7e718e6dce067be5fa",
+    "repository_license": "Apache-2.0",
+    "license_evidence": "Repository root LICENSE at the registered revision; the model file is tracked by that same revision.",
+    "weight_license_status": "not_separately_declared",
+    "weight_license_gate": "Research-only probe is allowed because the checkpoint is tracked in the Apache-2.0 repository, but product use remains blocked until the authors explicitly confirm that the repository license grants use of the released checkpoint.",
+    "source_files": {
+      "src/model/ferretnet.py": "bb44a7c8afBfb6d56890bf0d08a25d2839d9ab9d2c7a3b7a77d0a3b24c6d254d",
+      "src/model/lpd.py": "3b7abcb53c640317d8ea47e1a57c9dceb9e0efed95520c76542dc7c1dfabdcad",
+      "configs/Test.yaml": "5ebdb2e9b114bfd35dff45679a27740fa2a9cf55e17891fa9b847d6263e3376b"
+    }
+  },
+  "checkpoint": {
+    "relative_path": "outputs/research/ferretnet_upstream_v1/checkpoints/4cls_ckpt/ferretnet-b-median-3.pth",
+    "tracked_in_registered_upstream_revision": true,
+    "size_bytes": 4286585,
+    "sha256": "fe755d78370bb6547070329553572405b4ecebd23382c9a6cbb11c4ab85a82c2",
+    "expected_state_tensor_count": 89,
+    "strict_load_required": true
+  },
+  "inference": {
+    "device": "cpu",
+    "cpu_threads": 2,
+    "batch_size": 1,
+    "forward_only": true,
+    "input_preprocessing": "official Test.yaml: CenterCrop(256), ToTensor(), Normalize(CLIP mean/std); no Grad-CAM, backward pass, CUDA, distributed setup, or automatic downloads",
+    "operation_point": 0.5,
+    "score_semantics": "sigmoid(logit) from the released checkpoint; a model output, not an AI probability"
+  },
+  "resource_probe": {
+    "manifest": "data/openfake_recalibration_confirmation_v1/manifest.json",
+    "manifest_sha256": "e48fb7fa12aa444d8f627abef3d7f9040e103da7a08238a26458f84e0e84665c",
+    "image_root": "data/openfake_recalibration_confirmation_v1",
+    "selection": "first 12 manifest records in frozen manifest order; labels and source classes are not emitted in probe output or used for any decision",
+    "public_row_fields": [
+      "manifest_index",
+      "asset_sha256",
+      "score"
+    ],
+    "profiles": [
+      "original_decode",
+      "jpeg_reencode_quality=85"
+    ],
+    "repeat_runs": 2,
+    "score_absolute_difference_maximum": 0.000001,
+    "maximum_peak_working_set_mib": 750,
+    "maximum_p95_seconds_per_scored_view": 5.0,
+    "subprocess_timeout_seconds": 180,
+    "fail_on_nonfinite_score": true,
+    "fail_on_input_hash_mismatch": true
+  },
+  "decision_policy": {
+    "any_probe_failure": "stop_before_any_new_labelled_elimination_screen",
+    "all_probe_gates_pass": "confirm only CPU execution eligibility; product integration remains blocked",
+    "website_and_origin_scoring_must_remain_unchanged": true
+  }
+}

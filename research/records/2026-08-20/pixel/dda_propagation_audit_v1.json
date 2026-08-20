@@ -1,0 +1,107 @@
+{
+  "deployment_eligible": false,
+  "protocol_sha256": "503c886ee982ed22a800324130db93b7f001f44db7081f808bb5bac1dab2b2d8",
+  "purpose": "Frozen-threshold propagation audit only; no threshold, product score, dependency or web-policy change is authorized.",
+  "resource": {
+    "elapsed_seconds": 1747.765000000014,
+    "maximum_sampled_process_count": 3,
+    "maximum_sampled_working_set_bytes": 1587105792,
+    "maximum_working_set_bytes": 2147483648,
+    "sampling_scope": "launcher_and_all_descendants"
+  },
+  "runtime_equivalence": {
+    "absolute_difference": 0.0,
+    "batch_score": 0.3888949155807495,
+    "maximum": 1e-06,
+    "profile": "screenshot_raster_png_longest=1600",
+    "registered_product_score": 0.3888949155807495,
+    "source_asset_sha256": "14acd8d390f3612c5aa9d495b81b871f5f5676b0870a055d35ec0c53df11b85e"
+  },
+  "runtime_policy_changed": false,
+  "schema_version": "demirror-dda-propagation-audit-v1",
+  "score_checkpoint_sha256": "dd2eb5a3dfc906d7f2f41d18e668b22605d7042d81e6f5ce9258b11e81144210",
+  "summary": {
+    "high_confidence_threshold": 0.94,
+    "profile_metrics": {
+      "jpeg_reencode_quality=85": {
+        "generated_high_threshold": {
+          "available": 80,
+          "hits": 13,
+          "rate_over_available": 0.1625,
+          "unavailable": 0
+        },
+        "product_high_eligible": true,
+        "real_high_threshold": {
+          "available": 66,
+          "hits": 2,
+          "rate_over_available": 0.030303030303030304,
+          "unavailable": 14
+        }
+      },
+      "original_decode": {
+        "generated_high_threshold": {
+          "available": 80,
+          "hits": 12,
+          "rate_over_available": 0.15,
+          "unavailable": 0
+        },
+        "product_high_eligible": true,
+        "real_high_threshold": {
+          "available": 66,
+          "hits": 1,
+          "rate_over_available": 0.015151515151515152,
+          "unavailable": 14
+        }
+      },
+      "resize_longest=1024_restore_png": {
+        "generated_high_threshold": {
+          "available": 80,
+          "hits": 5,
+          "rate_over_available": 0.0625,
+          "unavailable": 0
+        },
+        "product_high_eligible": true,
+        "real_high_threshold": {
+          "available": 66,
+          "hits": 0,
+          "rate_over_available": 0.0,
+          "unavailable": 14
+        }
+      },
+      "screenshot_raster_png_longest=1600": {
+        "generated_high_threshold": {
+          "available": 80,
+          "hits": 8,
+          "rate_over_available": 0.1,
+          "unavailable": 0
+        },
+        "product_high_eligible": true,
+        "real_high_threshold": {
+          "available": 66,
+          "hits": 0,
+          "rate_over_available": 0.0,
+          "unavailable": 14
+        }
+      },
+      "webp_reencode_quality=85": {
+        "generated_high_threshold": {
+          "available": 80,
+          "hits": 11,
+          "rate_over_available": 0.1375,
+          "unavailable": 0
+        },
+        "product_high_eligible": false,
+        "real_high_threshold": {
+          "available": 66,
+          "hits": 1,
+          "rate_over_available": 0.015151515151515152,
+          "unavailable": 14
+        }
+      }
+    }
+  },
+  "view_count": 800,
+  "worker_warning_codes": [
+    "xformers_not_available_cpu_fallback_used"
+  ]
+}

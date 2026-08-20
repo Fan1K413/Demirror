@@ -1,0 +1,126 @@
+{
+  "schema_version": "demirror-ferretnet-cpu-probe-and-tier1-audit-v1",
+  "date": "2026-08-19",
+  "purpose": "Frozen CPU resource probe and OpenFake first-tier elimination for FerretNet. This record cannot modify product scoring, thresholds, dependencies, or web behaviour.",
+  "protocols": {
+    "tier1_elimination": {
+      "path": "research/records/2026-08-19/pixel/ferretnet_cpu_probe_protocol_v1.json",
+      "sha256": "565f5d22ac45bfdb55b72f7c7cf8fcdc734cf676026e98d17ef803116eb74824"
+    },
+    "resource_probe_v2": {
+      "path": "research/records/2026-08-19/pixel/ferretnet_cpu_probe_protocol_v2.json",
+      "sha256": "ce7a63d0b2570f5f18bfadf3cb01e61a55fa27162405ba0fd99930b26aa22369"
+    }
+  },
+  "upstream": {
+    "repository": "https://github.com/xigua7105/FerretNet",
+    "revision": "e92796c1a2fb07ccc57ecd7e718e6dce067be5fa",
+    "repository_license": "Apache-2.0",
+    "checkpoint_sha256": "fe755d78370bb6547070329553572405b4ecebd23382c9a6cbb11c4ab85a82c2",
+    "checkpoint_size_bytes": 4286585,
+    "strict_load": {
+      "checkpoint_state_tensor_count": 89,
+      "model_state_tensor_count": 89,
+      "parameter_count": 1057777,
+      "missing_keys": 0,
+      "unexpected_keys": 0
+    },
+    "weight_license_status": "not_separately_declared",
+    "product_license_gate": "unresolved"
+  },
+  "resource_probe": {
+    "selection": "first 12 frozen OpenFake manifest records; v2 public rows contain only frozen index, asset SHA-256 and score",
+    "profiles": {
+      "original_decode": {
+        "repeated_runs": 2,
+        "maximum_score_absolute_difference": 0.0,
+        "maximum_p95_seconds_per_scored_view": 2.7330114799959095,
+        "maximum_peak_working_set_bytes": 343285760
+      },
+      "jpeg_reencode_quality=85": {
+        "repeated_runs": 2,
+        "maximum_score_absolute_difference": 0.0,
+        "maximum_p95_seconds_per_scored_view": 2.843358675006309,
+        "maximum_peak_working_set_bytes": 370282496
+      }
+    },
+    "resource_probe_passed": true,
+    "limits": {
+      "maximum_peak_working_set_mib": 750,
+      "maximum_p95_seconds_per_scored_view": 5.0,
+      "maximum_score_absolute_difference": 0.000001
+    }
+  },
+  "tier1_elimination": {
+    "dataset": "ComplexDataLab/OpenFake confirmation manifest",
+    "manifest_sha256": "e48fb7fa12aa444d8f627abef3d7f9040e103da7a08238a26458f84e0e84665c",
+    "selection": "all 160 frozen records: 80 newer generated images and 80 web/natural real controls",
+    "operation_point": 0.5,
+    "threshold_tuning_allowed": false,
+    "profiles": {
+      "original_decode": {
+        "generated_hits": 1,
+        "generated_total": 80,
+        "generated_recall": 0.0125,
+        "generated_recall_wilson_95_lower": 0.0022099755204522693,
+        "real_hits": 1,
+        "real_total": 80,
+        "real_false_positive_rate": 0.0125,
+        "additional_generated_hits_over_current_five_channel_baseline": 0,
+        "additional_real_hits_over_current_five_channel_baseline": 1,
+        "weakest_generator_recall": 0.0,
+        "p95_seconds_per_scored_view": 1.2510344899958,
+        "peak_working_set_bytes": 448270336
+      },
+      "jpeg_reencode_quality=85": {
+        "generated_hits": 0,
+        "generated_total": 80,
+        "generated_recall": 0.0,
+        "generated_recall_wilson_95_lower": 0.0,
+        "real_hits": 1,
+        "real_total": 80,
+        "real_false_positive_rate": 0.0125,
+        "additional_generated_hits_over_current_five_channel_baseline": 0,
+        "additional_real_hits_over_current_five_channel_baseline": 0,
+        "weakest_generator_recall": 0.0,
+        "p95_seconds_per_scored_view": 1.3113617750292177,
+        "peak_working_set_bytes": 590131200
+      }
+    },
+    "cross_view_binary_agreement": 0.99375,
+    "checks": {
+      "candidate_generated_recall_wilson_lower": false,
+      "each_generator_point_recall": false,
+      "candidate_real_false_positive_rate_wilson_upper": true,
+      "additional_generated_hits": false,
+      "additional_real_hits": true,
+      "original_jpeg85_binary_agreement": true,
+      "peak_working_set": true,
+      "p95_seconds": true
+    },
+    "decision": "rejected_before_five_variant_research_gate"
+  },
+  "artifacts": {
+    "resource_probe_output_v2": {
+      "path": "outputs/research/ferretnet_cpu_probe_v2/ferretnet_cpu_probe_audit_v2.json",
+      "sha256": "126b509f338389bdd4b55b2ced139901a06a3970e4e8823ef15394af6ab19bad"
+    },
+    "tier1_original_scores": {
+      "path": "outputs/research/ferretnet_tier1_v1/original_decode.json",
+      "sha256": "151bbe533d28c89780fbaaa6df098251e49f72e18395180dcc9c800ade12c96c"
+    },
+    "tier1_jpeg85_scores": {
+      "path": "outputs/research/ferretnet_tier1_v1/jpeg_reencode_quality_85.json",
+      "sha256": "2cca84a0b7efdc1b560c1d4137bb93b537edc6f92087715ced8e8515697c61eb"
+    },
+    "tier1_audit_output": {
+      "path": "outputs/research/ferretnet_tier1_v1/ferretnet_tier1_audit_v1.json",
+      "sha256": "e471be7413403c7f46852b4d3d3bb11b535ca9bddec51b54ecc8af4a1303da72"
+    }
+  },
+  "deployment_eligible": false,
+  "runtime_policy_changed": false,
+  "score_policy_changed": false,
+  "output_contract_correction": "The initial resource probe scorer emitted label-bearing relative paths despite omitting a label field. That v1 output is not used as a label-blind artifact. v2 removed paths, repeated the same frozen 12-image probe, and reconfirmed deterministic scores and resource limits before this record was finalized.",
+  "conclusion": "FerretNet is CPU-resource-safe in this environment but does not generalize to the frozen newer-generator confirmation cohort at its released 0.5 operating point. It adds no generated hits over the current five-channel baseline and is rejected without threshold tuning or further transform testing."
+}

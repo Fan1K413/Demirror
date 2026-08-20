@@ -1,0 +1,24 @@
+{
+  "schema_version": "demirror-dda-propagation-preflight-failure-v1",
+  "created_at": "2026-08-20",
+  "protocol_path": "research/records/2026-08-20/pixel/dda_propagation_preflight_protocol_v1.json",
+  "protocol_sha256": "e4cced198e53586a1dda95d0eb4d2ed63f453ad7e2869580a8618fd33c5049fb",
+  "invalidated_audit_path": "research/records/2026-08-20/pixel/dda_propagation_preflight_v1.json",
+  "invalidated_audit_sha256": "2ac0d2ea2f2e42825555ae55bfdb4733cba1c6ad33ccd34cc1da6479bfcdb295",
+  "failure": {
+    "reason": "launcher_only_working_set_sampled",
+    "cause": "On Windows the virtual-environment python.exe launcher started a descendant interpreter, while the v1 sampler observed only the launcher PID.",
+    "invalid_measurement_bytes": 5320704
+  },
+  "runtime_equivalence_result_retained": {
+    "prior_product_score": 0.3888949155807495,
+    "preflight_score": 0.3888949155807495,
+    "absolute_difference": 0.0,
+    "passed": true
+  },
+  "resource_result_interpretation_allowed": false,
+  "full_propagation_audit_authorized": false,
+  "deployment_eligible": false,
+  "runtime_policy_changed": false,
+  "remediation": "A successor protocol must sample the launcher and all descendants, terminate the complete process tree on limit breach, and repeat the same frozen one-image preflight."
+}

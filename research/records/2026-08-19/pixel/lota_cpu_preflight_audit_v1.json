@@ -1,0 +1,78 @@
+{
+  "cpu_smoke": {
+    "construction_seconds": 0.2410721000051126,
+    "cpu_threads": 2,
+    "forward_seconds": 0.15812940004980192,
+    "input": {
+      "bit_mode": "scaling",
+      "output_shape": [
+        1,
+        3,
+        256,
+        256
+      ],
+      "patch_mode": "max",
+      "patch_size": 32,
+      "source": "deterministic synthetic gradient; no labelled or user image"
+    },
+    "model_constructor": "model.model() with temporary module-local resnet50(pretrained=False) guard",
+    "model_output_logit": -34.051910400390625,
+    "model_output_shape": [
+      1,
+      1
+    ],
+    "parameter_count": 23510081,
+    "peak_working_set_bytes": 410591232,
+    "pretrained_model_zoo_download": false,
+    "random_seed": 20260819
+  },
+  "created_at": "2026-08-19",
+  "deployment_eligible": false,
+  "next_required_step": "Obtain the authors' released checkpoint with explicit permission or documented terms, record its stable file hash and size in a new immutable protocol, then run source-isolated original/JPEG/WebP/resize/screenshot screening.",
+  "protocol_sha256": "2927a2eca1aad72bf2cca03ba3437a8b2d1441abe0c7f2ec00c9ad8da3478c76",
+  "purpose": "Source and CPU-adapter preflight only; no released detector checkpoint is loaded or scored.",
+  "released_weight_gate": {
+    "downloaded": false,
+    "official_readme_weight_locations": [
+      "https://pan.baidu.com/s/1H0IceEHzpB_ADh5J487bkA?pwd=imjw",
+      "https://pan.baidu.com/s/1h9qN-tWjZrXT1wQsHhZBpw?pwd=a942"
+    ],
+    "required_before_scoring": [
+      "Do not use an unverified third-party mirror.",
+      "Record the exact author-provided file's byte size and SHA-256 in a new protocol before scoring.",
+      "Resolve whether the repository MIT license grants use of released weight files; source-code permission is not assumed to settle weight permission.",
+      "Load only through a strict key and tensor-shape audit in an isolated CPU process."
+    ],
+    "weight_hash_status": "not_published_in_official_readme",
+    "weight_license_status": "not_declared_separately"
+  },
+  "runtime_policy_changed": false,
+  "schema_version": "demirror-lota-cpu-preflight-audit-v1",
+  "status": "source_preflight_passed_checkpoint_screen_blocked",
+  "stock_entrypoint_assessment": {
+    "conclusion": "The stock evaluation entrypoint is not CPU-safe. The isolated adapter proves only construction with pretrain=False and a synthetic forward pass.",
+    "stock_model_default_requests_imagenet_weights": true,
+    "stock_test_uses_cuda": true
+  },
+  "upstream": {
+    "official_requirements": [
+      "numpy==1.24.4",
+      "opencv_python==4.8.1.78",
+      "opencv_python_headless==4.9.0.80",
+      "Pillow==10.3.0",
+      "scipy==1.10.1",
+      "torch==1.12.1",
+      "torchvision==0.13.1"
+    ],
+    "repository": "https://github.com/hongsong-wang/LOTA",
+    "repository_license": "MIT",
+    "revision": "de2f70a5acc195cbb3cfedb1909d75343b1bd023",
+    "source_files": {
+      "LICENSE": "0055c4331d1f7b97c707615de0dc2dd7d98d3eb09c5d816eff4d825015b310b4",
+      "bit_patch.py": "321f2042493dd66c8fd8dfd3d7abcb16d21af47bdbe2edd9831e80dc23b88606",
+      "loader.py": "c9344ccb1061cdd38a8c44567d7ccbe80f7d4bd1701752837d9faa28135781ae",
+      "model.py": "6192bd7ab2fef65e14268e7e6b3ba42a92e097caa511dcd3004ad03d387efdd6",
+      "requirements.txt": "cec2254afe20b4a8dca89b8fabf3774666135617592e8a8768ca2df2cfb7202c"
+    }
+  }
+}

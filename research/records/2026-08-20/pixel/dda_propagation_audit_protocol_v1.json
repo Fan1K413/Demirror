@@ -1,0 +1,68 @@
+{
+  "schema_version": "demirror-dda-propagation-audit-protocol-v1",
+  "created_at": "2026-08-20",
+  "purpose": "Evaluate the already registered DDA high-confidence threshold across frozen propagation views. A single label-blind worker keeps one model resident, checkpoints every view and is monitored under the registered 2 GiB process-tree stop. Labels are joined only after scoring completes.",
+  "source_manifest": {
+    "path": "data/openfake_recalibration_confirmation_v1/manifest.json",
+    "sha256": "e48fb7fa12aa444d8f627abef3d7f9040e103da7a08238a26458f84e0e84665c",
+    "record_count": 160
+  },
+  "variant_manifest": {
+    "path": "outputs/research/propagation_variants_openfake_confirmation_v1/manifest.json",
+    "sha256": "d3e19c931552e7e7362b9b82c3ccd6006982cd13270c9451548f4c561d89ca9c",
+    "record_count": 640
+  },
+  "profiles": [
+    "original_decode",
+    "jpeg_reencode_quality=85",
+    "webp_reencode_quality=85",
+    "resize_longest=1024_restore_png",
+    "screenshot_raster_png_longest=1600"
+  ],
+  "model": {
+    "checkpoint_path": "weights/dda-v1/DDA_ckpt.pth",
+    "checkpoint_sha256": "b27a31d39374803ddeff02bfabb2be76e190b04300490cddfafb24f683f37e3e",
+    "audit_path": "models/ai_likelihood_dda_v1.json",
+    "audit_sha256": "14781067d343ae45c18d74a530775ee37b39956593fcf4e63cbdfc5592cb14b7"
+  },
+  "resource_preflight": {
+    "path": "research/records/2026-08-20/pixel/dda_propagation_preflight_v2.json",
+    "sha256": "af5393620ba489f327d4856e25ed9b7f5e1865acd02c4feb8e383877b4304285",
+    "required_pass_field": "full_propagation_audit_resource_preflight_passed"
+  },
+  "implementation": {
+    "audit_script_path": "scripts/audit_dda_propagation_variants.py",
+    "audit_script_sha256": "cfae2864e55d5268e2975b6ff087000e3d3b97e22ea4095e687db5d632ce50e9",
+    "resource_monitor_path": "scripts/preflight_dda_propagation.py",
+    "resource_monitor_sha256": "688bc03692eef1abb3d4d9965e654a1abe6bcef3b8265789c2e8408fce3aaa02",
+    "runtime_adapter_path": "src/image_trust/ai_likelihood/dda.py",
+    "runtime_adapter_sha256": "fae67b96e5f1645cd13d389ef7ed9ffb22c1f79b77b264a1a46d210a91976117",
+    "equivalence_probe": {
+      "source_asset_sha256": "14acd8d390f3612c5aa9d495b81b871f5f5676b0870a055d35ec0c53df11b85e",
+      "profile": "screenshot_raster_png_longest=1600",
+      "registered_product_score": 0.3888949155807495,
+      "absolute_difference_maximum": 0.000001
+    }
+  },
+  "execution": {
+    "device": "cpu",
+    "cpu_threads": 4,
+    "batch_size": 1,
+    "detector_processes_in_parallel": 1,
+    "model_loads_per_worker": 1,
+    "checkpoint_after_each_view": true,
+    "memory_sampling_scope": "launcher_and_all_descendants",
+    "memory_accounting": "sum_of_sampled_process_working_sets",
+    "maximum_working_set_bytes": 2147483648,
+    "sample_interval_seconds": 0.05,
+    "timeout_seconds": 7200,
+    "limit_breach_action": "terminate_complete_process_tree"
+  },
+  "policy": {
+    "deployment_eligible": false,
+    "runtime_policy_changed": false,
+    "threshold_selection_allowed": false,
+    "score_rows_must_not_contain_labels": true,
+    "failed_or_incomplete_runs_must_not_be_interpreted": true
+  }
+}

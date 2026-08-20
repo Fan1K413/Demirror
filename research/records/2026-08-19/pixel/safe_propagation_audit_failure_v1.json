@@ -1,0 +1,18 @@
+{
+  "schema_version": "demirror-safe-propagation-audit-failure-v1",
+  "created_at": "2026-08-19",
+  "protocol_path": "research/records/2026-08-19/pixel/safe_propagation_audit_protocol_v1.json",
+  "protocol_sha256": "01bf9923b44b63cc39c596a5d484b65dee584bacf3ce9e85a501fd837c445bef",
+  "partial_checkpoint_path": "outputs/research/safe_propagation_audit_v1/scores.partial.json",
+  "partial_checkpoint_sha256": "1d7d66918de424fe0dff2c879e8c4e5cfe2d255a6a93a92079829e005a3a9c3f",
+  "completed_label_free_score_rows": 134,
+  "failure": {
+    "reason": "safe_input_too_small",
+    "minimum_crop_dimension": 256,
+    "cause": "The v1 batch runner treated an input condition which the product worker reports as unavailable as a fatal audit error."
+  },
+  "result_interpretation_allowed": false,
+  "deployment_eligible": false,
+  "runtime_policy_changed": false,
+  "remediation": "A successor protocol must represent unavailable views without upsampling, excluding them from fixed-threshold denominators while reporting availability by profile."
+}

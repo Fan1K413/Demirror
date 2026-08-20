@@ -1,0 +1,65 @@
+{
+  "schema_version": "demirror-dda-propagation-preflight-protocol-v2",
+  "created_at": "2026-08-20",
+  "purpose": "Repeat one label-blind DDA product-worker preflight while sampling the launcher and every descendant under a 2 GiB summed-working-set stop. This protocol cannot estimate accuracy or change product policy.",
+  "supersedes": {
+    "protocol_path": "research/records/2026-08-20/pixel/dda_propagation_preflight_protocol_v1.json",
+    "protocol_sha256": "e4cced198e53586a1dda95d0eb4d2ed63f453ad7e2869580a8618fd33c5049fb",
+    "failure_record_path": "research/records/2026-08-20/pixel/dda_propagation_preflight_failure_v1.json",
+    "failure_record_sha256": "f508a714436371ced95b94cf62c8720432444cafc428b8f6f6f52776fe8fbc21"
+  },
+  "variant_manifest": {
+    "path": "outputs/research/propagation_variants_openfake_confirmation_v1/manifest.json",
+    "sha256": "d3e19c931552e7e7362b9b82c3ccd6006982cd13270c9451548f4c561d89ca9c",
+    "record_count": 640
+  },
+  "input": {
+    "artifact_sha256": "4374d1900d98dc8d09bd57f660f882459a2200ad276ca3a2695572708b1887be",
+    "profile": "screenshot_raster_png_longest=1600",
+    "source_asset_sha256": "14acd8d390f3612c5aa9d495b81b871f5f5676b0870a055d35ec0c53df11b85e",
+    "source_manifest_index": 0
+  },
+  "prior_probe": {
+    "path": "research/records/2026-08-19/pixel/current_pixel_variant_compatibility_probe_audit_v1.json",
+    "sha256": "74090327d3313f2ba3f1fc7fe07276cd6bfa1fba4fc22ea2fdd11593923cdb3b"
+  },
+  "model": {
+    "checkpoint_path": "weights/dda-v1/DDA_ckpt.pth",
+    "checkpoint_sha256": "b27a31d39374803ddeff02bfabb2be76e190b04300490cddfafb24f683f37e3e",
+    "audit_path": "models/ai_likelihood_dda_v1.json",
+    "audit_sha256": "14781067d343ae45c18d74a530775ee37b39956593fcf4e63cbdfc5592cb14b7",
+    "low_memory_audit_path": "research/records/2026-08-12/pixel/ai_likelihood_dda_low_memory_audit_v1.json",
+    "low_memory_audit_sha256": "afcee9f29980c335d64f18dd546e6bc57909ee5c1c21f43e76ba0e615046fafc"
+  },
+  "implementation": {
+    "preflight_script_path": "scripts/preflight_dda_propagation.py",
+    "preflight_script_sha256": "688bc03692eef1abb3d4d9965e654a1abe6bcef3b8265789c2e8408fce3aaa02",
+    "runtime_adapter_path": "src/image_trust/ai_likelihood/dda.py",
+    "runtime_adapter_sha256": "fae67b96e5f1645cd13d389ef7ed9ffb22c1f79b77b264a1a46d210a91976117",
+    "torch_hub_directory": "facebookresearch_dinov2_main",
+    "torch_hub_python_tree_sha256": "5090a776bf5624800907802060da4efc989a058c8f15abb41860d260f67bc970"
+  },
+  "equivalence": {
+    "absolute_difference_maximum": 0.000001,
+    "preprocessing": "center_crop_336_clip_normalization"
+  },
+  "execution": {
+    "device": "cpu",
+    "cpu_threads": 4,
+    "batch_size": 1,
+    "detector_processes_in_parallel": 1,
+    "memory_sampling_scope": "launcher_and_all_descendants",
+    "memory_accounting": "sum_of_sampled_process_working_sets",
+    "maximum_working_set_bytes": 2147483648,
+    "sample_interval_seconds": 0.05,
+    "timeout_seconds": 180,
+    "limit_breach_action": "terminate_complete_process_tree"
+  },
+  "policy": {
+    "accuracy_interpretation_allowed": false,
+    "deployment_eligible": false,
+    "runtime_policy_changed": false,
+    "threshold_selection_allowed": false,
+    "full_propagation_audit_requires_preflight_pass": true
+  }
+}

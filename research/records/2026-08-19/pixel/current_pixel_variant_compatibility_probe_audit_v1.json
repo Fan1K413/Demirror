@@ -1,0 +1,50 @@
+{
+  "deployment_eligible": false,
+  "input": {
+    "artifact_sha256": "4374d1900d98dc8d09bd57f660f882459a2200ad276ca3a2695572708b1887be",
+    "profile": "screenshot_raster_png_longest=1600",
+    "source_asset_sha256": "14acd8d390f3612c5aa9d495b81b871f5f5676b0870a055d35ec0c53df11b85e",
+    "source_manifest_index": 0
+  },
+  "protocol_sha256": "a1ddbfb0dddb213204857456befcffdd4f0d30d5d465963120c31f5c419f9254",
+  "purpose": "A single fixed, label-blind functional probe. It cannot estimate accuracy, choose a threshold, change a detector, or alter runtime policy.",
+  "rows": [
+    {
+      "detector": "dda",
+      "elapsed_seconds": 17.275748800020665,
+      "preprocessing": "center_crop_336_clip_normalization",
+      "score": 0.3888949155807495,
+      "status": "available"
+    },
+    {
+      "detector": "safe",
+      "elapsed_seconds": 9.628860700002406,
+      "preprocessing": "center_crop_256_rgb_to_tensor_dwt_bior1.3",
+      "score": 0.022900283336639404,
+      "status": "available"
+    },
+    {
+      "detector": "forensic_clip",
+      "elapsed_seconds": 18.32604519999586,
+      "preprocessing": "resize_256x256_clip_normalization_temperature_0.594889",
+      "score": 0.3192428946495056,
+      "status": "available"
+    },
+    {
+      "detector": "community_forensics",
+      "elapsed_seconds": 16.280780599976424,
+      "preprocessing": "resize_shorter_256_center_crop_224_imagenet_normalization",
+      "score": 0.0005452595069073141,
+      "status": "available"
+    },
+    {
+      "detector": "nonescape_mini",
+      "elapsed_seconds": 15.439342800003942,
+      "preprocessing": "resize_256_center_crop_224_jpeg100_imagenet_normalization",
+      "score": 0.8128120303153992,
+      "status": "available"
+    }
+  ],
+  "runtime_policy_changed": false,
+  "schema_version": "demirror-current-pixel-variant-compatibility-probe-v1"
+}

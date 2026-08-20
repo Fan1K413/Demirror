@@ -1,0 +1,112 @@
+{
+  "deployment_eligible": false,
+  "protocol_sha256": "eca56e58b14121f42e1d8963c84f7fd69f4815f02b7704e3beb170492edc73fd",
+  "purpose": "Frozen threshold propagation audit only; no threshold, product score, dependency or web-policy change is authorized.",
+  "runtime_equivalence": {
+    "absolute_difference": 0.0,
+    "batch_score": 0.022900283336639404,
+    "isolated_score": 0.022900283336639404,
+    "maximum": 1e-06,
+    "profile": "screenshot_raster_png_longest=1600",
+    "source_asset_sha256": "14acd8d390f3612c5aa9d495b81b871f5f5676b0870a055d35ec0c53df11b85e"
+  },
+  "runtime_policy_changed": false,
+  "schema_version": "demirror-safe-propagation-audit-v2",
+  "score_checkpoint_sha256": "5adbcedeb18d9697932774766f105a6409dae3ffc8d40a8d2b9f57197b8acfe5",
+  "summary": {
+    "high_confidence_threshold": 0.9,
+    "profile_metrics": {
+      "jpeg_reencode_quality=85": {
+        "available_count": 158,
+        "generated_high_threshold": {
+          "hits": 0,
+          "rate": 0.0,
+          "total": 80
+        },
+        "product_high_eligible": false,
+        "real_high_threshold": {
+          "hits": 0,
+          "rate": 0.0,
+          "total": 78
+        },
+        "unavailable_count": 2,
+        "unavailable_reasons": {
+          "safe_input_too_small": 2
+        }
+      },
+      "original_decode": {
+        "available_count": 158,
+        "generated_high_threshold": {
+          "hits": 0,
+          "rate": 0.0,
+          "total": 80
+        },
+        "product_high_eligible": true,
+        "real_high_threshold": {
+          "hits": 0,
+          "rate": 0.0,
+          "total": 78
+        },
+        "unavailable_count": 2,
+        "unavailable_reasons": {
+          "safe_input_too_small": 2
+        }
+      },
+      "resize_longest=1024_restore_png": {
+        "available_count": 158,
+        "generated_high_threshold": {
+          "hits": 2,
+          "rate": 0.025,
+          "total": 80
+        },
+        "product_high_eligible": false,
+        "real_high_threshold": {
+          "hits": 0,
+          "rate": 0.0,
+          "total": 78
+        },
+        "unavailable_count": 2,
+        "unavailable_reasons": {
+          "safe_input_too_small": 2
+        }
+      },
+      "screenshot_raster_png_longest=1600": {
+        "available_count": 158,
+        "generated_high_threshold": {
+          "hits": 1,
+          "rate": 0.0125,
+          "total": 80
+        },
+        "product_high_eligible": false,
+        "real_high_threshold": {
+          "hits": 0,
+          "rate": 0.0,
+          "total": 78
+        },
+        "unavailable_count": 2,
+        "unavailable_reasons": {
+          "safe_input_too_small": 2
+        }
+      },
+      "webp_reencode_quality=85": {
+        "available_count": 158,
+        "generated_high_threshold": {
+          "hits": 0,
+          "rate": 0.0,
+          "total": 80
+        },
+        "product_high_eligible": false,
+        "real_high_threshold": {
+          "hits": 0,
+          "rate": 0.0,
+          "total": 78
+        },
+        "unavailable_count": 2,
+        "unavailable_reasons": {
+          "safe_input_too_small": 2
+        }
+      }
+    }
+  },
+  "view_count": 800
+}

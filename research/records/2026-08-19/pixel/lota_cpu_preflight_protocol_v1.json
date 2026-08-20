@@ -1,0 +1,48 @@
+{
+  "schema_version": "demirror-lota-cpu-preflight-protocol-v1",
+  "created_at": "2026-08-19",
+  "purpose": "Freeze a source-only CPU preflight for LOTA before any released checkpoint is downloaded or scored. This protocol cannot alter product dependencies, web behaviour, origin scoring, thresholds or AI score.",
+  "upstream": {
+    "repository": "https://github.com/hongsong-wang/LOTA",
+    "relative_path": "outputs/research/lota_upstream_v1",
+    "revision": "de2f70a5acc195cbb3cfedb1909d75343b1bd023",
+    "repository_license": "MIT",
+    "source_files": {
+      "LICENSE": "0055c4331d1f7b97c707615de0dc2dd7d98d3eb09c5d816eff4d825015b310b4",
+      "bit_patch.py": "321f2042493dd66c8fd8dfd3d7abcb16d21af47bdbe2edd9831e80dc23b88606",
+      "loader.py": "c9344ccb1061cdd38a8c44567d7ccbe80f7d4bd1701752837d9faa28135781ae",
+      "model.py": "6192bd7ab2fef65e14268e7e6b3ba42a92e097caa511dcd3004ad03d387efdd6",
+      "requirements.txt": "cec2254afe20b4a8dca89b8fabf3774666135617592e8a8768ca2df2cfb7202c"
+    }
+  },
+  "cpu_smoke": {
+    "cpu_threads": 2,
+    "seed": 20260819,
+    "img_height": 256,
+    "bit_mode": "scaling",
+    "patch_size": 32,
+    "patch_mode": "max",
+    "expected_parameter_count": 23510081
+  },
+  "released_weight_gate": {
+    "official_readme_weight_locations": [
+      "https://pan.baidu.com/s/1H0IceEHzpB_ADh5J487bkA?pwd=imjw",
+      "https://pan.baidu.com/s/1h9qN-tWjZrXT1wQsHhZBpw?pwd=a942"
+    ],
+    "weight_license_status": "not_declared_separately",
+    "weight_hash_status": "not_published_in_official_readme",
+    "downloaded": false,
+    "required_before_scoring": [
+      "Do not use an unverified third-party mirror.",
+      "Record the exact author-provided file's byte size and SHA-256 in a new protocol before scoring.",
+      "Resolve whether the repository MIT license grants use of released weight files; source-code permission is not assumed to settle weight permission.",
+      "Load only through a strict key and tensor-shape audit in an isolated CPU process."
+    ]
+  },
+  "policy": {
+    "deployment_eligible": false,
+    "runtime_policy_changed": false,
+    "no_checkpoint_no_detector_scoring": true,
+    "no_automatic_downloads": true
+  }
+}

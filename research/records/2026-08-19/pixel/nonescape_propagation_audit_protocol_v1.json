@@ -1,0 +1,53 @@
+{
+  "schema_version": "demirror-nonescape-propagation-audit-protocol-v1",
+  "created_at": "2026-08-19",
+  "purpose": "Evaluate the already registered Nonescape Mini high threshold across frozen propagation views. Scores are produced without label-dependent branching and labels are used only after scoring for fixed-threshold aggregation.",
+  "source_manifest": {
+    "path": "data/openfake_recalibration_confirmation_v1/manifest.json",
+    "sha256": "e48fb7fa12aa444d8f627abef3d7f9040e103da7a08238a26458f84e0e84665c",
+    "record_count": 160
+  },
+  "variant_manifest": {
+    "path": "outputs/research/propagation_variants_openfake_confirmation_v1/manifest.json",
+    "sha256": "d3e19c931552e7e7362b9b82c3ccd6006982cd13270c9451548f4c561d89ca9c",
+    "record_count": 640
+  },
+  "profiles": [
+    "original_decode",
+    "jpeg_reencode_quality=85",
+    "webp_reencode_quality=85",
+    "resize_longest=1024_restore_png",
+    "screenshot_raster_png_longest=1600"
+  ],
+  "model": {
+    "checkpoint_path": "weights/nonescape/nonescape-mini-v0.safetensors",
+    "checkpoint_sha256": "7a0d0740c813ce199bc32ed16a5f4f4915895c4c9fdee0a98bdbeedd4f3631fd",
+    "audit_path": "models/ai_likelihood_nonescape_mini_v1.json"
+  },
+  "implementation": {
+    "audit_script_path": "scripts/audit_nonescape_propagation_variants.py",
+    "audit_script_sha256": "8165f2f143bd0e4001eb92eb4d5cdc6356d84b360e8a9977d839d56052981998",
+    "runtime_adapter_path": "src/image_trust/ai_likelihood/nonescape.py",
+    "runtime_adapter_sha256": "b29accceb14e8428b2fb8824524df886cb771f104c7d3a1831813b9243158c6d",
+    "equivalence_requirement": "Before interpreting this audit, the existing isolated worker must match the batch support score on a fixed registered artifact within 0.000001.",
+    "equivalence_probe": {
+      "source_asset_sha256": "14acd8d390f3612c5aa9d495b81b871f5f5676b0870a055d35ec0c53df11b85e",
+      "profile": "screenshot_raster_png_longest=1600",
+      "absolute_difference_maximum": 0.000001
+    }
+  },
+  "execution": {
+    "device": "cpu",
+    "cpu_threads": 2,
+    "batch_size": 4,
+    "detector_processes_in_parallel": 1,
+    "checkpoint_after_each_batch": true
+  },
+  "policy": {
+    "deployment_eligible": false,
+    "runtime_policy_changed": false,
+    "threshold_selection_allowed": false,
+    "score_rows_must_not_contain_labels": true,
+    "static_webp_high_eligible": false
+  }
+}

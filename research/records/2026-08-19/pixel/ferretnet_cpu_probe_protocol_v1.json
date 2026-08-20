@@ -1,0 +1,91 @@
+{
+  "schema_version": "demirror-ferretnet-cpu-probe-protocol-v1",
+  "created_at": "2026-08-19",
+  "purpose": "Resource and deterministic-forward probe for FerretNet before any labelled elimination screen. This protocol cannot alter product scoring, thresholds, dependencies, or web behaviour.",
+  "deployment_eligible": false,
+  "runtime_policy_changed": false,
+  "upstream": {
+    "repository": "https://github.com/xigua7105/FerretNet",
+    "revision": "e92796c1a2fb07ccc57ecd7e718e6dce067be5fa",
+    "repository_license": "Apache-2.0",
+    "license_evidence": "Repository root LICENSE at the registered revision; the model file is tracked by that same revision.",
+    "weight_license_status": "not_separately_declared",
+    "weight_license_gate": "Research-only probe is allowed because the checkpoint is tracked in the Apache-2.0 repository, but product use remains blocked until the authors explicitly confirm that the repository license grants use of the released checkpoint.",
+    "source_files": {
+      "src/model/ferretnet.py": "bb44a7c8afBfb6d56890bf0d08a25d2839d9ab9d2c7a3b7a77d0a3b24c6d254d",
+      "src/model/lpd.py": "3b7abcb53c640317d8ea47e1a57c9dceb9e0efed95520c76542dc7c1dfabdcad",
+      "configs/Test.yaml": "5ebdb2e9b114bfd35dff45679a27740fa2a9cf55e17891fa9b847d6263e3376b"
+    }
+  },
+  "checkpoint": {
+    "relative_path": "outputs/research/ferretnet_upstream_v1/checkpoints/4cls_ckpt/ferretnet-b-median-3.pth",
+    "tracked_in_registered_upstream_revision": true,
+    "size_bytes": 4286585,
+    "sha256": "fe755d78370bb6547070329553572405b4ecebd23382c9a6cbb11c4ab85a82c2",
+    "expected_state_tensor_count": 89,
+    "strict_load_required": true
+  },
+  "inference": {
+    "device": "cpu",
+    "cpu_threads": 2,
+    "batch_size": 1,
+    "forward_only": true,
+    "input_preprocessing": "official Test.yaml: CenterCrop(256), ToTensor(), Normalize(CLIP mean/std); no Grad-CAM, backward pass, CUDA, distributed setup, or automatic downloads",
+    "operation_point": 0.5,
+    "score_semantics": "sigmoid(logit) from the released checkpoint; a model output, not an AI probability"
+  },
+  "resource_probe": {
+    "manifest": "data/openfake_recalibration_confirmation_v1/manifest.json",
+    "manifest_sha256": "e48fb7fa12aa444d8f627abef3d7f9040e103da7a08238a26458f84e0e84665c",
+    "image_root": "data/openfake_recalibration_confirmation_v1",
+    "selection": "first 12 manifest records in frozen manifest order; labels and source classes are not read into probe output or used for any decision",
+    "profiles": [
+      "original_decode",
+      "jpeg_reencode_quality=85"
+    ],
+    "repeat_runs": 2,
+    "score_absolute_difference_maximum": 0.000001,
+    "maximum_peak_working_set_mib": 750,
+    "maximum_p95_seconds_per_scored_view": 5.0,
+    "subprocess_timeout_seconds": 180,
+    "fail_on_nonfinite_score": true,
+    "fail_on_input_hash_mismatch": true
+  },
+  "future_elimination_profiles": {
+    "original_decode": "decode source bytes to RGB",
+    "jpeg_reencode_quality=85": "Pillow in-memory RGB JPEG quality 85",
+    "webp_reencode_quality=85": "Pillow in-memory RGB WebP quality 85",
+    "resize_longest=1024_restore": "Lanczos downscale long edge to 1024 when larger, then Lanczos restore to decoded dimensions",
+    "screenshot_raster_png_longest=1600": "Lanczos render to a maximum 1600-pixel long edge, serialize RGB PNG, then decode; a deterministic screenshot proxy, not a substitute for platform or camera recapture data"
+  },
+  "labelled_elimination_tier1": {
+    "manifest": "data/openfake_recalibration_confirmation_v1/manifest.json",
+    "manifest_sha256": "e48fb7fa12aa444d8f627abef3d7f9040e103da7a08238a26458f84e0e84665c",
+    "image_root": "data/openfake_recalibration_confirmation_v1",
+    "selection": "all 160 frozen records in manifest order; no record may be removed after scoring",
+    "profiles": [
+      "original_decode",
+      "jpeg_reencode_quality=85"
+    ],
+    "operation_point": 0.5,
+    "registered_current_baseline_audit": "research/records/2026-08-12/pixel/ai_likelihood_openfake_available_pixel_baseline_audit_v1.json",
+    "registered_current_baseline_audit_sha256": "bfcc48ddc31cbc7d69bc2da7164aa8cda665dd52d633dfc56e39e37f22e4d1e5",
+    "gates": {
+      "candidate_generated_recall_wilson_95_lower_minimum": 0.55,
+      "each_generator_point_recall_minimum": 0.45,
+      "candidate_real_false_positive_rate_wilson_95_upper_maximum": 0.25,
+      "additional_generated_hits_over_current_baseline_minimum": 8,
+      "additional_real_hits_over_current_baseline_maximum": 4,
+      "original_jpeg85_binary_agreement_minimum": 0.85,
+      "maximum_peak_working_set_mib": 750,
+      "maximum_p95_seconds_per_scored_view": 5.0
+    },
+    "threshold_tuning_allowed": false,
+    "failure_policy": "Failure in either profile, any generator slice, resource limit, or cross-view stability rejects FerretNet before full five-variant testing. No threshold, crop, ensemble, or augmentation may be retuned on this cohort."
+  },
+  "decision_policy": {
+    "any_probe_failure": "stop_before_labelled_elimination_screen",
+    "all_probe_gates_pass": "allow_only_a_new_frozen_labelled_elimination protocol; product integration remains blocked",
+    "website_and_origin_scoring_must_remain_unchanged": true
+  }
+}

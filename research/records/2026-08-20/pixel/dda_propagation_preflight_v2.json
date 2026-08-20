@@ -1,0 +1,37 @@
+{
+  "deployment_eligible": false,
+  "full_propagation_audit_resource_preflight_passed": true,
+  "input": {
+    "artifact_sha256": "4374d1900d98dc8d09bd57f660f882459a2200ad276ca3a2695572708b1887be",
+    "profile": "screenshot_raster_png_longest=1600",
+    "source_asset_sha256": "14acd8d390f3612c5aa9d495b81b871f5f5676b0870a055d35ec0c53df11b85e",
+    "source_manifest_index": 0
+  },
+  "protocol_sha256": "0f76289ce40594ad215deb68acbf8df2d9139b3bd1d012445ca301c9f2de432e",
+  "purpose": "One label-blind resource and runtime-equivalence preflight; no accuracy, threshold, score or web-policy decision is authorized.",
+  "resource": {
+    "elapsed_seconds": 8.766000000061467,
+    "maximum_sampled_process_count": 2,
+    "maximum_sampled_working_set_bytes": 1567924224,
+    "maximum_working_set_bytes": 2147483648,
+    "passed": true,
+    "sample_interval_seconds": 0.05,
+    "sampling_scope": "launcher_and_all_descendants",
+    "stop_reason": null
+  },
+  "runtime_equivalence": {
+    "absolute_difference": 0.0,
+    "maximum": 1e-06,
+    "passed": true,
+    "preflight_score": 0.3888949155807495,
+    "preprocessing": "center_crop_336_clip_normalization",
+    "prior_product_score": 0.3888949155807495
+  },
+  "runtime_policy_changed": false,
+  "schema_version": "demirror-dda-propagation-preflight-v2",
+  "worker_returncode": 0,
+  "worker_stderr_present_unclassified": false,
+  "worker_warning_codes": [
+    "xformers_not_available_cpu_fallback_used"
+  ]
+}
