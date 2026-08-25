@@ -17,6 +17,34 @@ Demirror 是一个本地静态图片审阅工具，将来源记录、AI 像素�
 如果本地 Python 进程意外停止，下一次启动服务会把未完成的网页作业标成失败，
 避免浏览器无限等待。
 
+### Docker Compose
+
+仓库提供 `Dockerfile`、`compose.yaml` 和环境变量示例。首次使用可复制配置后启动：
+
+    Copy-Item .env.example .env
+    docker compose up --build -d
+
+然后打开 `http://127.0.0.1:8765`。默认发布的端口只绑定宿主机回环地址；容器以非 root
+用户、只读根文件系统和移除全部 Linux capabilities 的方式运行。作业与模型缓存保存在
+具名卷中，`weights/` 和 `data/` 以只读方式挂载，均不会被写进镜像。停止并保留数据使用
+`docker compose down`；同时移除作业和缓存卷需显式执行 `docker compose down --volumes`。
+
+默认镜像包含 C2PA、CPU 像素通道和离线水印适配器的运行库，但不包含受许可约束的模型
+权重、数据集或 Perspective Fields/GeoCalib 上游代码。缺少挂载资产的通道会按现有规则
+明确显示不可用。若只需核心几何、元数据和网页能力，可在 `.env` 中设置
+`DEMIRROR_INSTALL_OPTIONAL_DETECTORS=0` 后本地重新构建。`OPENAI_API_KEY` 只从本地
+`.env` 注入运行容器，不能作为 Docker build 参数或提交到仓库。
+
+GitHub Actions 会在拉取请求中构建并调用 `/api/health` 做容器冒烟测试，但不发布镜像；
+推送到 `main`、推送 `v*` 版本标签或手动运行工作流时，AMD64 与 ARM64 的构建、启动和
+健康检查会分成并行任务执行。两种架构的健康检查都通过后，发布任务复用这两份架构缓存，
+将多架构镜像及 SBOM、构建来源证明发布
+到 `ghcr.io/fan1k413/demirror`。服务器拉取同一标签时由 Docker 自动选择本机架构，无需
+修改 `compose.yaml`。私有包拉取时使用具备
+`read:packages` 权限的 GitHub 凭据登录 `ghcr.io`；发布工作流本身仅使用仓库内置的
+`GITHUB_TOKEN`，不需要另建 Registry Key。Docker 构建摘要仍会生成，但关闭可下载的
+`.dockerbuild` 构建记录上传，避免该诊断文件继续占用 Actions Artifact 配额。
+
 分析过程中，页面会显示当前检测阶段、阶段完成度和已用时间。进度按几何、来源记录、
 各像素模型、相机检查与综合推断的实际边界更新；它表示流水线已走到的位置，不是对剩余
 时间的估算。修改后端代码后需要重启本地服务，浏览器再强制刷新一次。

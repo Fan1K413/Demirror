@@ -139,6 +139,14 @@ def build_parser() -> argparse.ArgumentParser:
     serve.add_argument("--host", default="127.0.0.1")
     serve.add_argument("--port", type=int, default=8765)
     serve.add_argument(
+        "--allow-non-loopback",
+        action="store_true",
+        help=(
+            "Allow binding a non-loopback address. Intended for a container whose "
+            "published host port remains restricted to loopback."
+        ),
+    )
+    serve.add_argument(
         "--jobs-root",
         type=Path,
         default=Path(".demirror_web_jobs"),
@@ -242,6 +250,7 @@ def main(argv: list[str] | None = None) -> int:
             args.host,
             args.port,
             relation_review_root=args.blind_root,
+            allow_non_loopback=args.allow_non_loopback,
         )
         print(f"Demirror local demo: http://{args.host}:{args.port}")
         if server.relation_review_store is not None:  # type: ignore[attr-defined]

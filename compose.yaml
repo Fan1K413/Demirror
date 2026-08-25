@@ -1,0 +1,46 @@
+name: demirror
+
+services:
+  demirror:
+    image: ${DEMIRROR_IMAGE:-ghcr.io/fan1k413/demirror:latest}
+    build:
+      context: .
+      target: runtime
+      args:
+        INSTALL_OPTIONAL_DETECTORS: ${DEMIRROR_INSTALL_OPTIONAL_DETECTORS:-1}
+    init: true
+    restart: unless-stopped
+    command:
+      - serve
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8765"
+      - --jobs-root
+      - /app/.demirror_web_jobs
+      - --allow-non-loopback
+    ports:
+      - "${DEMIRROR_BIND_ADDRESS:-127.0.0.1}:${DEMIRROR_PORT:-8765}:8765"
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      GOOGLE_SYNTHID_MANUAL_ENABLED: ${GOOGLE_SYNTHID_MANUAL_ENABLED:-0}
+      DEMIRROR_GEOMETRY_PERSPECTIVE_FIELDS: ${DEMIRROR_GEOMETRY_PERSPECTIVE_FIELDS:-0}
+    volumes:
+      - ./weights:/app/weights:ro
+      - ./data:/app/data:ro
+      - demirror-jobs:/app/.demirror_web_jobs
+      - demirror-cache:/home/demirror/.cache
+    read_only: true
+    tmpfs:
+      - /tmp:size=512m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 256
+    mem_limit: ${DEMIRROR_MEMORY_LIMIT:-4g}
+    stop_grace_period: 30s
+
+volumes:
+  demirror-jobs:
+  demirror-cache:

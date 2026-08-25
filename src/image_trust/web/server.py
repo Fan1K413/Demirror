@@ -59,6 +59,8 @@ def create_app(
             if relation_review_app is None:
                 return _json(start_response, "404 Not Found", {"error": "not_found"})
             return _mount_relation_review(environ, start_response, relation_review_app)
+        if method == "GET" and path == "/api/health":
+            return _json(start_response, "200 OK", {"status": "ok"})
         if method == "GET" and path == "/api/capabilities":
             return _json(
                 start_response,
@@ -84,10 +86,11 @@ def serve_local_demo(
     host: str = "127.0.0.1",
     port: int = 8765,
     relation_review_root: Path | None = None,
+    allow_non_loopback: bool = False,
 ) -> WSGIServer:
     """Construct, but do not start, a local-only server for CLI use and tests."""
 
-    if not _is_loopback_host(host):
+    if not allow_non_loopback and not _is_loopback_host(host):
         raise ValueError("Demirror local server accepts loopback hosts only")
     remote_settings = load_remote_verification_settings(project_root)
     store = LocalJobStore(

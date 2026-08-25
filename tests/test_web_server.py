@@ -169,6 +169,36 @@ def test_local_server_refuses_non_loopback_bind_before_creating_jobs(tmp_path) -
     assert not (tmp_path / "jobs").exists()
 
 
+def test_local_server_accepts_explicit_container_bind(tmp_path) -> None:
+    project_root = Path(__file__).resolve().parents[1]
+    server = serve_local_demo(
+        project_root,
+        tmp_path / "jobs",
+        host="0.0.0.0",
+        port=0,
+        allow_non_loopback=True,
+    )
+    try:
+        assert server.server_address[1] > 0
+    finally:
+        server.job_store.close()
+        server.server_close()
+
+
+def test_wsgi_health_endpoint_has_no_runtime_dependency(tmp_path) -> None:
+    store = LocalJobStore(
+        tmp_path / "jobs",
+        lambda *_: WebJobOutcome(status=WebJobStatus.COMPLETED),
+    )
+    app = create_app(store, tmp_path)
+    try:
+        response = _request(app, "GET", "/api/health")
+        assert response["status"] == "200 OK"
+        assert json.loads(response["body"]) == {"status": "ok"}
+    finally:
+        store.close()
+
+
 def test_local_server_uses_threaded_wsgi_for_browser_requests(tmp_path) -> None:
     project_root = Path(__file__).resolve().parents[1]
     server = serve_local_demo(project_root, tmp_path / "jobs", port=0)
