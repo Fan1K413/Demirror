@@ -26,10 +26,11 @@ from image_trust.watermark.contracts import (
     WatermarkCoverage,
     WatermarkPayload,
 )
+from image_trust.runtime_paths import runtime_weights_root
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
-TRUSTMARK_Q_MODEL_PATH = PROJECT_ROOT / "weights" / "trustmark" / "Q" / "decoder_Q.onnx"
+TRUSTMARK_Q_MODEL_PATH = runtime_weights_root(PROJECT_ROOT) / "trustmark" / "Q" / "decoder_Q.onnx"
 TRUSTMARK_Q_MODEL_SHA256 = "ee3268f057c9dabef680e169302f5973d0589feea86189ed229a896cc3aa88df"
 TRUSTMARK_Q_MODEL_RELEASE = "official-onnx-Q-2026-04"
 TRUSTMARK_DECODER_VERSION = "demirror-trustmark-q-onnx-v1"

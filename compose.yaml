@@ -17,7 +17,7 @@ services:
       - --port
       - "8765"
       - --jobs-root
-      - /app/.demirror_web_jobs
+      - /app/data/jobs
       - --allow-non-loopback
     ports:
       - "${DEMIRROR_BIND_ADDRESS:-127.0.0.1}:${DEMIRROR_PORT:-8765}:8765"
@@ -25,11 +25,12 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       GOOGLE_SYNTHID_MANUAL_ENABLED: ${GOOGLE_SYNTHID_MANUAL_ENABLED:-0}
       DEMIRROR_GEOMETRY_PERSPECTIVE_FIELDS: ${DEMIRROR_GEOMETRY_PERSPECTIVE_FIELDS:-0}
+      # Download detector assets into the writable host bind mount.
+      DEMIRROR_WEIGHTS_ROOT: /app/weights
+      DEMIRROR_HUGGINGFACE_ENDPOINT: ${DEMIRROR_HUGGINGFACE_ENDPOINT:-}
     volumes:
-      - ./weights:/app/weights:ro
-      - ./data:/app/data:ro
-      - demirror-jobs:/app/.demirror_web_jobs
-      - demirror-cache:/home/demirror/.cache
+      - ./weights:/app/weights
+      - ./data:/app/data
     read_only: true
     tmpfs:
       - /tmp:size=512m,mode=1777
@@ -40,7 +41,3 @@ services:
     pids_limit: 256
     mem_limit: ${DEMIRROR_MEMORY_LIMIT:-4g}
     stop_grace_period: 30s
-
-volumes:
-  demirror-jobs:
-  demirror-cache:

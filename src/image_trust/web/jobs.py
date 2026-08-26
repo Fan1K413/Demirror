@@ -37,6 +37,7 @@ from image_trust.origin import assess_origin
 from image_trust.pipeline import analyze_image
 from image_trust.provenance.c2pa import inspect_c2pa_asset, write_c2pa_record
 from image_trust.provenance.config import load_c2pa_config
+from image_trust.runtime_paths import runtime_weights_root
 from image_trust.schemas import RunStatus
 from image_trust.utils.config import load_config
 from image_trust.watermark.suite import (
@@ -638,9 +639,15 @@ def build_local_runner(
         watermark_result = aggregate_watermark_results(watermark_results)
         result["watermark"] = watermark_result.model_dump(mode="json")
         write_partial_result()
+        runtime_weights = runtime_weights_root(project_root)
         p3_result = assess_high_confidence_ai(
             upload_path,
             c2pa_record,
+            checkpoint_path=runtime_weights / "dda-v1" / "DDA_ckpt.pth",
+            safe_checkpoint_path=runtime_weights / "aigibench-safe/SAFE-main/checkpoint-best.pth",
+            forensic_clip_model_root=runtime_weights / "wkaandemir-ai-detector",
+            community_forensics_model_root=runtime_weights / "community-forensics-224",
+            nonescape_mini_checkpoint_path=runtime_weights / "nonescape" / "nonescape-mini-v0.safetensors",
             progress_callback=report_progress,
         )
         limitations.extend(p3_result.limitations)

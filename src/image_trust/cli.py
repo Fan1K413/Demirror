@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+import sys
 
 from image_trust.camera.calibration import (
     load_camera_experiment_results,
@@ -20,8 +21,10 @@ from image_trust.camera.dataset import (
 )
 from image_trust.camera.pipeline import analyze_camera_image
 from image_trust.pipeline import analyze_image
+from image_trust.model_bootstrap import ModelBootstrapError, bootstrap_runtime_models, main as bootstrap_models_main
 from image_trust.provenance.c2pa import inspect_c2pa_asset, write_c2pa_record
 from image_trust.provenance.config import load_c2pa_config
+from image_trust.runtime_paths import runtime_cache_root, runtime_weights_root
 from image_trust.schemas import RunStatus
 from image_trust.utils.config import load_config
 from image_trust.web.server import GEOMETRY_REVIEW_PREFIX, serve_local_demo
@@ -158,11 +161,39 @@ def build_parser() -> argparse.ArgumentParser:
         default=Path("outputs/geometry_semantic_relation_pilot_v1/blind"),
         help="Blind geometry-review directory mounted below /geometry-review/ when present.",
     )
+    serve.add_argument(
+        "--skip-model-bootstrap",
+        action="store_true",
+        help="Start without checking or downloading the optional detector assets.",
+    )
+    bootstrap = subparsers.add_parser(
+        "bootstrap-models",
+        help="Download and verify the fixed runtime detector assets into persistent storage.",
+    )
+    bootstrap.add_argument("--weights-root", type=Path, default=runtime_weights_root(Path.cwd()))
+    bootstrap.add_argument("--cache-root", type=Path, default=runtime_cache_root(Path.cwd()))
+    bootstrap.add_argument("--timeout-seconds", type=int, default=60)
+    bootstrap.add_argument("--verify", action="store_true")
+    bootstrap.add_argument("--accept-trustmark-license", action="store_true")
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.command == "bootstrap-models":
+        bootstrap_args = [
+            "--weights-root",
+            str(args.weights_root),
+            "--cache-root",
+            str(args.cache_root),
+            "--timeout-seconds",
+            str(args.timeout_seconds),
+        ]
+        if args.accept_trustmark_license:
+            bootstrap_args.append("--accept-trustmark-license")
+        if args.verify:
+            bootstrap_args.append("--verify")
+        return bootstrap_models_main(bootstrap_args)
     if args.command == "analyze":
         config = load_config(args.config)
         result = analyze_image(args.input, config, args.output)
@@ -244,8 +275,23 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 0
     if args.command == "serve":
+        project_root = Path.cwd()
+        if args.skip_model_bootstrap:
+            print("Demirror model bootstrap skipped by --skip-model-bootstrap.")
+        else:
+            print("Demirror is checking detector assets before accepting uploads.", flush=True)
+            try:
+                bootstrap_runtime_models(
+                    weights_root=runtime_weights_root(project_root),
+                    cache_root=runtime_cache_root(project_root),
+                    reporter=lambda message: print(message, flush=True),
+                )
+            except (ModelBootstrapError, OSError, ValueError) as error:
+                print(f"Demirror startup stopped: model_bootstrap_failed={error}", file=sys.stderr, flush=True)
+                return 2
+            print("Demirror detector assets are ready.", flush=True)
         server = serve_local_demo(
-            Path.cwd(),
+            project_root,
             args.jobs_root,
             args.host,
             args.port,

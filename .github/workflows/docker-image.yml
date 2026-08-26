@@ -101,7 +101,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          container_id="$(docker run --detach --rm --platform '${{ matrix.platform }}' --publish '127.0.0.1:${{ matrix.port }}:8765' 'demirror:ci-${{ matrix.arch }}')"
+          container_id="$(
+            docker run --detach --rm \
+              --platform '${{ matrix.platform }}' \
+              --publish '127.0.0.1:${{ matrix.port }}:8765' \
+              'demirror:ci-${{ matrix.arch }}' \
+              serve \
+              --host 0.0.0.0 \
+              --port 8765 \
+              --jobs-root /app/.demirror_web_jobs \
+              --allow-non-loopback \
+              --skip-model-bootstrap
+          )"
           trap 'docker stop "$container_id" >/dev/null 2>&1 || true' EXIT
           for attempt in {1..30}; do
             if curl --fail --silent 'http://127.0.0.1:${{ matrix.port }}/api/health' >/dev/null; then

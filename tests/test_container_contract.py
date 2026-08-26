@@ -22,7 +22,7 @@ def test_non_loopback_cli_bind_requires_an_explicit_opt_in() -> None:
     assert container_args.allow_non_loopback is True
 
 
-def test_compose_keeps_host_binding_local_and_container_restricted() -> None:
+def test_compose_keeps_host_binding_local_and_uses_only_bind_mounted_storage() -> None:
     compose = yaml.safe_load((PROJECT_ROOT / "compose.yaml").read_text(encoding="utf-8"))
     service = compose["services"]["demirror"]
 
@@ -34,8 +34,10 @@ def test_compose_keeps_host_binding_local_and_container_restricted() -> None:
     assert service["security_opt"] == ["no-new-privileges:true"]
     assert "--allow-non-loopback" in service["command"]
     assert "0.0.0.0" in service["command"]
-    assert "./weights:/app/weights:ro" in service["volumes"]
-    assert "./data:/app/data:ro" in service["volumes"]
+    assert service["volumes"] == ["./weights:/app/weights", "./data:/app/data"]
+    assert service["environment"]["DEMIRROR_WEIGHTS_ROOT"] == "/app/weights"
+    assert service["command"][service["command"].index("--jobs-root") + 1] == "/app/data/jobs"
+    assert "volumes" not in compose
 
 
 def test_dockerfile_uses_non_root_runtime_and_external_assets() -> None:
@@ -73,6 +75,7 @@ def test_docker_workflow_parallelizes_architecture_tests_and_only_publishes_trus
     assert "Build ${{ matrix.arch }} smoke-test image" in workflow
     assert "Smoke test ${{ matrix.arch }} health endpoint" in workflow
     assert "--platform '${{ matrix.platform }}'" in workflow
+    assert "--skip-model-bootstrap" in workflow
     assert "platforms: linux/amd64,linux/arm64" in workflow
     assert "scope=demirror-amd64" in workflow
     assert "scope=demirror-arm64" in workflow

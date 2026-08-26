@@ -24,9 +24,21 @@ Demirror 是一个本地静态图片审阅工具，将来源记录、AI 像素�
     Copy-Item .env.example .env
     docker compose up --build -d
 
-然后打开 `http://127.0.0.1:8765`。默认发布的端口只绑定宿主机回环地址；容器以非 root
-用户、只读根文件系统和移除全部 Linux capabilities 的方式运行。作业与模型缓存保存在
-具名卷中，`weights/` 和 `data/` 以只读方式挂载，均不会被写进镜像。停止并保留数据使用
+然后打开 `http://127.0.0.1:8765`。首次执行 `image-trust serve`（包括 Compose 启动服务时）会先
+将约 1.9 GB 固定版本的检测资产下载到持久化模型目录，逐个核对大小和 SHA-256 后才接受上传。
+下载可断点续传；终端会打印当前文件与每 5% 的进度。首次安装逐项计算 SHA-256；成功后写入本地
+安装记录，后续启动只检查文件大小和修改时间，不会重新下载或重新扫描 1.9 GB。需要完整复核可运行
+`image-trust bootstrap-models --verify --accept-trustmark-license`。若网络中断，保留的 `.part` 文件会在
+下次执行 `image-trust serve` 时续传；可用
+`image-trust serve --skip-model-bootstrap` 显式跳过该步骤并只运行可用的通道。
+
+如网络无法直连 Hugging Face，可在 `.env` 设置 `DEMIRROR_HUGGINGFACE_ENDPOINT` 为自行确认可信的
+镜像基础地址；下载后的大小和 SHA-256 校验仍不会放宽。Adobe TrustMark、GeoCalib 和 DINOv2 继续
+使用登记的官方主机。
+
+默认发布的端口只绑定宿主机回环地址；容器以非 root 用户、只读根文件系统和移除全部 Linux
+capabilities 的方式运行。作业与模型缓存保存在具名卷中，`weights/` 和 `data/` 以只读方式挂载，
+均不会被写进镜像；容器内自动下载的资产位于可写模型缓存卷。停止并保留数据使用
 `docker compose down`；同时移除作业和缓存卷需显式执行 `docker compose down --volumes`。
 
 默认镜像包含 C2PA、CPU 像素通道和离线水印适配器的运行库，但不包含受许可约束的模型
